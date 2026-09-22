@@ -299,4 +299,82 @@ class PerumahanTest extends TestCase
             ->assertJsonPath('features.0.geometry', null)
             ->assertJsonPath('features.0.properties.nama', 'Perumahan Hanya Polygon');
     }
+
+    public function test_luas_polygon_dihitung_dan_dibandingkan_dengan_luas_lahan(): void
+    {
+        $kelurahan = $this->wilayah();
+
+        // Perkiraan: 1 menit bujur di sekitar lat -6.9 ≈ 1.845 m,
+        // 1 menit lintang ≈ 1.853 m. Persegi 2' × 2' ≈ 3.706 × 3.690 m
+        // ≈ 13,67 juta m² (≈ 1.367 ha).
+        $perumahan = Perumahan::create([
+            'nama' => 'Perumahan Hitung Luas',
+            'kelurahan_id' => $kelurahan->id,
+            'luas_lahan' => 12660000,
+            'jumlah_unit' => 100,
+            'status' => 'komersil',
+            'batas_polygon' => [
+                [-6.90, 107.60],
+                [-6.90, 107.633333333],
+                [-6.933333333, 107.633333333],
+                [-6.933333333, 107.60],
+            ],
+        ]);
+
+        $luas = $perumahan->luas_polygon;
+
+        $this->assertNotNull($luas);
+        $this->assertGreaterThan(13000000, $luas);
+        $this->assertLessThan(14000000, $luas);
+        $this->assertEqualsWithDelta(1366.87, $perumahan->luas_polygon_ha, 0.5);
+
+        // Selisih & deviasi terhadap luas lahan inputan (12.660.000 m²).
+        $this->assertNotNull($perumahan->selisih_luas);
+        $this->assertEqualsWithDelta($luas - 12660000, $perumahan->selisih_luas, 0.01);
+        $this->assertEqualsWithDelta(
+            ($luas - 12660000) / 12660000 * 100,
+            $perumahan->deviasi_luas_persen,
+            0.01,
+        );
+
+        // Luas polygon muncul di GeoJSON.
+        $this->actingAs($this->petugas())
+            ->get(route('perumahan.geojson'))
+            ->assertOk()
+            ->assertJsonPath('features.0.properties.luas_polygon', $luas);
+    }
+
+    public function test_luas_polygon_tanpa_polygon_atau_luas_lahan_nol(): void
+    {
+        $kelurahan = $this->wilayah();
+
+        $tanpaPolygon = Perumahan::create([
+            'nama' => 'Perumahan Tanpa Polygon Luas',
+            'kelurahan_id' => $kelurahan->id,
+            'luas_lahan' => 5000,
+            'jumlah_unit' => 10,
+            'status' => 'komersil',
+        ]);
+
+        $this->assertNull($tanpaPolygon->luas_polygon);
+        $this->assertNull($tanpaPolygon->selisih_luas);
+        $this->assertNull($tanpaPolygon->deviasi_luas_persen);
+
+        $polygonTapiLuasNol = Perumahan::create([
+            'nama' => 'Perumahan Polygon Luas Nol',
+            'kelurahan_id' => $kelurahan->id,
+            'luas_lahan' => 0,
+            'jumlah_unit' => 10,
+            'status' => 'komersil',
+            'batas_polygon' => [
+                [-6.9, 107.6],
+                [-6.902, 107.604],
+                [-6.905, 107.601],
+            ],
+        ]);
+
+        $this->assertNotNull($polygonTapiLuasNol->luas_polygon);
+        $this->assertNull($polygonTapiLuasNol->selisih_luas);
+        $this->assertNull($polygonTapiLuasNol->deviasi_luas_persen);
+    }
 }

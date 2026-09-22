@@ -26,7 +26,7 @@ Aplikasi terdiri dari dua bagian: **portal publik** (tanpa login) dan **area adm
 | Detail Perumahan | Ringkasan luasan, KDB/KDH, RTH, lahan pemakaman, rincian tipe unit, tabel PSU, mini map |
 | Peta Sebaran (GIS) | Leaflet + OpenStreetMap, marker berwarna per status, polygon batas area, pencarian lokasi, endpoint GeoJSON |
 | Titik Lokasi | Pemilih titik di peta saat input/ubah data, tombol "gunakan lokasi saya" (geolokasi browser) |
-| Batas Area (Polygon) | Gambar batas lahan perumahan di peta saat input/ubah data; tampil di peta sebaran & detail |
+| Batas Area (Polygon) | Gambar batas lahan perumahan di peta saat input/ubah data; luas polygon dihitung otomatis (rumus Chamberlain–Duquette) dan dibandingkan dengan luas lahan inputan beserta deviasinya |
 | Master Wilayah | Kelola kecamatan dan kelurahan sebagai sumber dropdown |
 | Manajemen Pengguna | Khusus admin: tambah/ubah/nonaktifkan/hapus akun |
 
@@ -87,6 +87,7 @@ Mencakup autentikasi, hak akses role, CRUD perumahan, validasi rentang tahun, pe
 - Peta memakai Leaflet 1.9.4 dari CDN (Unpkg) dan tile OpenStreetMap, sehingga browser perlu akses internet.
 - Grafik dashboard memakai Chart.js 4 dari CDN (jsDelivr).
 - Polygon batas area disimpan sebagai JSON array pasangan `[lat,lng]` pada kolom `perumahans.batas_polygon`; GeoJSON mengeluarkannya sebagai `properties.geometry_polygon` (RingGeometry GeoJSON `[lng,lat]`) sehingga tetap kompatibel QGIS.
+- Luas polygon dihitung otomatis dari koordinat (accessor `luas_polygon`, `luas_polygon_ha`, `selisih_luas`, `deviasi_luas_persen`) — form menghitung real-time saat menggambar, detail & popup peta menampilkan hasilnya; deviasi di atas 10% ditandai merah.
 - Filter pencarian publik dan admin memakai scope yang sama (`Perumahan::filter()`), jadi hasil pencarian konsisten.
 - Endpoint GeoJSON tersedia di publik (`/peta/geojson`) maupun admin (`/admin/perumahan/geojson`).
 - Filter pencarian pada daftar perumahan mencakup nama, pengembang, alamat, kelurahan, dan kecamatan.

@@ -76,6 +76,61 @@
 
         setTimeout(() => map.invalidateSize(), 200);
 
+        // --- Perbandingan luas polygon vs luas lahan inputan ---
+        const inputLuasLahan = document.querySelector('input[name="luas_lahan"]');
+        const elLuasPolygon = document.getElementById('polygon-luas');
+        const elLuasLahan = document.getElementById('polygon-luas-lahan');
+        const elSelisih = document.getElementById('polygon-selisih');
+
+        const luasPolygonShoelace = (koordinat) => {
+            // Proyeksi equirectangular lokal (akurat untuk area kecil).
+            const R = 6378137;
+            const rad = Math.PI / 180;
+            const latRata = koordinat.reduce((sum, t) => sum + t[0], 0) / koordinat.length * rad;
+            const titikProyeksi = koordinat.map(([lat, lng]) => [
+                R * lat * rad,
+                R * lng * rad * Math.cos(latRata),
+            ]);
+
+            let total = 0;
+            for (let i = 0; i < titikProyeksi.length; i++) {
+                const [y1, x1] = titikProyeksi[i];
+                const [y2, x2] = titikProyeksi[(i + 1) % titikProyeksi.length];
+                total += x1 * y2 - x2 * y1;
+            }
+
+            return Math.abs(total / 2);
+        };
+
+        const formatM2 = (angka) => `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(angka)} m\u00b2`;
+        const formatHa = (angka) => `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 4 }).format(angka / 10000)} ha`;
+
+        const segarkanPerbandingan = () => {
+            if (!elLuasPolygon || !elLuasLahan || !elSelisih) return;
+
+            const adaPolygon = titikPolygon.length >= 3;
+            const luas = adaPolygon ? luasPolygonShoelace(titikPolygon) : null;
+            const luasLahan = parseFloat(inputLuasLahan?.value);
+
+            elLuasPolygon.textContent = luas !== null ? `${formatM2(luas)} (${formatHa(luas)})` : '-';
+            elLuasLahan.textContent = Number.isFinite(luasLahan) && luasLahan > 0
+                ? `${formatM2(luasLahan)} (${formatHa(luasLahan)})`
+                : '-';
+
+            if (luas === null || !Number.isFinite(luasLahan) || luasLahan <= 0) {
+                elSelisih.textContent = '-';
+                elSelisih.className = 'font-semibold text-slate-800';
+                return;
+            }
+
+            const selisih = luas - luasLahan;
+            const persen = (selisih / luasLahan) * 100;
+            const teks = `${selisih >= 0 ? '+' : ''}${formatM2(Math.abs(selisih))} (${persen >= 0 ? '+' : ''}${persen.toFixed(1)}%)`;
+
+            elSelisih.textContent = teks;
+            elSelisih.className = `font-semibold ${Math.abs(persen) > 10 ? 'text-rose-600' : 'text-emerald-600'}`;
+        };
+
         // --- Peta batas polygon ---
         const mapPolygonEl = document.getElementById('map-polygon');
         const inputPolygon = document.getElementById('input-batas-polygon');
@@ -183,8 +238,18 @@
                 segarkanPolygon();
             });
 
+            const segarkanPolygonAsli = segarkanPolygon;
+            segarkanPolygon = function () {
+                segarkanPolygonAsli();
+                segarkanPerbandingan();
+            };
+
             segarkanPolygon();
             setTimeout(() => mapPolygon.invalidateSize(), 200);
         }
+
+        inputLuasLahan?.addEventListener('input', segarkanPerbandingan);
+        // Hitungan awal bila polygon sudah tersimpan sebelumnya.
+        document.addEventListener('DOMContentLoaded', segarkanPerbandingan);
     });
 </script>

@@ -168,6 +168,67 @@ class Perumahan extends Model
         return $this->polygon_koordinat !== [];
     }
 
+    /**
+     * Luas polygon batas dalam m² memakai rumus Chamberlain–Duquette
+     * (spherical excess — sama seperti turf.js), akurat untuk area
+     * sekecil apapun pada permukaan bumi.
+     */
+    public function getLuasPolygonAttribute(): ?float
+    {
+        $koordinat = $this->polygon_koordinat;
+
+        if (count($koordinat) < 3) {
+            return null;
+        }
+
+        $jariBumi = 6378137.0; // meter (WGS84)
+        $jumlah = count($koordinat);
+        $total = 0.0;
+
+        for ($i = 0; $i < $jumlah; $i++) {
+            [$latBawah, $lngBawah] = $koordinat[$i];
+            $latTengah = $koordinat[($i + 1) % $jumlah][0];
+            $lngAtas = $koordinat[($i + 2) % $jumlah][1];
+
+            $total += deg2rad($lngAtas - $lngBawah) * sin(deg2rad($latTengah));
+        }
+
+        return (float) abs(round($total * $jariBumi ** 2 / 2, 2));
+    }
+
+    /**
+     * Luas polygon batas dalam hektar.
+     */
+    public function getLuasPolygonHaAttribute(): ?float
+    {
+        return $this->luas_polygon === null ? null : round($this->luas_polygon / 10000, 4);
+    }
+
+    /**
+     * Selisih luas polygon terhadap luas lahan inputan (m²),
+     * positif berarti polygon lebih luas.
+     */
+    public function getSelisihLuasAttribute(): ?float
+    {
+        if ($this->luas_polygon === null || (float) $this->luas_lahan <= 0) {
+            return null;
+        }
+
+        return round($this->luas_polygon - (float) $this->luas_lahan, 2);
+    }
+
+    /**
+     * Persentase deviasi luas polygon terhadap luas lahan inputan.
+     */
+    public function getDeviasiLuasPersenAttribute(): ?float
+    {
+        if ($this->luas_polygon === null || (float) $this->luas_lahan <= 0) {
+            return null;
+        }
+
+        return round(($this->luas_polygon - (float) $this->luas_lahan) / (float) $this->luas_lahan * 100, 2);
+    }
+
     public function getTotalUnitTipeAttribute(): int
     {
         return (int) $this->tipeUnits->sum('jumlah_unit');
@@ -195,6 +256,7 @@ class Perumahan extends Model
             'kdh' => $this->kdh !== null ? (float) $this->kdh : null,
             'tahun_selesai' => $this->tahun_selesai,
             'polygon' => $this->polygon_koordinat,
+            'luas_polygon' => $this->luas_polygon,
         ];
     }
 

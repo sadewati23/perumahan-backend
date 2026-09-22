@@ -73,6 +73,30 @@
 
                 <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Luasan &amp; Unit</p>
+                    @if ($perumahan->punya_polygon)
+                        <dl class="mt-3 mb-3 space-y-2 rounded-lg bg-slate-50 p-3 text-sm">
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-slate-500">Luas polygon batas</dt>
+                                <dd class="text-right font-medium text-slate-800">
+                                    {{ number_format((float) $perumahan->luas_polygon, 0, ',', '.') }} m&sup2;
+                                    ({{ number_format($perumahan->luas_polygon_ha, 4, ',', '.') }} ha)
+                                </dd>
+                            </div>
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-slate-500">Selisih vs luas lahan</dt>
+                                @php
+                                    $selisih = $perumahan->selisih_luas;
+                                    $deviasi = $perumahan->deviasi_luas_persen;
+                                @endphp
+                                <dd class="text-right font-medium {{ $deviasi !== null && abs($deviasi) > 10 ? 'text-rose-600' : 'text-emerald-600' }}">
+                                    @if ($selisih !== null)
+                                        {{ $selisih >= 0 ? '+' : '-' }}{{ number_format(abs((float) $selisih), 0, ',', '.') }} m&sup2;
+                                        ({{ $deviasi >= 0 ? '+' : '' }}{{ number_format((float) $deviasi, 1, ',', '.') }}%)
+                                    @endif
+                                </dd>
+                            </div>
+                        </dl>
+                    @endif
                     <dl class="mt-3 space-y-2 text-sm">
                         <div class="flex justify-between gap-4">
                             <dt class="text-slate-500">Luas lahan</dt>

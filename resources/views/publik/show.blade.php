@@ -47,6 +47,13 @@
                     <p class="text-xs text-slate-500">Luas Lahan</p>
                     <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format((float) $perumahan->luas_lahan, 0, ',', '.') }} m&sup2;</p>
                     <p class="text-xs text-slate-500">{{ number_format($perumahan->luas_lahan_ha, 2, ',', '.') }} hektar</p>
+                    @if ($perumahan->punya_polygon && $perumahan->deviasi_luas_persen !== null)
+                        @php $deviasi = $perumahan->deviasi_luas_persen; @endphp
+                        <p class="mt-1 text-xs {{ abs($deviasi) > 10 ? 'text-rose-600' : 'text-emerald-600' }}">
+                            Polygon: {{ number_format((float) $perumahan->luas_polygon, 0, ',', '.') }} m&sup2;
+                            ({{ $deviasi >= 0 ? '+' : '' }}{{ number_format((float) $deviasi, 1, ',', '.') }}%)
+                        </p>
+                    @endif
                 </div>
                 <div class="rounded-xl bg-slate-50 p-4">
                     <p class="text-xs text-slate-500">Jumlah Unit</p>

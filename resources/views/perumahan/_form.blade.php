@@ -149,6 +149,21 @@
 
             <p id="polygon-status" class="mt-2 text-xs text-slate-500">Belum ada titik polygon.</p>
             <ul id="polygon-titik-list" class="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-slate-600"></ul>
+
+            <div class="mt-4 grid gap-3 rounded-lg bg-slate-50 p-3 text-sm sm:grid-cols-3">
+                <div>
+                    <p class="text-xs text-slate-500">Luas polygon</p>
+                    <p id="polygon-luas" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500">Luas lahan (inputan)</p>
+                    <p id="polygon-luas-lahan" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500">Selisih</p>
+                    <p id="polygon-selisih" class="font-semibold text-slate-800">-</p>
+                </div>
+            </div>
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

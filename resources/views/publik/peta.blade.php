@@ -177,6 +177,7 @@
                             <tr><td>Luas RTH</td><td style="text-align:right;padding-left:8px">${formatAngka(p.rth)} m&sup2;</td></tr>
                             <tr><td>KDB / KDH</td><td style="text-align:right;padding-left:8px">${p.kdb ?? '-'}% / ${p.kdh ?? '-'}%</td></tr>
                             <tr><td>Tahun selesai</td><td style="text-align:right;padding-left:8px">${p.tahun_selesai ?? '-'}</td></tr>
+                            ${p.luas_polygon ? `<tr><td>Luas polygon</td><td style="text-align:right;padding-left:8px">${formatAngka(Math.round(p.luas_polygon))} m&sup2;</td></tr>` : ''}
                         </table>
                         <a href="${p.url}" style="display:inline-block;margin-top:8px;color:#4f46e5;font-size:12px;font-weight:500">Lihat detail &rarr;</a>
                     </div>`);
