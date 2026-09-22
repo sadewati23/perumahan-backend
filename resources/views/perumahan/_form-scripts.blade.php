@@ -7,7 +7,6 @@
             detailPemakaman?.classList.toggle('hidden', !checkboxPemakaman.checked);
         });
 
-        // --- Peta pemilih titik (Leaflet) ---
         const mapEl = document.getElementById('map-picker');
         if (!mapEl || typeof window.L === 'undefined') {
             return;
@@ -22,6 +21,12 @@
         let lng = parseFloat(lngInput?.value);
         const adaTitik = Number.isFinite(lat) && Number.isFinite(lng);
 
+        // --- State bersama antara peta titik & peta polygon ---
+        let titikPolygon = [];
+        let mapPolygon = null;
+        let penandaTitikPolygon = null;
+
+        // --- Peta pemilih titik (Leaflet) ---
         const map = L.map(mapEl, { scrollWheelZoom: true })
             .setView(
                 adaTitik ? [lat, lng] : [PETA.latitude, PETA.longitude],
@@ -38,6 +43,38 @@
             marker = L.marker([lat, lng]).addTo(map);
         }
 
+        /**
+         * Peta polygon langsung mengikuti titik yang dipilih:
+         * dipusatkan ke titik baru + tampilkan penanda titik lokasi.
+         */
+        const fokusPetaPolygon = (newLat, newLng) => {
+            if (!mapPolygon) {
+                return;
+            }
+
+            // Polygon yang sudah digambar tidak dipaksa zoom ulang,
+            // cukup digeser mengikuti titik.
+            mapPolygon.setView(
+                [newLat, newLng],
+                titikPolygon.length > 0 ? mapPolygon.getZoom() : PETA.zoom_detail,
+            );
+
+            if (penandaTitikPolygon) {
+                penandaTitikPolygon.setLatLng([newLat, newLng]);
+            } else {
+                penandaTitikPolygon = L.circleMarker([newLat, newLng], {
+                    radius: 7,
+                    color: '#d97706',
+                    fillColor: '#f59e0b',
+                    fillOpacity: 1,
+                    weight: 2,
+                })
+                    .addTo(mapPolygon)
+                    .bindPopup('Titik lokasi perumahan');
+                penandaTitikPolygon.on('click', (event) => L.DomEvent.stopPropagation(event));
+            }
+        };
+
         const setPoint = (newLat, newLng, move) => {
             latInput.value = newLat.toFixed(7);
             lngInput.value = newLng.toFixed(7);
@@ -49,6 +86,7 @@
             if (move) {
                 map.setView([newLat, newLng], Math.max(map.getZoom(), PETA.zoom_detail));
             }
+            fokusPetaPolygon(newLat, newLng);
         };
 
         map.on('click', (event) => setPoint(event.latlng.lat, event.latlng.lng, false));
@@ -87,9 +125,9 @@
             const R = 6378137;
             const rad = Math.PI / 180;
             const latRata = koordinat.reduce((sum, t) => sum + t[0], 0) / koordinat.length * rad;
-            const titikProyeksi = koordinat.map(([lat, lng]) => [
-                R * lat * rad,
-                R * lng * rad * Math.cos(latRata),
+            const titikProyeksi = koordinat.map(([tLat, tLng]) => [
+                R * tLat * rad,
+                R * tLng * rad * Math.cos(latRata),
             ]);
 
             let total = 0;
@@ -106,7 +144,9 @@
         const formatHa = (angka) => `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 4 }).format(angka / 10000)} ha`;
 
         const segarkanPerbandingan = () => {
-            if (!elLuasPolygon || !elLuasLahan || !elSelisih) return;
+            if (!elLuasPolygon || !elLuasLahan || !elSelisih) {
+                return;
+            }
 
             const adaPolygon = titikPolygon.length >= 3;
             const luas = adaPolygon ? luasPolygonShoelace(titikPolygon) : null;
@@ -138,7 +178,7 @@
         const listPolygon = document.getElementById('polygon-titik-list');
         const btnResetPolygon = document.getElementById('btn-polygon-reset');
 
-        if (mapPolygonEl && inputPolygon && typeof window.L !== 'undefined') {
+        if (mapPolygonEl && inputPolygon) {
             const polygonSaved = (() => {
                 try {
                     const parsed = JSON.parse(inputPolygon.value || '[]');
@@ -148,10 +188,10 @@
                 }
             })();
 
-            let titikPolygon = polygonSaved.map((t) => [parseFloat(t[0]), parseFloat(t[1])])
+            titikPolygon = polygonSaved.map((t) => [parseFloat(t[0]), parseFloat(t[1])])
                 .filter((t) => Number.isFinite(t[0]) && Number.isFinite(t[1]));
 
-            const mapPolygon = L.map(mapPolygonEl, { scrollWheelZoom: true })
+            mapPolygon = L.map(mapPolygonEl, { scrollWheelZoom: true })
                 .setView(
                     adaTitik ? [lat, lng] : [PETA.latitude, PETA.longitude],
                     adaTitik ? PETA.zoom_detail : PETA.zoom,
@@ -161,6 +201,20 @@
                 maxZoom: 19,
                 attribution: PETA.tile_attribution,
             }).addTo(mapPolygon);
+
+            // Penanda titik lokasi pada peta polygon (data awal).
+            if (adaTitik) {
+                penandaTitikPolygon = L.circleMarker([lat, lng], {
+                    radius: 7,
+                    color: '#d97706',
+                    fillColor: '#f59e0b',
+                    fillOpacity: 1,
+                    weight: 2,
+                })
+                    .addTo(mapPolygon)
+                    .bindPopup('Titik lokasi perumahan');
+                penandaTitikPolygon.on('click', (event) => L.DomEvent.stopPropagation(event));
+            }
 
             let polyline = null;
             let polygonLayer = null;
@@ -184,6 +238,7 @@
                 if (titikPolygon.length === 0) {
                     statusPolygon.textContent = 'Belum ada titik polygon.';
                     listPolygon.innerHTML = '';
+                    segarkanPerbandingan();
                     return;
                 }
 
@@ -226,6 +281,8 @@
                 listPolygon.innerHTML = titikPolygon.map((t, i) =>
                     `<li>(${i + 1}) ${t[0].toFixed(6)}, ${t[1].toFixed(6)}</li>`,
                 ).join('');
+
+                segarkanPerbandingan();
             };
 
             mapPolygon.on('click', (event) => {
@@ -238,18 +295,11 @@
                 segarkanPolygon();
             });
 
-            const segarkanPolygonAsli = segarkanPolygon;
-            segarkanPolygon = function () {
-                segarkanPolygonAsli();
-                segarkanPerbandingan();
-            };
-
             segarkanPolygon();
             setTimeout(() => mapPolygon.invalidateSize(), 200);
         }
 
         inputLuasLahan?.addEventListener('input', segarkanPerbandingan);
-        // Hitungan awal bila polygon sudah tersimpan sebelumnya.
-        document.addEventListener('DOMContentLoaded', segarkanPerbandingan);
+        segarkanPerbandingan();
     });
 </script>

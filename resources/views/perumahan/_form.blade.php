@@ -133,7 +133,10 @@
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
                     <h2 class="text-sm font-semibold text-slate-800">2b. Batas Area (Polygon)</h2>
-                    <p class="text-xs text-slate-500">Klik peta untuk menambah titik batas. Minimal 3 titik.</p>
+                    <p class="text-xs text-slate-500">
+                        Peta mengikuti titik lokasi yang dipilih. Klik peta untuk menambah titik batas (minimal 3 titik);
+                        bulatan amber = titik lokasi perumahan, bulatan indigo = titik batas polygon.
+                    </p>
                 </div>
                 <div class="flex gap-2">
                     <button type="button" id="btn-polygon-reset"
