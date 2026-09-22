@@ -143,6 +143,26 @@
         const formatM2 = (angka) => `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(angka)} m\u00b2`;
         const formatHa = (angka) => `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 4 }).format(angka / 10000)} ha`;
 
+        /**
+         * Lingkaran approx 12 titik di permukaan bumi (meter) — dipakai polygon otomatis.
+         */
+        const hitungLingkaran = (latPusat, lngPusat, radiusMeter, jumlahTitik = 12) => {
+            const rad = Math.PI / 180;
+            const jarakLat = radiusMeter / 111320; // meter per derajat lintang
+            const jarakLng = radiusMeter / (111320 * Math.cos(latPusat * rad));
+            const titik = [];
+
+            for (let i = 0; i < jumlahTitik; i++) {
+                const sudut = (i * 2 * Math.PI) / jumlahTitik;
+                titik.push([
+                    +(latPusat + jarakLat * Math.sin(sudut)).toFixed(6),
+                    +(lngPusat + jarakLng * Math.cos(sudut)).toFixed(6),
+                ]);
+            }
+
+            return titik;
+        };
+
         const segarkanPerbandingan = () => {
             if (!elLuasPolygon || !elLuasLahan || !elSelisih) {
                 return;
@@ -294,6 +314,31 @@
                 titikPolygon = [];
                 segarkanPolygon();
             });
+
+            /**
+             * Polygon otomatis: lingkaran 12 titik di sekitar titik lokasi,
+             * radius dihitung agar luasnya mendekati isian Luas Lahan.
+             */
+            const buatPolygonOtomatis = () => {
+                const newLat = parseFloat(latInput?.value);
+                const newLng = parseFloat(lngInput?.value);
+
+                if (!Number.isFinite(newLat) || !Number.isFinite(newLng)) {
+                    alert('Tentukan titik lokasi dulu (klik peta, isi Latitude/Longitude, atau gunakan lokasi saya).');
+                    return;
+                }
+
+                const luasLahan = parseFloat(inputLuasLahan?.value);
+                const luasTarget = Number.isFinite(luasLahan) && luasLahan > 0 ? luasLahan : 10000; // default 1 ha
+                const radius = Math.sqrt(luasTarget / Math.PI); // meter
+
+                titikPolygon = hitungLingkaran(newLat, newLng, radius);
+                segarkanPolygon();
+
+                mapPolygon.fitBounds(L.latLngBounds(titikPolygon), { padding: [30, 30] });
+            };
+
+            document.getElementById('btn-polygon-otomatis')?.addEventListener('click', buatPolygonOtomatis);
 
             segarkanPolygon();
             setTimeout(() => mapPolygon.invalidateSize(), 200);

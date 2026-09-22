@@ -136,9 +136,15 @@
                     <p class="text-xs text-slate-500">
                         Peta mengikuti titik lokasi yang dipilih. Klik peta untuk menambah titik batas (minimal 3 titik);
                         bulatan amber = titik lokasi perumahan, bulatan indigo = titik batas polygon.
+                        Tombol <span class="font-medium text-indigo-600">Polygon Otomatis</span> membuat polygon awal
+                        berbentuk lingkaran mengikuti titik — luasnya menyesuaikan isian Luas Lahan.
                     </p>
                 </div>
                 <div class="flex gap-2">
+                    <button type="button" id="btn-polygon-otomatis" title="Buat polygon awal di sekitar titik lokasi (luas menyesuaikan isian Luas Lahan)"
+                            class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-700">
+                        Polygon Otomatis
+                    </button>
                     <button type="button" id="btn-polygon-reset"
                             class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
                         Reset Polygon
