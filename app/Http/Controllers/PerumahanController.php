@@ -120,6 +120,17 @@ class PerumahanController extends Controller
 
     private function validated(Request $request): array
     {
+        // Peta mengirim polygon sebagai string JSON melalui input hidden;
+        // dekode di sini agar validasi 'array' lolos.
+        $polygon = $request->input('batas_polygon');
+        if (is_string($polygon)) {
+            $polygonTerdekode = json_decode($polygon, true);
+            $request->merge([
+                // Array kosong dianggap tidak ada polygon.
+                'batas_polygon' => is_array($polygonTerdekode) && $polygonTerdekode !== [] ? $polygonTerdekode : null,
+            ]);
+        }
+
         $request->merge([
             'ada_lahan_pemakaman' => $request->boolean('ada_lahan_pemakaman'),
         ]);

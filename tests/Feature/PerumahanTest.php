@@ -186,6 +186,49 @@ class PerumahanTest extends TestCase
         $this->assertTrue($perumahan->punya_polygon);
     }
 
+    public function test_batas_polygon_string_json_dari_form_bisa_disimpan(): void
+    {
+        // Browser mengirim input hidden sebagai string JSON, bukan array.
+        $kelurahan = $this->wilayah();
+
+        $this->actingAs($this->petugas())
+            ->post(route('perumahan.store'), [
+                'nama' => 'Perumahan Polygon String',
+                'kelurahan_id' => $kelurahan->id,
+                'luas_lahan' => 8000,
+                'batas_polygon' => '[[-6.9,107.6],[-6.902,107.604],[-6.905,107.601]]',
+                'jumlah_unit' => 40,
+                'status' => 'komersil',
+            ])
+            ->assertRedirect();
+
+        $perumahan = Perumahan::where('nama', 'Perumahan Polygon String')->firstOrFail();
+
+        $this->assertCount(3, $perumahan->polygon_koordinat);
+        $this->assertTrue($perumahan->punya_polygon);
+    }
+
+    public function test_batas_polygon_string_kosong_dari_form_diabaikan(): void
+    {
+        $kelurahan = $this->wilayah();
+
+        $this->actingAs($this->petugas())
+            ->post(route('perumahan.store'), [
+                'nama' => 'Perumahan Tanpa Polygon',
+                'kelurahan_id' => $kelurahan->id,
+                'luas_lahan' => 8000,
+                'jumlah_unit' => 40,
+                'status' => 'komersil',
+                'batas_polygon' => '[]',
+            ])
+            ->assertRedirect();
+
+        $perumahan = Perumahan::where('nama', 'Perumahan Tanpa Polygon')->firstOrFail();
+
+        $this->assertNull($perumahan->batas_polygon);
+        $this->assertFalse($perumahan->punya_polygon);
+    }
+
     public function test_batas_polygon_kurang_dari_tiga_titik_ditolak_validasi(): void
     {
         $kelurahan = $this->wilayah();
