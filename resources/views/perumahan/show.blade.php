@@ -73,30 +73,6 @@
 
                 <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Luasan &amp; Unit</p>
-                    @if ($perumahan->punya_polygon)
-                        <dl class="mt-3 mb-3 space-y-2 rounded-lg bg-slate-50 p-3 text-sm">
-                            <div class="flex justify-between gap-4">
-                                <dt class="text-slate-500">Luas polygon batas</dt>
-                                <dd class="text-right font-medium text-slate-800">
-                                    {{ number_format((float) $perumahan->luas_polygon, 0, ',', '.') }} m&sup2;
-                                    ({{ number_format($perumahan->luas_polygon_ha, 4, ',', '.') }} ha)
-                                </dd>
-                            </div>
-                            <div class="flex justify-between gap-4">
-                                <dt class="text-slate-500">Selisih vs luas lahan</dt>
-                                @php
-                                    $selisih = $perumahan->selisih_luas;
-                                    $deviasi = $perumahan->deviasi_luas_persen;
-                                @endphp
-                                <dd class="text-right font-medium {{ $deviasi !== null && abs($deviasi) > 10 ? 'text-rose-600' : 'text-emerald-600' }}">
-                                    @if ($selisih !== null)
-                                        {{ $selisih >= 0 ? '+' : '-' }}{{ number_format(abs((float) $selisih), 0, ',', '.') }} m&sup2;
-                                        ({{ $deviasi >= 0 ? '+' : '' }}{{ number_format((float) $deviasi, 1, ',', '.') }}%)
-                                    @endif
-                                </dd>
-                            </div>
-                        </dl>
-                    @endif
                     <dl class="mt-3 space-y-2 text-sm">
                         <div class="flex justify-between gap-4">
                             <dt class="text-slate-500">Luas lahan</dt>
@@ -190,7 +166,6 @@
                                     <th class="px-3 py-2 text-right">Jumlah</th>
                                     <th class="px-3 py-2 text-right">L. Tanah</th>
                                     <th class="px-3 py-2 text-right">L. Bangunan</th>
-                                    <th class="px-3 py-2 text-right">Harga</th>
                                     <th class="px-3 py-2">Keterangan</th>
                                 </tr>
                             </thead>
@@ -201,7 +176,6 @@
                                         <td class="px-3 py-2 text-right">{{ number_format($tipe->jumlah_unit, 0, ',', '.') }}</td>
                                         <td class="px-3 py-2 text-right">{{ $tipe->luas_tanah !== null ? number_format((float) $tipe->luas_tanah, 0, ',', '.') . ' m²' : '-' }}</td>
                                         <td class="px-3 py-2 text-right">{{ $tipe->luas_bangunan !== null ? number_format((float) $tipe->luas_bangunan, 0, ',', '.') . ' m²' : '-' }}</td>
-                                        <td class="px-3 py-2 text-right">{{ $tipe->harga !== null ? 'Rp ' . number_format((float) $tipe->harga, 0, ',', '.') : '-' }}</td>
                                         <td class="px-3 py-2 text-slate-500">{{ $tipe->keterangan ?: '-' }}</td>
                                     </tr>
                                 @endforeach
@@ -210,7 +184,7 @@
                                 <tr>
                                     <td class="px-3 py-2" colspan="1">Total</td>
                                     <td class="px-3 py-2 text-right">{{ number_format($perumahan->total_unit_tipe, 0, ',', '.') }}</td>
-                                    <td colspan="4"></td>
+                                    <td colspan="3"></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -253,9 +227,10 @@
             </div>
         </div>
 
-        <div class="space-y-4">                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <p class="text-sm font-semibold text-slate-800">Titik Lokasi &amp; Batas Area</p>
-                    @if ($perumahan->punya_koordinat || $perumahan->punya_polygon)
+        <div class="space-y-4">
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-sm font-semibold text-slate-800">Titik Lokasi</p>
+                @if ($perumahan->punya_koordinat)
                     <div id="map-detail" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100"></div>
                     <a href="https://www.openstreetmap.org/?mlat={{ $perumahan->latitude }}&mlon={{ $perumahan->longitude }}#map=17/{{ $perumahan->latitude }}/{{ $perumahan->longitude }}"
                        target="_blank" rel="noopener"
@@ -264,7 +239,7 @@
                     </a>
                 @else
                     <p class="mt-3 text-sm text-slate-500">
-                        Titik koordinat &amp; batas area belum diisi.
+                        Titik koordinat belum diisi.
                         <a href="{{ route('perumahan.edit', $perumahan) }}" class="font-medium text-indigo-600 hover:underline">Lengkapi sekarang</a>.
                     </p>
                 @endif
@@ -289,7 +264,7 @@
                 </dl>
 
                 <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}" class="mt-4"
-                      data-confirm="Hapus data perumahan {{ $perumahan->nama }}?">
+                      data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
                     @csrf
                     @method('DELETE')
                     <button type="submit"
@@ -302,7 +277,7 @@
     </div>
 @endsection
 
-@if ($perumahan->punya_koordinat || $perumahan->punya_polygon)
+@if ($perumahan->punya_koordinat)
     @push('scripts')
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script>
@@ -311,39 +286,17 @@
                 if (!el || typeof window.L === 'undefined') return;
 
                 const PETA = @json(config('peta'));
-                const polygon = @json($perumahan->polygon_koordinat);
-                const lat = {{ $perumahan->punya_koordinat ? (float) $perumahan->latitude : 'null' }};
-                const lng = {{ $perumahan->punya_koordinat ? (float) $perumahan->longitude : 'null' }};
+                const lat = {{ (float) $perumahan->latitude }};
+                const lng = {{ (float) $perumahan->longitude }};
 
-                const map = L.map(el).setView(
-                    [lat ?? PETA.latitude, lng ?? PETA.longitude],
-                    lat !== null ? PETA.zoom_detail : PETA.zoom,
-                );
+                const map = L.map(el).setView([lat, lng], PETA.zoom_detail);
                 L.tileLayer(PETA.tile_url, {
                     maxZoom: 19,
                     attribution: PETA.tile_attribution,
                 }).addTo(map);
 
-                const bounds = [];
+                L.marker([lat, lng]).addTo(map).bindPopup(@json($perumahan->nama)).openPopup();
 
-                if (Array.isArray(polygon) && polygon.length >= 3) {
-                    L.polygon(polygon, {
-                        color: '#6366f1',
-                        fillColor: '#6366f1',
-                        fillOpacity: 0.18,
-                        weight: 2,
-                    }).addTo(map).bindPopup(@json($perumahan->nama.' — batas area'));
-                    polygon.forEach((t) => bounds.push(t));
-                }
-
-                if (lat !== null && lng !== null) {
-                    L.marker([lat, lng]).addTo(map).bindPopup(@json($perumahan->nama)).openPopup();
-                    bounds.push([lat, lng]);
-                }
-
-                if (bounds.length) {
-                    map.fitBounds(bounds, { padding: [30, 30], maxZoom: PETA.zoom_detail });
-                }
                 setTimeout(() => map.invalidateSize(), 200);
             });
         </script>

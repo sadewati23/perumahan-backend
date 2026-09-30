@@ -23,7 +23,7 @@
     </div>
 
     <form method="GET" class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="grid gap-3 md:grid-cols-4">
+        <div class="grid gap-3 md:grid-cols-3">
             <div class="md:col-span-2">
                 <label class="mb-1 block text-xs font-medium text-slate-600">Pencarian</label>
                 <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nama perumahan, pengembang, kelurahan, kecamatan..."
@@ -38,25 +38,23 @@
                     @endforeach
                 </select>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-600">Status</label>
-                    <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500">
-                        <option value="">Semua</option>
-                        @foreach (\App\Models\Perumahan::STATUS as $value => $label)
-                            <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-600">Tahun selesai</label>
-                    <select name="tahun" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500">
-                        <option value="">Semua</option>
-                        @foreach ($tahunList as $tahun)
-                            <option value="{{ $tahun }}" @selected(($filters['tahun'] ?? '') == $tahun)>{{ $tahun }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Status</label>
+                <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500">
+                    <option value="">Semua</option>
+                    @foreach (\App\Models\Perumahan::STATUS as $value => $label)
+                        <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Tahun selesai</label>
+                <select name="tahun" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500">
+                    <option value="">Semua</option>
+                    @foreach ($tahunList as $tahun)
+                        <option value="{{ $tahun }}" @selected(($filters['tahun'] ?? '') == $tahun)>{{ $tahun }}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
         <div class="mt-3 flex gap-2">
@@ -145,7 +143,7 @@
                                     <a href="{{ route('perumahan.show', $perumahan) }}" class="text-xs font-medium text-slate-600 hover:text-indigo-600">Detail</a>
                                     <a href="{{ route('perumahan.edit', $perumahan) }}" class="text-xs font-medium text-amber-600 hover:text-amber-700">Ubah</a>
                                     <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}"
-                                          data-confirm="Hapus data perumahan {{ $perumahan->nama }}?">
+                                          data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-xs font-medium text-rose-600 hover:text-rose-700">Hapus</button>

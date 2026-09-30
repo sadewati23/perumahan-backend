@@ -6,11 +6,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Perumahan extends Model
 {
-    use SoftDeletes;
 
     public const STATUS = [
         'subsidi' => 'Subsidi',
@@ -43,7 +41,7 @@ class Perumahan extends Model
 
     protected $fillable = [
         'nama', 'pengembang', 'kelurahan_id', 'alamat', 'rt', 'rw',
-        'latitude', 'longitude', 'batas_polygon', 'luas_lahan', 'jumlah_unit', 'status',
+        'latitude', 'longitude', 'luas_lahan', 'jumlah_unit', 'status',
         'tahun_pembuatan', 'tahun_selesai', 'jumlah_rth', 'luas_rth',
         'kdb', 'kdh', 'ada_lahan_pemakaman', 'luas_lahan_pemakaman',
         'lokasi_lahan_pemakaman', 'keterangan',
@@ -54,7 +52,6 @@ class Perumahan extends Model
         return [
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
-            'batas_polygon' => 'array',
             'luas_lahan' => 'decimal:2',
             'luas_rth' => 'decimal:2',
             'luas_lahan_pemakaman' => 'decimal:2',
@@ -133,102 +130,6 @@ class Perumahan extends Model
         return $this->latitude !== null && $this->longitude !== null;
     }
 
-    /**
-     * Batas polygon dalam bentuk array pasangan [lat, lng] yang siap dipakai Leaflet.
-     */
-    public function getPolygonKoordinatAttribute(): array
-    {
-        $polygon = $this->batas_polygon;
-
-        if (! is_array($polygon)) {
-            return [];
-        }
-
-        $koordinat = [];
-        foreach ($polygon as $titik) {
-            if (! is_array($titik) || count($titik) < 2) {
-                continue;
-            }
-
-            $lat = is_numeric($titik[0]) ? (float) $titik[0] : null;
-            $lng = is_numeric($titik[1]) ? (float) $titik[1] : null;
-
-            if ($lat === null || $lng === null) {
-                continue;
-            }
-
-            $koordinat[] = [$lat, $lng];
-        }
-
-        return count($koordinat) >= 3 ? $koordinat : [];
-    }
-
-    public function getPunyaPolygonAttribute(): bool
-    {
-        return $this->polygon_koordinat !== [];
-    }
-
-    /**
-     * Luas polygon batas dalam m² memakai rumus Chamberlain–Duquette
-     * (spherical excess — sama seperti turf.js), akurat untuk area
-     * sekecil apapun pada permukaan bumi.
-     */
-    public function getLuasPolygonAttribute(): ?float
-    {
-        $koordinat = $this->polygon_koordinat;
-
-        if (count($koordinat) < 3) {
-            return null;
-        }
-
-        $jariBumi = 6378137.0; // meter (WGS84)
-        $jumlah = count($koordinat);
-        $total = 0.0;
-
-        for ($i = 0; $i < $jumlah; $i++) {
-            [$latBawah, $lngBawah] = $koordinat[$i];
-            $latTengah = $koordinat[($i + 1) % $jumlah][0];
-            $lngAtas = $koordinat[($i + 2) % $jumlah][1];
-
-            $total += deg2rad($lngAtas - $lngBawah) * sin(deg2rad($latTengah));
-        }
-
-        return (float) abs(round($total * $jariBumi ** 2 / 2, 2));
-    }
-
-    /**
-     * Luas polygon batas dalam hektar.
-     */
-    public function getLuasPolygonHaAttribute(): ?float
-    {
-        return $this->luas_polygon === null ? null : round($this->luas_polygon / 10000, 4);
-    }
-
-    /**
-     * Selisih luas polygon terhadap luas lahan inputan (m²),
-     * positif berarti polygon lebih luas.
-     */
-    public function getSelisihLuasAttribute(): ?float
-    {
-        if ($this->luas_polygon === null || (float) $this->luas_lahan <= 0) {
-            return null;
-        }
-
-        return round($this->luas_polygon - (float) $this->luas_lahan, 2);
-    }
-
-    /**
-     * Persentase deviasi luas polygon terhadap luas lahan inputan.
-     */
-    public function getDeviasiLuasPersenAttribute(): ?float
-    {
-        if ($this->luas_polygon === null || (float) $this->luas_lahan <= 0) {
-            return null;
-        }
-
-        return round(($this->luas_polygon - (float) $this->luas_lahan) / (float) $this->luas_lahan * 100, 2);
-    }
-
     public function getTotalUnitTipeAttribute(): int
     {
         return (int) $this->tipeUnits->sum('jumlah_unit');
@@ -255,8 +156,6 @@ class Perumahan extends Model
             'kdb' => $this->kdb !== null ? (float) $this->kdb : null,
             'kdh' => $this->kdh !== null ? (float) $this->kdh : null,
             'tahun_selesai' => $this->tahun_selesai,
-            'polygon' => $this->polygon_koordinat,
-            'luas_polygon' => $this->luas_polygon,
         ];
     }
 
@@ -266,50 +165,17 @@ class Perumahan extends Model
     public static function featureCollection(): array
     {
         $features = self::with('kelurahan.kecamatan')
-            ->where(function (Builder $q) {
-                $q->whereNotNull('latitude')->whereNotNull('longitude')
-                    ->orWhereNotNull('batas_polygon');
-            })
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
             ->get()
-            ->map(function (self $p) {
-                $properties = $p->titikPeta();
-
-                // Polygon disimpan terpisah sebagai Feature geometry Polygon.
-                if ($p->punya_polygon) {
-                    $cincin = array_map(
-                        fn (array $titik) => [$titik[1], $titik[0]],
-                        $p->polygon_koordinat,
-                    );
-
-                    // Tutup cincin polygon bila titik awal dan akhir berbeda.
-                    if ($cincin[0] !== $cincin[count($cincin) - 1]) {
-                        $cincin[] = $cincin[0];
-                    }
-
-                    $properties['geometry_polygon'] = [
-                        'type' => 'Polygon',
-                        'coordinates' => [$cincin],
-                    ];
-                }
-
-                // Feature titik wajib punya koordinat; polygon saja masuk sebagai null-coordinates.
-                if (! $p->punya_koordinat) {
-                    return [
-                        'type' => 'Feature',
-                        'geometry' => null,
-                        'properties' => $properties,
-                    ];
-                }
-
-                return [
-                    'type' => 'Feature',
-                    'geometry' => [
-                        'type' => 'Point',
-                        'coordinates' => [(float) $p->longitude, (float) $p->latitude],
-                    ],
-                    'properties' => $properties,
-                ];
-            });
+            ->map(fn (self $p) => [
+                'type' => 'Feature',
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [(float) $p->longitude, (float) $p->latitude],
+                ],
+                'properties' => $p->titikPeta(),
+            ]);
 
         return [
             'type' => 'FeatureCollection',

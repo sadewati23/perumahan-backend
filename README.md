@@ -24,9 +24,8 @@ Aplikasi terdiri dari dua bagian: **portal publik** (tanpa login) dan **area adm
 | Dashboard | Statistik total perumahan, unit, luas lahan, RTH, sebaran per kecamatan, tren tahun selesai (Chart.js), komposisi kondisi PSU, jenis PSU terbanyak |
 | Data Perumahan | CRUD lengkap + filter (kata kunci, kecamatan, status, tahun) |
 | Detail Perumahan | Ringkasan luasan, KDB/KDH, RTH, lahan pemakaman, rincian tipe unit, tabel PSU, mini map |
-| Peta Sebaran (GIS) | Leaflet + OpenStreetMap, marker berwarna per status, polygon batas area, pencarian lokasi, endpoint GeoJSON |
+| Peta Sebaran (GIS) | Leaflet + OpenStreetMap, marker berwarna per status, pencarian lokasi, endpoint GeoJSON |
 | Titik Lokasi | Pemilih titik di peta saat input/ubah data, tombol "gunakan lokasi saya" (geolokasi browser) |
-| Batas Area (Polygon) | Gambar batas lahan perumahan di peta saat input/ubah data; luas polygon dihitung otomatis (rumus Chamberlain–Duquette) dan dibandingkan dengan luas lahan inputan beserta deviasinya |
 | Master Wilayah | Kelola kecamatan dan kelurahan sebagai sumber dropdown |
 | Manajemen Pengguna | Khusus admin: tambah/ubah/nonaktifkan/hapus akun |
 
@@ -36,9 +35,9 @@ Data yang di-soft delete otomatis hilang dari portal publik namun tetap tersimpa
 
 - `kecamatans` — kode, nama, kabupaten/kota
 - `kelurahans` — kecamatan_id, kode, nama, kode_pos
-- `perumahans` — nama, pengembang, kelurahan_id, alamat, rt, rw, latitude, longitude, batas_polygon (JSON array [lat,lng]), luas_lahan, jumlah_unit, status (`subsidi`/`komersil`), tahun_pembuatan, tahun_selesai, jumlah_rth, luas_rth, kdb, kdh, ada_lahan_pemakaman, luas_lahan_pemakaman, lokasi_lahan_pemakaman, keterangan (soft delete)
+- `perumahans` — nama, pengembang, kelurahan_id, alamat, rt, rw, latitude, longitude, luas_lahan, jumlah_unit, status (`subsidi`/`komersil`), tahun_pembuatan, tahun_selesai, jumlah_rth, luas_rth, kdb, kdh, ada_lahan_pemakaman, luas_lahan_pemakaman, lokasi_lahan_pemakaman, keterangan — penghapusan data bersifat **permanen** (hard delete, detail PSU & tipe unit ikut terhapus via FK cascade)
 - `psu_perumahans` — perumahan_id, jenis, jumlah, satuan, kondisi, keterangan
-- `tipe_units` — perumahan_id, tipe, jumlah_unit, luas_tanah, luas_bangunan, harga, keterangan
+- `tipe_units` — perumahan_id, tipe, jumlah_unit, luas_tanah, luas_bangunan, keterangan
 
 Satuan luas menggunakan **m²** (dibantu tampilan hektar pada dashboard/daftar).
 
@@ -80,14 +79,13 @@ Akses `http://localhost:8000` untuk portal publik dan `http://localhost:8000/adm
 php artisan test
 ```
 
-Mencakup autentikasi, hak akses role, CRUD perumahan, validasi rentang tahun, penyimpanan PSU & tipe unit, penyimpanan & normalisasi batas polygon, GeoJSON polygon, statistik dashboard, dan render seluruh halaman utama.
+Mencakup autentikasi, hak akses role, CRUD perumahan, validasi rentang tahun, penyimpanan PSU & tipe unit, GeoJSON, statistik dashboard, dan render seluruh halaman utama.
 
 ## Catatan Teknis
 
 - Peta memakai Leaflet 1.9.4 dari CDN (Unpkg) dan tile OpenStreetMap, sehingga browser perlu akses internet.
 - Grafik dashboard memakai Chart.js 4 dari CDN (jsDelivr).
-- Polygon batas area disimpan sebagai JSON array pasangan `[lat,lng]` pada kolom `perumahans.batas_polygon`; GeoJSON mengeluarkannya sebagai `properties.geometry_polygon` (RingGeometry GeoJSON `[lng,lat]`) sehingga tetap kompatibel QGIS.
-- Luas polygon dihitung otomatis dari koordinat (accessor `luas_polygon`, `luas_polygon_ha`, `selisih_luas`, `deviasi_luas_persen`) — form menghitung real-time saat menggambar, detail & popup peta menampilkan hasilnya; deviasi di atas 10% ditandai merah.
 - Filter pencarian publik dan admin memakai scope yang sama (`Perumahan::filter()`), jadi hasil pencarian konsisten.
+- Kolom harga pada tipe unit telah dihapus sepenuhnya dari fitur (form, filter, tampilan, dan kolom database).
 - Endpoint GeoJSON tersedia di publik (`/peta/geojson`) maupun admin (`/admin/perumahan/geojson`).
 - Filter pencarian pada daftar perumahan mencakup nama, pengembang, alamat, kelurahan, dan kecamatan.

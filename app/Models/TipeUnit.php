@@ -10,7 +10,7 @@ class TipeUnit extends Model
     protected $table = 'tipe_units';
 
     protected $fillable = [
-        'perumahan_id', 'tipe', 'jumlah_unit', 'luas_tanah', 'luas_bangunan', 'harga', 'keterangan',
+        'perumahan_id', 'tipe', 'jumlah_unit', 'luas_tanah', 'luas_bangunan', 'keterangan',
     ];
 
     protected function casts(): array
@@ -18,7 +18,6 @@ class TipeUnit extends Model
         return [
             'luas_tanah' => 'decimal:2',
             'luas_bangunan' => 'decimal:2',
-            'harga' => 'decimal:2',
         ];
     }
 

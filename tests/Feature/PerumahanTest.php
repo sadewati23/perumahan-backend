@@ -121,7 +121,41 @@ class PerumahanTest extends TestCase
             ->delete(route('perumahan.destroy', $perumahan))
             ->assertRedirect(route('perumahan.index'));
 
-        $this->assertSoftDeleted('perumahans', ['id' => $perumahan->id]);
+        // Hard delete permanen: baris hilang total dari database.
+        $this->assertDatabaseMissing('perumahans', ['id' => $perumahan->id]);
+        $this->assertSame(0, Perumahan::count());
+    }
+
+    public function test_hapus_perumahan_menghapus_psu_dan_tipe_unit_ikutan(): void
+    {
+        $kelurahan = $this->wilayah();
+        $perumahan = Perumahan::create([
+            'nama' => 'Perumahan Beranak',
+            'kelurahan_id' => $kelurahan->id,
+            'luas_lahan' => 5000,
+            'jumlah_unit' => 50,
+            'status' => 'komersil',
+        ]);
+
+        $psu = $perumahan->psu()->create([
+            'jenis' => 'Jalan Lingkungan',
+            'jumlah' => 1500,
+            'satuan' => 'meter',
+            'kondisi' => 'baik',
+        ]);
+        $tipe = $perumahan->tipeUnits()->create([
+            'tipe' => 'Tipe 36',
+            'jumlah_unit' => 50,
+        ]);
+
+        $this->actingAs($this->petugas())
+            ->delete(route('perumahan.destroy', $perumahan))
+            ->assertRedirect(route('perumahan.index'));
+
+        // Data induk & detail ikut terhapus permanen (FK cascadeOnDelete).
+        $this->assertDatabaseMissing('perumahans', ['id' => $perumahan->id]);
+        $this->assertDatabaseMissing('psu_perumahans', ['id' => $psu->id]);
+        $this->assertDatabaseMissing('tipe_units', ['id' => $tipe->id]);
     }
 
     public function test_geojson_menyertakan_titik_yang_punya_koordinat(): void
@@ -159,222 +193,33 @@ class PerumahanTest extends TestCase
         $this->actingAs($admin)->get(route('users.index'))->assertOk();
     }
 
-    public function test_batas_polygon_bisa_disimpan_dan_normalisasi(): void
+    public function test_peta_sebaran_menyediakan_fokus_kecamatan(): void
     {
-        $kelurahan = $this->wilayah();
+        $kecamatan = Kecamatan::create(['nama' => 'Mandalasari', 'kabupaten_kota' => 'Kota Bandung']);
+        $kelurahan = Kelurahan::create(['kecamatan_id' => $kecamatan->id, 'nama' => 'Cibangkong']);
 
-        $this->actingAs($this->petugas())
-            ->post(route('perumahan.store'), [
-                'nama' => 'Perumahan Berpolygon',
-                'kelurahan_id' => $kelurahan->id,
-                'luas_lahan' => 8000,
-                'jumlah_unit' => 40,
-                'status' => 'komersil',
-                'batas_polygon' => [
-                    ['-6.900000', '107.600000'],
-                    ['-6.902000', '107.604000'],
-                    ['-6.905000', '107.601000'],
-                    ['-6.900000', '107.600000'], // titik penutup duplikat harus dibuang
-                ],
-            ])
-            ->assertRedirect();
-
-        $perumahan = Perumahan::where('nama', 'Perumahan Berpolygon')->firstOrFail();
-
-        $this->assertCount(3, $perumahan->polygon_koordinat);
-        $this->assertSame([-6.9, 107.6], $perumahan->polygon_koordinat[0]);
-        $this->assertTrue($perumahan->punya_polygon);
-    }
-
-    public function test_batas_polygon_string_json_dari_form_bisa_disimpan(): void
-    {
-        // Browser mengirim input hidden sebagai string JSON, bukan array.
-        $kelurahan = $this->wilayah();
-
-        $this->actingAs($this->petugas())
-            ->post(route('perumahan.store'), [
-                'nama' => 'Perumahan Polygon String',
-                'kelurahan_id' => $kelurahan->id,
-                'luas_lahan' => 8000,
-                'batas_polygon' => '[[-6.9,107.6],[-6.902,107.604],[-6.905,107.601]]',
-                'jumlah_unit' => 40,
-                'status' => 'komersil',
-            ])
-            ->assertRedirect();
-
-        $perumahan = Perumahan::where('nama', 'Perumahan Polygon String')->firstOrFail();
-
-        $this->assertCount(3, $perumahan->polygon_koordinat);
-        $this->assertTrue($perumahan->punya_polygon);
-    }
-
-    public function test_batas_polygon_string_kosong_dari_form_diabaikan(): void
-    {
-        $kelurahan = $this->wilayah();
-
-        $this->actingAs($this->petugas())
-            ->post(route('perumahan.store'), [
-                'nama' => 'Perumahan Tanpa Polygon',
-                'kelurahan_id' => $kelurahan->id,
-                'luas_lahan' => 8000,
-                'jumlah_unit' => 40,
-                'status' => 'komersil',
-                'batas_polygon' => '[]',
-            ])
-            ->assertRedirect();
-
-        $perumahan = Perumahan::where('nama', 'Perumahan Tanpa Polygon')->firstOrFail();
-
-        $this->assertNull($perumahan->batas_polygon);
-        $this->assertFalse($perumahan->punya_polygon);
-    }
-
-    public function test_batas_polygon_kurang_dari_tiga_titik_ditolak_validasi(): void
-    {
-        $kelurahan = $this->wilayah();
-
-        $this->actingAs($this->petugas())
-            ->post(route('perumahan.store'), [
-                'nama' => 'Perumahan Polygon Kosong',
-                'kelurahan_id' => $kelurahan->id,
-                'luas_lahan' => 8000,
-                'jumlah_unit' => 40,
-                'status' => 'komersil',
-                'batas_polygon' => [
-                    ['-6.9', '107.6'],
-                    ['-6.902', '107.604'],
-                ],
-            ])
-            ->assertSessionHasErrors('batas_polygon');
-
-        $this->assertSame(0, Perumahan::count());
-    }
-
-    public function test_geojson_menyertakan_geometry_polygon(): void
-    {
-        $kelurahan = $this->wilayah();
         Perumahan::create([
-            'nama' => 'Perumahan Polygon GeoJSON',
+            'nama' => 'Perumahan Peta Titik',
             'kelurahan_id' => $kelurahan->id,
             'luas_lahan' => 5000,
-            'jumlah_unit' => 50,
+            'jumlah_unit' => 10,
             'status' => 'komersil',
             'latitude' => -6.9,
             'longitude' => 107.6,
-            'batas_polygon' => [
-                [-6.9, 107.6],
-                [-6.902, 107.604],
-                [-6.905, 107.601],
-            ],
         ]);
 
         $this->actingAs($this->petugas())
-            ->get(route('perumahan.geojson'))
+            ->get(route('perumahan.peta'))
             ->assertOk()
-            ->assertJsonPath('features.0.geometry.type', 'Point')
-            ->assertJsonPath('features.0.properties.geometry_polygon.type', 'Polygon')
-            ->assertJsonCount(4, 'features.0.properties.geometry_polygon.coordinates.0');
-    }
+            ->assertSee('Fokus Kecamatan')
+            ->assertSee('Mandalasari')
+            // Data koordinat titik kecamatan ikut terkirim ke JS.
+            ->assertSee('-6.9,107.6');
 
-    public function test_geojson_menerima_perumahan_hanya_polygon_tanpa_titik(): void
-    {
-        $kelurahan = $this->wilayah();
-        Perumahan::create([
-            'nama' => 'Perumahan Hanya Polygon',
-            'kelurahan_id' => $kelurahan->id,
-            'luas_lahan' => 5000,
-            'jumlah_unit' => 50,
-            'status' => 'subsidi',
-            'batas_polygon' => [
-                [-6.9, 107.6],
-                [-6.902, 107.604],
-                [-6.905, 107.601],
-            ],
-        ]);
-
+        // Parameter ?kecamatan=ID diterima dan memfokuskan peta saat dibuka.
         $this->actingAs($this->petugas())
-            ->get(route('perumahan.geojson'))
+            ->get(route('perumahan.peta', ['kecamatan' => $kecamatan->id]))
             ->assertOk()
-            ->assertJsonCount(1, 'features')
-            ->assertJsonPath('features.0.geometry', null)
-            ->assertJsonPath('features.0.properties.nama', 'Perumahan Hanya Polygon');
-    }
-
-    public function test_luas_polygon_dihitung_dan_dibandingkan_dengan_luas_lahan(): void
-    {
-        $kelurahan = $this->wilayah();
-
-        // Perkiraan: 1 menit bujur di sekitar lat -6.9 ≈ 1.845 m,
-        // 1 menit lintang ≈ 1.853 m. Persegi 2' × 2' ≈ 3.706 × 3.690 m
-        // ≈ 13,67 juta m² (≈ 1.367 ha).
-        $perumahan = Perumahan::create([
-            'nama' => 'Perumahan Hitung Luas',
-            'kelurahan_id' => $kelurahan->id,
-            'luas_lahan' => 12660000,
-            'jumlah_unit' => 100,
-            'status' => 'komersil',
-            'batas_polygon' => [
-                [-6.90, 107.60],
-                [-6.90, 107.633333333],
-                [-6.933333333, 107.633333333],
-                [-6.933333333, 107.60],
-            ],
-        ]);
-
-        $luas = $perumahan->luas_polygon;
-
-        $this->assertNotNull($luas);
-        $this->assertGreaterThan(13000000, $luas);
-        $this->assertLessThan(14000000, $luas);
-        $this->assertEqualsWithDelta(1366.87, $perumahan->luas_polygon_ha, 0.5);
-
-        // Selisih & deviasi terhadap luas lahan inputan (12.660.000 m²).
-        $this->assertNotNull($perumahan->selisih_luas);
-        $this->assertEqualsWithDelta($luas - 12660000, $perumahan->selisih_luas, 0.01);
-        $this->assertEqualsWithDelta(
-            ($luas - 12660000) / 12660000 * 100,
-            $perumahan->deviasi_luas_persen,
-            0.01,
-        );
-
-        // Luas polygon muncul di GeoJSON.
-        $this->actingAs($this->petugas())
-            ->get(route('perumahan.geojson'))
-            ->assertOk()
-            ->assertJsonPath('features.0.properties.luas_polygon', $luas);
-    }
-
-    public function test_luas_polygon_tanpa_polygon_atau_luas_lahan_nol(): void
-    {
-        $kelurahan = $this->wilayah();
-
-        $tanpaPolygon = Perumahan::create([
-            'nama' => 'Perumahan Tanpa Polygon Luas',
-            'kelurahan_id' => $kelurahan->id,
-            'luas_lahan' => 5000,
-            'jumlah_unit' => 10,
-            'status' => 'komersil',
-        ]);
-
-        $this->assertNull($tanpaPolygon->luas_polygon);
-        $this->assertNull($tanpaPolygon->selisih_luas);
-        $this->assertNull($tanpaPolygon->deviasi_luas_persen);
-
-        $polygonTapiLuasNol = Perumahan::create([
-            'nama' => 'Perumahan Polygon Luas Nol',
-            'kelurahan_id' => $kelurahan->id,
-            'luas_lahan' => 0,
-            'jumlah_unit' => 10,
-            'status' => 'komersil',
-            'batas_polygon' => [
-                [-6.9, 107.6],
-                [-6.902, 107.604],
-                [-6.905, 107.601],
-            ],
-        ]);
-
-        $this->assertNotNull($polygonTapiLuasNol->luas_polygon);
-        $this->assertNull($polygonTapiLuasNol->selisih_luas);
-        $this->assertNull($polygonTapiLuasNol->deviasi_luas_persen);
+            ->assertSee('const fokusAwal = '.$kecamatan->id.';');
     }
 }

@@ -47,13 +47,6 @@
                     <p class="text-xs text-slate-500">Luas Lahan</p>
                     <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format((float) $perumahan->luas_lahan, 0, ',', '.') }} m&sup2;</p>
                     <p class="text-xs text-slate-500">{{ number_format($perumahan->luas_lahan_ha, 2, ',', '.') }} hektar</p>
-                    @if ($perumahan->punya_polygon && $perumahan->deviasi_luas_persen !== null)
-                        @php $deviasi = $perumahan->deviasi_luas_persen; @endphp
-                        <p class="mt-1 text-xs {{ abs($deviasi) > 10 ? 'text-rose-600' : 'text-emerald-600' }}">
-                            Polygon: {{ number_format((float) $perumahan->luas_polygon, 0, ',', '.') }} m&sup2;
-                            ({{ $deviasi >= 0 ? '+' : '' }}{{ number_format((float) $deviasi, 1, ',', '.') }}%)
-                        </p>
-                    @endif
                 </div>
                 <div class="rounded-xl bg-slate-50 p-4">
                     <p class="text-xs text-slate-500">Jumlah Unit</p>
@@ -159,7 +152,6 @@
                                         <th class="py-2 pr-4 text-right">Jumlah</th>
                                         <th class="py-2 pr-4 text-right">L. Tanah</th>
                                         <th class="py-2 pr-4 text-right">L. Bangunan</th>
-                                        <th class="py-2 text-right">Harga</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
@@ -169,7 +161,6 @@
                                             <td class="py-3 pr-4 text-right text-slate-600">{{ number_format($tipe->jumlah_unit, 0, ',', '.') }} unit</td>
                                             <td class="py-3 pr-4 text-right text-slate-600">{{ $tipe->luas_tanah !== null ? number_format((float) $tipe->luas_tanah, 0, ',', '.') . ' m²' : '-' }}</td>
                                             <td class="py-3 pr-4 text-right text-slate-600">{{ $tipe->luas_bangunan !== null ? number_format((float) $tipe->luas_bangunan, 0, ',', '.') . ' m²' : '-' }}</td>
-                                            <td class="py-3 text-right text-slate-600">{{ $tipe->harga !== null ? 'Rp ' . number_format((float) $tipe->harga, 0, ',', '.') : '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -221,9 +212,9 @@
 
             <div class="space-y-6">
                 <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-sm font-semibold text-slate-900">Titik Lokasi &amp; Batas Area</h2>
+                    <h2 class="text-sm font-semibold text-slate-900">Titik Lokasi</h2>
 
-                    @if ($perumahan->punya_koordinat || $perumahan->punya_polygon)
+                    @if ($perumahan->punya_koordinat)
                         <div id="peta-detail-publik" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100"></div>
                         <dl class="mt-3 grid grid-cols-2 gap-2 text-xs">
                             <div>
@@ -241,7 +232,7 @@
                             Buka di OpenStreetMap &rarr;
                         </a>
                     @else
-                        <p class="mt-3 text-sm text-slate-500">Titik koordinat &amp; batas area perumahan ini belum tersedia.</p>
+                        <p class="mt-3 text-sm text-slate-500">Titik koordinat perumahan ini belum tersedia.</p>
                     @endif
                 </div>
 
@@ -276,7 +267,7 @@
     </div>
 @endsection
 
-@if ($perumahan->punya_koordinat || $perumahan->punya_polygon)
+@if ($perumahan->punya_koordinat)
     @push('scripts')
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script>
@@ -285,39 +276,17 @@
                 if (!el || typeof window.L === 'undefined') return;
 
                 const PETA = @json(config('peta'));
-                const polygon = @json($perumahan->polygon_koordinat);
-                const lat = {{ $perumahan->punya_koordinat ? (float) $perumahan->latitude : 'null' }};
-                const lng = {{ $perumahan->punya_koordinat ? (float) $perumahan->longitude : 'null' }};
+                const lat = {{ (float) $perumahan->latitude }};
+                const lng = {{ (float) $perumahan->longitude }};
 
-                const map = L.map(el).setView(
-                    [lat ?? PETA.latitude, lng ?? PETA.longitude],
-                    lat !== null ? PETA.zoom_detail : PETA.zoom,
-                );
+                const map = L.map(el).setView([lat, lng], PETA.zoom_detail);
                 L.tileLayer(PETA.tile_url, {
                     maxZoom: 19,
                     attribution: PETA.tile_attribution,
                 }).addTo(map);
 
-                const bounds = [];
+                L.marker([lat, lng]).addTo(map).bindPopup(@json($perumahan->nama)).openPopup();
 
-                if (Array.isArray(polygon) && polygon.length >= 3) {
-                    L.polygon(polygon, {
-                        color: '#6366f1',
-                        fillColor: '#6366f1',
-                        fillOpacity: 0.18,
-                        weight: 2,
-                    }).addTo(map).bindPopup(@json($perumahan->nama.' — batas area'));
-                    polygon.forEach((t) => bounds.push(t));
-                }
-
-                if (lat !== null && lng !== null) {
-                    L.marker([lat, lng]).addTo(map).bindPopup(@json($perumahan->nama)).openPopup();
-                    bounds.push([lat, lng]);
-                }
-
-                if (bounds.length) {
-                    map.fitBounds(bounds, { padding: [30, 30], maxZoom: PETA.zoom_detail });
-                }
                 setTimeout(() => map.invalidateSize(), 200);
             });
         </script>

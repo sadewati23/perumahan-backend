@@ -83,12 +83,9 @@ class HalamanTest extends TestCase
             ->assertDontSee($perumahan->nama);
     }
 
-    public function test_dashboard_menampilkan_statistik_psu_dan_polygon(): void
+    public function test_dashboard_menampilkan_statistik_psu(): void
     {
         $perumahan = $this->perumahan();
-        $perumahan->update([
-            'batas_polygon' => [[-6.9, 107.6], [-6.902, 107.604], [-6.905, 107.601]],
-        ]);
         $perumahan->psu()->create(['jenis' => 'Saluran Drainase', 'jumlah' => 300, 'satuan' => 'meter', 'kondisi' => 'rusak_ringan']);
         $perumahan->psu()->create(['jenis' => 'Jalan Lingkungan', 'jumlah' => 500, 'satuan' => 'meter', 'kondisi' => 'rusak_berat']);
 
@@ -96,7 +93,6 @@ class HalamanTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('PSU Rusak')
-            ->assertSee('Belum Punya Polygon')
             ->assertSee('grafik-tahun')
             ->assertSee('grafik-kondisi')
             ->assertSee('grafik-jenis-psu');

@@ -21,7 +21,6 @@ class DashboardController extends Controller
             'jumlah_komersil' => Perumahan::where('status', 'komersil')->count(),
             'jumlah_pemakaman' => Perumahan::where('ada_lahan_pemakaman', true)->count(),
             'belum_koordinat' => Perumahan::whereNull('latitude')->orWhereNull('longitude')->count(),
-            'belum_polygon' => Perumahan::whereNull('batas_polygon')->count(),
             'total_psu' => PsuPerumahan::count(),
             'psu_rusak' => PsuPerumahan::whereIn('kondisi', ['rusak_ringan', 'rusak_berat'])->count(),
         ];

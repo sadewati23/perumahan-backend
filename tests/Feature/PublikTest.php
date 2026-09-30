@@ -38,7 +38,7 @@ class PublikTest extends TestCase
         ], $atribut));
 
         $perumahan->psu()->create(['jenis' => 'Jalan Lingkungan', 'jumlah' => 900, 'satuan' => 'meter', 'kondisi' => 'baik']);
-        $perumahan->tipeUnits()->create(['tipe' => 'Tipe 36', 'jumlah_unit' => 80, 'luas_tanah' => 72, 'luas_bangunan' => 36, 'harga' => 385000000]);
+        $perumahan->tipeUnits()->create(['tipe' => 'Tipe 36', 'jumlah_unit' => 80, 'luas_tanah' => 72, 'luas_bangunan' => 36]);
 
         return $perumahan;
     }

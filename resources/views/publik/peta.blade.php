@@ -141,21 +141,6 @@
             const markers = {};
             const bounds = [];
             const formatAngka = (angka) => new Intl.NumberFormat('id-ID').format(angka);
-            const warnaHex = { subsidi: '#10b981', komersil: '#6366f1' };
-
-            // Gambar polygon batas area perumahan (bila ada).
-            titik.forEach((p) => {
-                if (!Array.isArray(p.polygon) || p.polygon.length < 3) return;
-
-                L.polygon(p.polygon, {
-                    color: warnaHex[p.status_kode] || '#64748b',
-                    fillColor: warnaHex[p.status_kode] || '#64748b',
-                    fillOpacity: 0.15,
-                    weight: 2,
-                }).addTo(map).bindPopup(`<strong>${p.nama}</strong><br>Batas area perumahan`);
-
-                p.polygon.forEach((t) => bounds.push(t));
-            });
 
             titik.forEach((p) => {
                 const warna = colors[p.status] || '#64748b';
@@ -177,7 +162,6 @@
                             <tr><td>Luas RTH</td><td style="text-align:right;padding-left:8px">${formatAngka(p.rth)} m&sup2;</td></tr>
                             <tr><td>KDB / KDH</td><td style="text-align:right;padding-left:8px">${p.kdb ?? '-'}% / ${p.kdh ?? '-'}%</td></tr>
                             <tr><td>Tahun selesai</td><td style="text-align:right;padding-left:8px">${p.tahun_selesai ?? '-'}</td></tr>
-                            ${p.luas_polygon ? `<tr><td>Luas polygon</td><td style="text-align:right;padding-left:8px">${formatAngka(Math.round(p.luas_polygon))} m&sup2;</td></tr>` : ''}
                         </table>
                         <a href="${p.url}" style="display:inline-block;margin-top:8px;color:#4f46e5;font-size:12px;font-weight:500">Lihat detail &rarr;</a>
                     </div>`);

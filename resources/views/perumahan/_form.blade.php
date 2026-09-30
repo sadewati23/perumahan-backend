@@ -17,18 +17,14 @@
         'jumlah_unit' => $row->jumlah_unit,
         'luas_tanah' => $angka($row->luas_tanah),
         'luas_bangunan' => $angka($row->luas_bangunan),
-        'harga' => $angka($row->harga),
         'keterangan' => $row->keterangan,
     ])->all());
-
-    // Polygon disimpan sebagai JSON array [lat,lng] untuk dikonsumsi skrip peta.
-    $polygonJson = json_encode($perumahan->polygon_koordinat ?: []);
 
     if (empty($psuRows)) {
         $psuRows = [['jenis' => '', 'jumlah' => '', 'satuan' => '', 'kondisi' => '', 'keterangan' => '']];
     }
     if (empty($tipeRows)) {
-        $tipeRows = [['tipe' => '', 'jumlah_unit' => '', 'luas_tanah' => '', 'luas_bangunan' => '', 'harga' => '', 'keterangan' => '']];
+        $tipeRows = [['tipe' => '', 'jumlah_unit' => '', 'luas_tanah' => '', 'luas_bangunan' => '', 'keterangan' => '']];
     }
 @endphp
 
@@ -130,52 +126,6 @@
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <div>
-                    <h2 class="text-sm font-semibold text-slate-800">2b. Batas Area (Polygon)</h2>
-                    <p class="text-xs text-slate-500">
-                        Peta mengikuti titik lokasi yang dipilih. Klik peta untuk menambah titik batas (minimal 3 titik);
-                        bulatan amber = titik lokasi perumahan, bulatan indigo = titik batas polygon.
-                        Tombol <span class="font-medium text-indigo-600">Polygon Otomatis</span> membuat polygon awal
-                        berbentuk lingkaran mengikuti titik — luasnya menyesuaikan isian Luas Lahan.
-                    </p>
-                </div>
-                <div class="flex gap-2">
-                    <button type="button" id="btn-polygon-otomatis" title="Buat polygon awal di sekitar titik lokasi (luas menyesuaikan isian Luas Lahan)"
-                            class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-700">
-                        Polygon Otomatis
-                    </button>
-                    <button type="button" id="btn-polygon-reset"
-                            class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
-                        Reset Polygon
-                    </button>
-                </div>
-            </div>
-
-            <input type="hidden" name="batas_polygon" id="input-batas-polygon" value="{{ $polygonJson }}">
-
-            <div id="map-polygon" class="h-64 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100"></div>
-
-            <p id="polygon-status" class="mt-2 text-xs text-slate-500">Belum ada titik polygon.</p>
-            <ul id="polygon-titik-list" class="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-slate-600"></ul>
-
-            <div class="mt-4 grid gap-3 rounded-lg bg-slate-50 p-3 text-sm sm:grid-cols-3">
-                <div>
-                    <p class="text-xs text-slate-500">Luas polygon</p>
-                    <p id="polygon-luas" class="font-semibold text-slate-800">-</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-500">Luas lahan (inputan)</p>
-                    <p id="polygon-luas-lahan" class="font-semibold text-slate-800">-</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-500">Selisih</p>
-                    <p id="polygon-selisih" class="font-semibold text-slate-800">-</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 class="mb-4 text-sm font-semibold text-slate-800">3. Luasan, Unit, RTH &amp; Koefisien</h2>
 
             <div class="grid gap-4 sm:grid-cols-3">
@@ -243,7 +193,6 @@
                             <th class="py-2 pr-2">Jumlah</th>
                             <th class="py-2 pr-2">L. Tanah (m&sup2;)</th>
                             <th class="py-2 pr-2">L. Bangunan (m&sup2;)</th>
-                            <th class="py-2 pr-2">Harga (Rp)</th>
                             <th class="py-2 pr-2">Keterangan</th>
                             <th class="py-2"></th>
                         </tr>
@@ -268,8 +217,8 @@
                                            value="{{ $row['luas_bangunan'] ?? '' }}" class="{{ $inputClass }} w-28">
                                 </td>
                                 <td class="py-2 pr-2">
-                                    <input type="number" step="0.01" min="0" name="tipe_units[{{ $index }}][harga]"
-                                           value="{{ $row['harga'] ?? '' }}" placeholder="185000000" class="{{ $inputClass }} w-36">
+                                    <input type="text" name="tipe_units[{{ $index }}][keterangan]" value="{{ $row['keterangan'] ?? '' }}"
+                                           class="{{ $inputClass }} w-40">
                                 </td>
                                 <td class="py-2 pr-2">
                                     <input type="text" name="tipe_units[{{ $index }}][keterangan]" value="{{ $row['keterangan'] ?? '' }}"
@@ -283,6 +232,7 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" data-dynamic-rows data-template="template-psu">
@@ -415,9 +365,6 @@
         </td>
         <td class="py-2 pr-2">
             <input type="number" step="0.01" min="0" name="tipe_units[__INDEX__][luas_bangunan]" class="{{ $inputClass }} w-28">
-        </td>
-        <td class="py-2 pr-2">
-            <input type="number" step="0.01" min="0" name="tipe_units[__INDEX__][harga]" class="{{ $inputClass }} w-36">
         </td>
         <td class="py-2 pr-2">
             <input type="text" name="tipe_units[__INDEX__][keterangan]" class="{{ $inputClass }} w-40">

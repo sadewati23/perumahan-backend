@@ -34,9 +34,9 @@ class PerumahanSeeder extends Seeder
                     ['jenis' => 'Penerangan Jalan Umum', 'jumlah' => 48, 'satuan' => 'titik', 'kondisi' => 'baik'],
                 ],
                 'tipe_units' => [
-                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 120, 'luas_tanah' => 72, 'luas_bangunan' => 36, 'harga' => 385000000],
-                    ['tipe' => 'Tipe 45', 'jumlah_unit' => 80, 'luas_tanah' => 90, 'luas_bangunan' => 45, 'harga' => 520000000],
-                    ['tipe' => 'Tipe 60', 'jumlah_unit' => 40, 'luas_tanah' => 120, 'luas_bangunan' => 60, 'harga' => 780000000],
+                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 120, 'luas_tanah' => 72, 'luas_bangunan' => 36],
+                    ['tipe' => 'Tipe 45', 'jumlah_unit' => 80, 'luas_tanah' => 90, 'luas_bangunan' => 45],
+                    ['tipe' => 'Tipe 60', 'jumlah_unit' => 40, 'luas_tanah' => 120, 'luas_bangunan' => 60],
                 ],
             ],
             [
@@ -57,8 +57,8 @@ class PerumahanSeeder extends Seeder
                     ['jenis' => 'Jaringan Listrik', 'jumlah' => 60, 'satuan' => 'unit', 'kondisi' => 'baik'],
                 ],
                 'tipe_units' => [
-                    ['tipe' => 'Tipe 60', 'jumlah_unit' => 40, 'luas_tanah' => 120, 'luas_bangunan' => 60, 'harga' => 850000000],
-                    ['tipe' => 'Tipe 90', 'jumlah_unit' => 20, 'luas_tanah' => 150, 'luas_bangunan' => 90, 'harga' => 1350000000],
+                    ['tipe' => 'Tipe 60', 'jumlah_unit' => 40, 'luas_tanah' => 120, 'luas_bangunan' => 60],
+                    ['tipe' => 'Tipe 90', 'jumlah_unit' => 20, 'luas_tanah' => 150, 'luas_bangunan' => 90],
                 ],
             ],
             [
@@ -80,8 +80,8 @@ class PerumahanSeeder extends Seeder
                     ['jenis' => 'Sarana Ibadah', 'jumlah' => 1, 'satuan' => 'unit', 'kondisi' => 'baik'],
                 ],
                 'tipe_units' => [
-                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 140, 'luas_tanah' => 60, 'luas_bangunan' => 30, 'harga' => 168000000],
-                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 60, 'luas_tanah' => 72, 'luas_bangunan' => 36, 'harga' => 195000000],
+                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 140, 'luas_tanah' => 60, 'luas_bangunan' => 30],
+                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 60, 'luas_tanah' => 72, 'luas_bangunan' => 36],
                 ],
             ],
             [
@@ -103,8 +103,8 @@ class PerumahanSeeder extends Seeder
                     ['jenis' => 'Sarana Ibadah', 'jumlah' => 1, 'satuan' => 'unit', 'kondisi' => 'baik'],
                 ],
                 'tipe_units' => [
-                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 90, 'luas_tanah' => 60, 'luas_bangunan' => 30, 'harga' => 172000000],
-                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 60, 'luas_tanah' => 72, 'luas_bangunan' => 36, 'harga' => 205000000],
+                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 90, 'luas_tanah' => 60, 'luas_bangunan' => 30],
+                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 60, 'luas_tanah' => 72, 'luas_bangunan' => 36],
                 ],
             ],
             [
@@ -125,8 +125,8 @@ class PerumahanSeeder extends Seeder
                     ['jenis' => 'Penerangan Jalan Umum', 'jumlah' => 12, 'satuan' => 'titik', 'kondisi' => 'baik'],
                 ],
                 'tipe_units' => [
-                    ['tipe' => 'Tipe 45', 'jumlah_unit' => 30, 'luas_tanah' => 90, 'luas_bangunan' => 45, 'harga' => 545000000],
-                    ['tipe' => 'Tipe 70', 'jumlah_unit' => 15, 'luas_tanah' => 130, 'luas_bangunan' => 70, 'harga' => 925000000],
+                    ['tipe' => 'Tipe 45', 'jumlah_unit' => 30, 'luas_tanah' => 90, 'luas_bangunan' => 45],
+                    ['tipe' => 'Tipe 70', 'jumlah_unit' => 15, 'luas_tanah' => 130, 'luas_bangunan' => 70],
                 ],
             ],
             [
@@ -148,8 +148,8 @@ class PerumahanSeeder extends Seeder
                     ['jenis' => 'Sarana Pendidikan', 'jumlah' => 1, 'satuan' => 'unit', 'kondisi' => 'baik'],
                 ],
                 'tipe_units' => [
-                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 80, 'luas_tanah' => 60, 'luas_bangunan' => 30, 'harga' => 170000000],
-                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 40, 'luas_tanah' => 72, 'luas_bangunan' => 36, 'harga' => 198000000],
+                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 80, 'luas_tanah' => 60, 'luas_bangunan' => 30],
+                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 40, 'luas_tanah' => 72, 'luas_bangunan' => 36],
                 ],
             ],
             [
@@ -171,9 +171,9 @@ class PerumahanSeeder extends Seeder
                     ['jenis' => 'Tempat Persampahan', 'jumlah' => 8, 'satuan' => 'unit', 'kondisi' => 'baik'],
                 ],
                 'tipe_units' => [
-                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 100, 'luas_tanah' => 60, 'luas_bangunan' => 30, 'harga' => 165000000],
-                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 60, 'luas_tanah' => 72, 'luas_bangunan' => 36, 'harga' => 192000000],
-                    ['tipe' => 'Tipe 45', 'jumlah_unit' => 20, 'luas_tanah' => 90, 'luas_bangunan' => 45, 'harga' => 245000000],
+                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 100, 'luas_tanah' => 60, 'luas_bangunan' => 30],
+                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 60, 'luas_tanah' => 72, 'luas_bangunan' => 36],
+                    ['tipe' => 'Tipe 45', 'jumlah_unit' => 20, 'luas_tanah' => 90, 'luas_bangunan' => 45],
                 ],
             ],
         ];

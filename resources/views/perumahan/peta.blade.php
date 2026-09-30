@@ -44,6 +44,24 @@
         </div>
 
         <div class="space-y-4">
+            @if ($kecamatanFokus)
+                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fokus Kecamatan</p>
+                        <button type="button" data-fokus-kecamatan="0"
+                                class="text-xs font-medium text-slate-500 transition hover:text-indigo-600">Reset</button>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        @foreach ($kecamatanFokus as $kec)
+                            <button type="button" data-fokus-kecamatan="{{ $kec['id'] }}"
+                                    class="rounded-full border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700">
+                                {{ $kec['nama'] }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <label class="mb-1 block text-xs font-medium text-slate-600">Cari lokasi</label>
                 <input type="text" id="cari-lokasi" placeholder="Nama perumahan / kecamatan..."
@@ -96,6 +114,7 @@
 
             const PETA = @json(config('peta'));
             const titik = @json($titik);
+            const KECAMATAN = @json($kecamatanFokus);
             const map = L.map(el).setView([PETA.latitude, PETA.longitude], PETA.zoom);
 
             L.tileLayer(PETA.tile_url, {
@@ -108,21 +127,6 @@
             const formatAngka = (angka) => new Intl.NumberFormat('id-ID').format(angka);
 
             const bounds = [];
-            const warnaHex = { subsidi: '#10b981', komersil: '#6366f1' };
-
-            // Gambar polygon batas area perumahan (bila ada).
-            titik.forEach((p) => {
-                if (!Array.isArray(p.polygon) || p.polygon.length < 3) return;
-
-                L.polygon(p.polygon, {
-                    color: warnaHex[p.status_kode] || '#64748b',
-                    fillColor: warnaHex[p.status_kode] || '#64748b',
-                    fillOpacity: 0.15,
-                    weight: 2,
-                }).addTo(map).bindPopup(`<strong>${p.nama}</strong><br>Batas area perumahan`);
-
-                p.polygon.forEach((t) => bounds.push(t));
-            });
 
             titik.forEach((p) => {
                 const warna = colors[p.status] || '#64748b';
@@ -143,7 +147,6 @@
                             <tr><td>Luas lahan</td><td style="text-align:right;padding-left:8px">${formatAngka(p.luas_lahan)} m&sup2;</td></tr>
                             <tr><td>Luas RTH</td><td style="text-align:right;padding-left:8px">${formatAngka(p.rth)} m&sup2;</td></tr>
                             <tr><td>KDB / KDH</td><td style="text-align:right;padding-left:8px">${p.kdb ?? '-'}% / ${p.kdh ?? '-'}%</td></tr>
-                            ${p.luas_polygon ? `<tr><td>Luas polygon</td><td style="text-align:right;padding-left:8px">${formatAngka(Math.round(p.luas_polygon))} m&sup2;</td></tr>` : ''}
                         </table>
                         <a href="${p.url}" style="display:inline-block;margin-top:8px;color:#4f46e5;font-size:12px;font-weight:500">Lihat detail &rarr;</a>
                     </div>`;
@@ -156,6 +159,37 @@
 
             if (bounds.length) {
                 map.fitBounds(bounds, { padding: [40, 40], maxZoom: PETA.zoom + 1 });
+            }
+
+            // Fokus peta ke seluruh titik milik satu kecamatan.
+            // id = 0 berarti reset: tampilkan semua titik kembali.
+            const fokusKecamatan = (id) => {
+                const kec = KECAMATAN.find((k) => k.id === id);
+
+                if (kec && Array.isArray(kec.koordinat) && kec.koordinat.length > 0) {
+                    map.fitBounds(L.latLngBounds(kec.koordinat), { padding: [40, 40], maxZoom: PETA.zoom_detail });
+                } else if (!id && bounds.length) {
+                    map.fitBounds(bounds, { padding: [40, 40], maxZoom: PETA.zoom + 1 });
+                }
+
+                // Simpan pilihan ke URL agar fokus terjaga saat halaman dibuka ulang.
+                const url = new URL(window.location.href);
+                if (id) {
+                    url.searchParams.set('kecamatan', id);
+                } else {
+                    url.searchParams.delete('kecamatan');
+                }
+                window.history.replaceState({}, '', url);
+            };
+
+            document.querySelectorAll('[data-fokus-kecamatan]').forEach((btn) => {
+                btn.addEventListener('click', () => fokusKecamatan(Number(btn.dataset.fokusKecamatan)));
+            });
+
+            // Parameter ?kecamatan=ID memfokuskan peta saat halaman dibuka.
+            const fokusAwal = {{ $fokusAktif ?? 0 }};
+            if (fokusAwal) {
+                fokusKecamatan(fokusAwal);
             }
 
             // Klik daftar -> fokus marker

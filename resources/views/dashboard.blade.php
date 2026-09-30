@@ -38,7 +38,7 @@
         @endforeach
     </div>
 
-    <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Total Entri PSU</p>
             <p class="mt-2 text-xl font-semibold text-slate-900">{{ number_format($statistik['total_psu'], 0, ',', '.') }}</p>
@@ -48,11 +48,6 @@
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">PSU Rusak</p>
             <p class="mt-2 text-xl font-semibold text-rose-600">{{ number_format($statistik['psu_rusak'], 0, ',', '.') }}</p>
             <p class="text-xs text-slate-500">rusak ringan + rusak berat</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Belum Punya Polygon</p>
-            <p class="mt-2 text-xl font-semibold text-amber-600">{{ number_format($statistik['belum_polygon'], 0, ',', '.') }}</p>
-            <p class="text-xs text-slate-500">batas area belum digambar</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Belum Punya Titik</p>

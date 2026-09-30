@@ -87,16 +87,19 @@ class PerumahanController extends Controller
     public function destroy(Perumahan $perumahan): RedirectResponse
     {
         $nama = $perumahan->nama;
+
+        // Hard delete permanen: baris induk dihapus, psu_perumahans &
+        // tipe_units ikut terhapus lewat foreign key cascadeOnDelete().
         $perumahan->delete();
 
         return redirect()->route('perumahan.index')
-            ->with('success', 'Data perumahan "'.$nama.'" berhasil dihapus.');
+            ->with('success', 'Data perumahan "'.$nama.'" beserta seluruh detailnya telah dihapus permanen.');
     }
 
     /**
      * Halaman peta sebaran perumahan (titik GIS).
      */
-    public function peta(): View
+    public function peta(Request $request): View
     {
         $perumahans = Perumahan::with('kelurahan.kecamatan')->orderBy('nama')->get();
 
@@ -104,9 +107,33 @@ class PerumahanController extends Controller
             ->map(fn (Perumahan $p) => $p->titikPeta() + ['url' => route('perumahan.show', $p)])
             ->values();
 
+        // Kelompokkan koordinat titik lokasi per kecamatan agar peta bisa
+        // fokus ke satu kecamatan saat chip-nya diklik.
+        $kecamatanFokus = [];
+        foreach ($perumahans as $p) {
+            $kecamatan = $p->kelurahan?->kecamatan;
+            if (! $kecamatan || ! $p->punya_koordinat) {
+                continue;
+            }
+
+            if (! isset($kecamatanFokus[$kecamatan->id])) {
+                $kecamatanFokus[$kecamatan->id] = [
+                    'id' => $kecamatan->id,
+                    'nama' => $kecamatan->nama,
+                    'koordinat' => [],
+                ];
+            }
+
+            $kecamatanFokus[$kecamatan->id]['koordinat'][] = [(float) $p->latitude, (float) $p->longitude];
+        }
+
+        $kecamatanFokus = array_values($kecamatanFokus);
+
         return view('perumahan.peta', [
             'titik' => $titik,
             'perumahans' => $perumahans,
+            'kecamatanFokus' => $kecamatanFokus,
+            'fokusAktif' => (int) $request->query('kecamatan', 0) ?: null,
         ]);
     }
 
@@ -120,17 +147,6 @@ class PerumahanController extends Controller
 
     private function validated(Request $request): array
     {
-        // Peta mengirim polygon sebagai string JSON melalui input hidden;
-        // dekode di sini agar validasi 'array' lolos.
-        $polygon = $request->input('batas_polygon');
-        if (is_string($polygon)) {
-            $polygonTerdekode = json_decode($polygon, true);
-            $request->merge([
-                // Array kosong dianggap tidak ada polygon.
-                'batas_polygon' => is_array($polygonTerdekode) && $polygonTerdekode !== [] ? $polygonTerdekode : null,
-            ]);
-        }
-
         $request->merge([
             'ada_lahan_pemakaman' => $request->boolean('ada_lahan_pemakaman'),
         ]);
@@ -146,8 +162,6 @@ class PerumahanController extends Controller
             'rw' => ['nullable', 'string', 'max:5'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'batas_polygon' => ['nullable', 'array', 'min:3'],
-            'batas_polygon.*' => ['array'],
             'luas_lahan' => ['required', 'numeric', 'min:0'],
             'jumlah_unit' => ['required', 'integer', 'min:0'],
             'status' => ['required', 'in:subsidi,komersil'],
@@ -172,7 +186,7 @@ class PerumahanController extends Controller
             'tipe_units.*.jumlah_unit' => ['nullable', 'integer', 'min:0'],
             'tipe_units.*.luas_tanah' => ['nullable', 'numeric', 'min:0'],
             'tipe_units.*.luas_bangunan' => ['nullable', 'numeric', 'min:0'],
-            'tipe_units.*.harga' => ['nullable', 'numeric', 'min:0'],
+
             'tipe_units.*.keterangan' => ['nullable', 'string', 'max:255'],
         ], [
             'nama.required' => 'Nama perumahan wajib diisi.',
@@ -194,45 +208,7 @@ class PerumahanController extends Controller
             $data['lokasi_lahan_pemakaman'] = null;
         }
 
-        $data['batas_polygon'] = $this->normalisasiPolygon($request->input('batas_polygon'));
-
         return $data;
-    }
-
-    /**
-     * Terima polygon dari peta (array [lat,lng] atau GeoJSON [lng,lat]) lalu
-     * normalisasi menjadi array pasangan [lat,lng] dengan maksimal 6 desimal.
-     */
-    private function normalisasiPolygon($raw): ?array
-    {
-        if (! is_array($raw) || count($raw) < 3) {
-            return null;
-        }
-
-        $koordinat = [];
-        foreach ($raw as $titik) {
-            if (! is_array($titik) || count($titik) < 2 || ! is_numeric($titik[0]) || ! is_numeric($titik[1])) {
-                continue;
-            }
-
-            $koordinat[] = [
-                round((float) $titik[0], 6),
-                round((float) $titik[1], 6),
-            ];
-        }
-
-        if (count($koordinat) < 3) {
-            return null;
-        }
-
-        // Buang titik penutup yang duplikat titik awal.
-        $pertama = $koordinat[0];
-        $terakhir = $koordinat[count($koordinat) - 1];
-        if ($pertama[0] === $terakhir[0] && $pertama[1] === $terakhir[1]) {
-            array_pop($koordinat);
-        }
-
-        return count($koordinat) >= 3 ? $koordinat : null;
     }
 
     private function syncDetail(Perumahan $perumahan, Request $request): void
@@ -263,7 +239,6 @@ class PerumahanController extends Controller
                 'jumlah_unit' => $row['jumlah_unit'] ?? 0,
                 'luas_tanah' => $row['luas_tanah'] ?? null,
                 'luas_bangunan' => $row['luas_bangunan'] ?? null,
-                'harga' => $row['harga'] ?? null,
                 'keterangan' => $row['keterangan'] ?? null,
             ]);
         }
