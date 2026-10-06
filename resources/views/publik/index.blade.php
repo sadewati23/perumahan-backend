@@ -48,16 +48,16 @@
                     </select>
                 </div>
 
-                <div class="flex gap-2 md:col-span-4">
-                    <button type="submit" class="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                <div class="flex flex-wrap gap-2 md:col-span-4">
+                    <button type="submit" class="flex-1 whitespace-nowrap rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 sm:flex-none">
                         Terapkan Filter
                     </button>
                     <a href="{{ route('publik.perumahan.index') }}"
-                       class="rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                       class="flex-1 whitespace-nowrap rounded-lg border border-slate-300 px-5 py-2 text-center text-sm font-medium text-slate-600 transition hover:bg-slate-50 sm:flex-none">
                         Reset
                     </a>
                     <a href="{{ route('publik.peta', request()->only(['q', 'status', 'kecamatan_id'])) }}"
-                       class="ml-auto rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                       class="ml-auto whitespace-nowrap rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Tampilkan di peta
                     </a>
                 </div>

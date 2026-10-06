@@ -67,8 +67,92 @@
         </div>
     </form>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
+    {{-- Tampilan kartu untuk layar kecil (HP) --}}
+    <div class="space-y-3 md:hidden">
+        @forelse ($perumahans as $perumahan)
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <a href="{{ route('perumahan.show', $perumahan) }}" class="block truncate font-semibold text-slate-800 hover:text-indigo-600">
+                            {{ $perumahan->nama }}
+                        </a>
+                        <p class="truncate text-xs text-slate-500">{{ $perumahan->pengembang ?: 'Pengembang belum diisi' }}</p>
+                    </div>
+                    <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->badge_status }}">
+                        {{ $perumahan->label_status }}
+                    </span>
+                </div>
+
+                <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                    <div>
+                        <dt class="text-xs text-slate-500">Luas lahan</dt>
+                        <dd class="font-medium text-slate-700">{{ number_format((float) $perumahan->luas_lahan, 0, ',', '.') }} m&sup2;</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-500">Jumlah unit</dt>
+                        <dd class="font-medium text-slate-700">{{ number_format($perumahan->jumlah_unit, 0, ',', '.') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-500">RTH</dt>
+                        <dd class="font-medium text-slate-700">{{ $perumahan->jumlah_rth }} titik</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-500">KDB / KDH</dt>
+                        <dd class="font-medium text-slate-700">
+                            {{ $perumahan->kdb !== null ? (float) $perumahan->kdb . '%' : '-' }} /
+                            {{ $perumahan->kdh !== null ? (float) $perumahan->kdh . '%' : '-' }}
+                        </dd>
+                    </div>
+                    <div class="col-span-2">
+                        <dt class="text-xs text-slate-500">Lokasi</dt>
+                        <dd class="text-slate-600">
+                            Kel. {{ $perumahan->kelurahan->nama ?? '-' }}, Kec. {{ $perumahan->kelurahan->kecamatan->nama ?? '-' }}
+                            &middot; RT {{ $perumahan->rt ?: '-' }}/RW {{ $perumahan->rw ?: '-' }}
+                        </dd>
+                    </div>
+                    <div class="col-span-2">
+                        <dt class="text-xs text-slate-500">Tahun</dt>
+                        <dd class="text-slate-600">{{ $perumahan->tahun_pembuatan ?: '-' }} &rarr; {{ $perumahan->tahun_selesai ?: '-' }}</dd>
+                    </div>
+                </dl>
+
+                <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                    @if ($perumahan->punya_koordinat)
+                        <span title="Titik GIS tersedia" class="text-emerald-600">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.4 7-11a7 7 0 10-14 0c0 4.6 7 11 7 11zm0-8.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/>
+                            </svg>
+                        </span>
+                    @else
+                        <span title="Titik GIS belum ada" class="text-slate-300">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.4 7-11a7 7 0 10-14 0c0 4.6 7 11 7 11zm0-8.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/>
+                            </svg>
+                        </span>
+                    @endif
+
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('perumahan.show', $perumahan) }}" class="text-xs font-medium text-slate-600 hover:text-indigo-600">Detail</a>
+                        <a href="{{ route('perumahan.edit', $perumahan) }}" class="text-xs font-medium text-amber-600 hover:text-amber-700">Ubah</a>
+                        <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}"
+                              data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-xs font-medium text-rose-600 hover:text-rose-700">Hapus</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+                Belum ada data perumahan yang cocok dengan pencarian.
+            </div>
+        @endforelse
+    </div>
+
+    {{-- Tampilan tabel untuk layar sedang ke atas --}}
+    <div class="hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:block">
+        <div class="no-scrollbar overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <tr>

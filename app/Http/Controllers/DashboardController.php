@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kecamatan;
+use App\Models\Laporan;
 use App\Models\Perumahan;
 use App\Models\PsuPerumahan;
 use Illuminate\Support\Facades\DB;
@@ -61,6 +62,19 @@ class DashboardController extends Controller
 
         $terbaru = Perumahan::with('kelurahan.kecamatan')->latest()->take(5)->get();
 
+        // Ringkasan laporan warga (semua jenis: kerusakan, pengaduan, bangunan liar).
+        $laporanStatistik = [
+            'total' => Laporan::count(),
+            'baru' => Laporan::where('status', 'baru')->count(),
+            'diproses' => Laporan::where('status', 'diproses')->count(),
+            'selesai' => Laporan::where('status', 'selesai')->count(),
+            'kerusakan' => Laporan::where('jenis', Laporan::JENIS_KERUSAKAN)->count(),
+            'pengaduan' => Laporan::where('jenis', Laporan::JENIS_PENGADUAN)->count(),
+            'bangunan_liar' => Laporan::where('jenis', Laporan::JENIS_BANGUNAN_LIAR)->count(),
+        ];
+
+        $laporanTerbaru = Laporan::with(['perumahan', 'kelurahan.kecamatan'])->latest()->take(5)->get();
+
         return view('dashboard', compact(
             'statistik',
             'perKecamatan',
@@ -69,6 +83,8 @@ class DashboardController extends Controller
             'totalPsuTerdata',
             'jenisPsu',
             'terbaru',
+            'laporanStatistik',
+            'laporanTerbaru',
         ));
     }
 }

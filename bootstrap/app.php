@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Percaya proxy (ngrok / Cloudflare / load balancer) agar URL aset
+        // ikut skema https saat situs dibuka lewat tunnel — tanpa ini,
+        // CSS/JS digenerate sebagai http dan diblokir browser (mixed content).
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);

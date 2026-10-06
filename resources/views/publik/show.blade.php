@@ -30,19 +30,23 @@
                     <p class="mt-1 text-xs text-slate-500">Pengembang: {{ $perumahan->pengembang ?: 'tidak tercatat' }}</p>
                 </div>
 
-                <div class="flex flex-wrap gap-2">
+                <div class="flex w-full flex-wrap gap-2 sm:w-auto">
+                    <a href="{{ route('lapor.create', ['perumahan' => $perumahan->id]) }}"
+                       class="flex-1 whitespace-nowrap rounded-lg bg-amber-500 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-amber-600 sm:flex-none">
+                        Lapor Kerusakan
+                    </a>
                     <a href="{{ route('publik.peta') }}"
-                       class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                       class="flex-1 whitespace-nowrap rounded-lg border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:flex-none">
                         Peta Sebaran
                     </a>
                     <a href="{{ route('publik.perumahan.index') }}"
-                       class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
+                       class="flex-1 whitespace-nowrap rounded-lg bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-slate-800 sm:flex-none">
                         Daftar Perumahan
                     </a>
                 </div>
             </div>
 
-            <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="rounded-xl bg-slate-50 p-4">
                     <p class="text-xs text-slate-500">Luas Lahan</p>
                     <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format((float) $perumahan->luas_lahan, 0, ',', '.') }} m&sup2;</p>
@@ -148,10 +152,10 @@
                             <table class="min-w-full divide-y divide-slate-200 text-sm">
                                 <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                                     <tr>
-                                        <th class="py-2 pr-4">Tipe</th>
-                                        <th class="py-2 pr-4 text-right">Jumlah</th>
-                                        <th class="py-2 pr-4 text-right">L. Tanah</th>
-                                        <th class="py-2 pr-4 text-right">L. Bangunan</th>
+                                        <th class="whitespace-nowrap py-2 pr-4">Tipe</th>
+                                        <th class="whitespace-nowrap py-2 pr-4 text-right">Jumlah</th>
+                                        <th class="whitespace-nowrap py-2 pr-4 text-right">L. Tanah</th>
+                                        <th class="whitespace-nowrap py-2 pr-4 text-right">L. Bangunan</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
@@ -170,7 +174,13 @@
                 </div>
 
                 <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-sm font-semibold text-slate-900">Prasarana, Sarana &amp; Utilitas (PSU)</h2>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-sm font-semibold text-slate-900">Prasarana, Sarana &amp; Utilitas (PSU)</h2>
+                        <a href="{{ route('lapor.create', ['perumahan' => $perumahan->id]) }}"
+                           class="text-xs font-medium text-amber-600 hover:underline">
+                            Ada yang rusak? Laporkan &rarr;
+                        </a>
+                    </div>
 
                     @if ($perumahan->psu->isEmpty())
                         <p class="mt-4 text-sm text-slate-500">Data PSU belum tersedia.</p>
@@ -179,10 +189,10 @@
                             <table class="min-w-full divide-y divide-slate-200 text-sm">
                                 <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                                     <tr>
-                                        <th class="py-2 pr-4">Jenis PSU</th>
-                                        <th class="py-2 pr-4 text-right">Jumlah</th>
-                                        <th class="py-2 pr-4">Kondisi</th>
-                                        <th class="py-2">Keterangan</th>
+                                        <th class="whitespace-nowrap py-2 pr-4">Jenis PSU</th>
+                                        <th class="whitespace-nowrap py-2 pr-4 text-right">Jumlah</th>
+                                        <th class="whitespace-nowrap py-2 pr-4">Kondisi</th>
+                                        <th class="whitespace-nowrap py-2">Keterangan</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">

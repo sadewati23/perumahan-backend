@@ -14,25 +14,36 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased">
 <div class="min-h-screen lg:flex">
+    {{-- Overlay gelap di belakang sidebar (hanya tampil saat sidebar terbuka di layar kecil) --}}
+    <div id="sidebar-backdrop" class="fixed inset-0 z-30 hidden bg-slate-900/50 backdrop-blur-sm lg:hidden" aria-hidden="true"></div>
+
     {{-- Sidebar --}}
     <aside id="sidebar"
            class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-slate-900 text-slate-300 transition-transform duration-200 lg:static lg:translate-x-0">
-        <div class="flex items-center gap-3 border-b border-white/10 px-5 py-4">
+        <div class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-lg font-bold text-white">
                 SP
             </div>
-            <div class="leading-tight">
-                <p class="text-sm font-semibold text-white">Sistem Data</p>
-                <p class="text-xs text-slate-400">Perumahan</p>
+            <div class="min-w-0 leading-tight">
+                <p class="truncate text-sm font-semibold text-white">Sistem Data</p>
+                <p class="truncate text-xs text-slate-400">Perumahan</p>
             </div>
+            <button type="button" data-toggle-sidebar
+                    class="rounded-md p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-white lg:hidden"
+                    aria-label="Tutup menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
         </div>
 
-        <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4 text-sm">
+        <nav class="no-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-4 text-sm">
             @php
                 $menu = [
                     ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'M3 12l9-9 9 9M5 10v10h14V10'],
                     ['label' => 'Data Perumahan', 'route' => 'perumahan.index', 'active' => 'perumahan.*', 'icon' => 'M4 21V8l8-5 8 5v13M9 21v-6h6v6'],
                     ['label' => 'Peta Sebaran', 'route' => 'perumahan.peta', 'active' => 'perumahan.peta', 'icon' => 'M12 21s7-6.4 7-11a7 7 0 10-14 0c0 4.6 7 11 7 11zm0-8.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z'],
+                    ['label' => 'Laporan Warga', 'route' => 'laporan.index', 'active' => 'laporan.*', 'icon' => 'M12 9v4m0 4h.01M10.3 3.9L2.5 17a1.7 1.7 0 001.5 2.5h16a1.7 1.7 0 001.5-2.5L13.7 3.9a1.7 1.7 0 00-3 0z', 'badgeLaporan' => true],
                     ['label' => 'Master Wilayah', 'route' => 'wilayah.index', 'active' => 'wilayah.*', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
                     ['label' => 'Manajemen Pengguna', 'route' => 'users.index', 'active' => 'users.*', 'icon' => 'M16 21v-2a4 4 0 00-8 0v2M12 11a4 4 0 100-8 4 4 0 000 8z', 'role' => 'admin'],
                 ];
@@ -47,6 +58,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
                         </svg>
                         <span>{{ $item['label'] }}</span>
+                        @if (! empty($item['badgeLaporan']) && ($jumlahLaporanBaru ?? 0) > 0)
+                            <span class="ml-auto rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">{{ $jumlahLaporanBaru }}</span>
+                        @endif
                     </a>
                 @endif
             @endforeach

@@ -4,11 +4,28 @@ import './bootstrap';
  * Baris dinamis (PSU & tipe unit) + helper kecil untuk halaman perumahan.
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Sidebar mobile ---
+    // --- Sidebar admin (mobile) ---
     const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+
+    const setSidebar = (open) => {
+        if (!sidebar) return;
+        sidebar.classList.toggle('-translate-x-full', !open);
+        backdrop?.classList.toggle('hidden', !open);
+        document.body.classList.toggle('overflow-hidden', open);
+    };
+
     document.querySelectorAll('[data-toggle-sidebar]').forEach((btn) => {
-        btn.addEventListener('click', () => sidebar?.classList.toggle('-translate-x-full'));
+        btn.addEventListener('click', () => setSidebar(sidebar?.classList.contains('-translate-x-full')));
     });
+    backdrop?.addEventListener('click', () => setSidebar(false));
+
+    // Tutup sidebar otomatis setelah memilih menu di layar kecil.
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+        sidebar?.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => setSidebar(false));
+        });
+    }
 
     // --- Baris dinamis ---
     document.querySelectorAll('[data-dynamic-rows]').forEach((container) => {

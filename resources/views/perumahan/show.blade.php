@@ -24,17 +24,17 @@
             <p class="mt-1 text-sm text-slate-600">{{ $perumahan->alamat_lengkap ?: 'Alamat belum dilengkapi' }}</p>
         </div>
 
-        <div class="flex flex-wrap gap-2">
+        <div class="flex w-full flex-wrap gap-2 sm:w-auto">
             <a href="{{ route('perumahan.peta') }}"
-               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+               class="flex-1 whitespace-nowrap rounded-lg border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:flex-none">
                 Peta Sebaran
             </a>
             <a href="{{ route('perumahan.edit', $perumahan) }}"
-               class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-600">
+               class="flex-1 whitespace-nowrap rounded-lg bg-amber-500 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-amber-600 sm:flex-none">
                 Ubah Data
             </a>
             <a href="{{ route('perumahan.index') }}"
-               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+               class="flex-1 whitespace-nowrap rounded-lg border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:flex-none">
                 Kembali
             </a>
         </div>

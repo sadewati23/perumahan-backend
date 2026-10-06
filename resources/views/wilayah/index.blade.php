@@ -45,7 +45,7 @@
                                     Ubah
                                 </summary>
                                 <form method="POST" action="{{ route('kecamatan.update', $kecamatan) }}"
-                                      class="absolute right-0 z-20 mt-2 w-72 space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                                      class="absolute right-0 z-20 mt-2 w-72 max-w-[calc(100vw-2.5rem)] space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
                                     @csrf
                                     @method('PUT')
                                     <input type="text" name="kode" value="{{ $kecamatan->kode }}" placeholder="Kode kecamatan (opsional)" class="{{ $inputClass }}">
@@ -84,7 +84,7 @@
                                         <details class="relative">
                                             <summary class="cursor-pointer list-none text-xs font-medium text-amber-600 hover:text-amber-700">Ubah</summary>
                                             <form method="POST" action="{{ route('kelurahan.update', $kelurahan) }}"
-                                                  class="absolute right-0 z-20 mt-2 w-64 space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                                                  class="absolute right-0 z-20 mt-2 w-64 max-w-[calc(100vw-3.5rem)] space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
                                                 @csrf
                                                 @method('PUT')
                                                 <select name="kecamatan_id" class="{{ $inputClass }}">

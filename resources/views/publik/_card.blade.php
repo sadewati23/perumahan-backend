@@ -45,9 +45,9 @@
     </div>
 
     <div class="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/70 px-5 py-3">
-        <div class="flex items-center gap-3 text-xs text-slate-500">
-            <span>KDB {{ $perumahan->kdb !== null ? (float) $perumahan->kdb . '%' : '-' }}</span>
-            <span>KDH {{ $perumahan->kdh !== null ? (float) $perumahan->kdh . '%' : '-' }}</span>
+        <div class="flex min-w-0 items-center gap-3 text-xs text-slate-500">
+            <span class="whitespace-nowrap">KDB {{ $perumahan->kdb !== null ? (float) $perumahan->kdb . '%' : '-' }}</span>
+            <span class="whitespace-nowrap">KDH {{ $perumahan->kdh !== null ? (float) $perumahan->kdh . '%' : '-' }}</span>
             @if ($perumahan->punya_koordinat)
                 <span class="inline-flex items-center gap-1 text-emerald-600">
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@
         </div>
 
         <a href="{{ route('publik.perumahan.show', $perumahan) }}"
-           class="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+           class="shrink-0 whitespace-nowrap text-sm font-semibold text-indigo-600 hover:text-indigo-700">
             Detail &rarr;
         </a>
     </div>

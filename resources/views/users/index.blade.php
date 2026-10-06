@@ -43,7 +43,7 @@
                                     Ubah
                                 </summary>
                                 <form method="POST" action="{{ route('users.update', $user) }}"
-                                      class="absolute right-0 z-20 mt-2 w-80 space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                                      class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
                                     @csrf
                                     @method('PUT')
                                     <input type="text" name="name" value="{{ $user->name }}" required placeholder="Nama" class="{{ $inputClass }}">

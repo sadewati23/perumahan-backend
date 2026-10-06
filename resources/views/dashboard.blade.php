@@ -189,6 +189,118 @@
             </ul>
         </div>
     </div>
+
+    <div class="mt-4 grid gap-4 lg:grid-cols-3">
+        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500">Laporan Warga</p>
+
+            <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                <a href="{{ route('laporan.index', ['jenis' => 'kerusakan']) }}" class="rounded-lg bg-indigo-50 p-2 transition hover:bg-indigo-100">
+                    <p class="text-xs text-indigo-700">Kerusakan</p>
+                    <p class="text-lg font-semibold text-indigo-800">{{ number_format($laporanStatistik['kerusakan'], 0, ',', '.') }}</p>
+                </a>
+                <a href="{{ route('laporan.index', ['jenis' => 'pengaduan']) }}" class="rounded-lg bg-violet-50 p-2 transition hover:bg-violet-100">
+                    <p class="text-xs text-violet-700">Pengaduan</p>
+                    <p class="text-lg font-semibold text-violet-800">{{ number_format($laporanStatistik['pengaduan'], 0, ',', '.') }}</p>
+                </a>
+                <a href="{{ route('laporan.index', ['jenis' => 'bangunan_liar']) }}" class="rounded-lg bg-orange-50 p-2 transition hover:bg-orange-100">
+                    <p class="text-xs text-orange-700">Bgn. Liar</p>
+                    <p class="text-lg font-semibold text-orange-800">{{ number_format($laporanStatistik['bangunan_liar'], 0, ',', '.') }}</p>
+                </a>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-3">
+                <div class="rounded-lg bg-amber-50 p-3">
+                    <p class="text-xs text-amber-700">Baru</p>
+                    <p class="mt-0.5 text-xl font-semibold text-amber-800">{{ number_format($laporanStatistik['baru'], 0, ',', '.') }}</p>
+                </div>
+                <div class="rounded-lg bg-sky-50 p-3">
+                    <p class="text-xs text-sky-700">Diproses</p>
+                    <p class="mt-0.5 text-xl font-semibold text-sky-800">{{ number_format($laporanStatistik['diproses'], 0, ',', '.') }}</p>
+                </div>
+                <div class="rounded-lg bg-emerald-50 p-3">
+                    <p class="text-xs text-emerald-700">Selesai</p>
+                    <p class="mt-0.5 text-xl font-semibold text-emerald-800">{{ number_format($laporanStatistik['selesai'], 0, ',', '.') }}</p>
+                </div>
+                <div class="rounded-lg bg-slate-50 p-3">
+                    <p class="text-xs text-slate-600">Total laporan</p>
+                    <p class="mt-0.5 text-xl font-semibold text-slate-800">{{ number_format($laporanStatistik['total'], 0, ',', '.') }}</p>
+                </div>
+            </div>
+
+            <a href="{{ route('laporan.index') }}"
+               class="mt-4 block rounded-lg bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-slate-800">
+                Kelola Laporan
+            </a>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-slate-500">Laporan warga terbaru</p>
+                <a href="{{ route('laporan.index') }}" class="text-xs font-medium text-indigo-600 hover:underline">Lihat semua</a>
+            </div>
+
+            <ul class="mt-4 divide-y divide-slate-100">
+                @forelse ($laporanTerbaru as $laporan)
+                    <li class="py-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <a href="{{ route('laporan.show', $laporan) }}" class="min-w-0">
+                                <p class="truncate text-sm font-medium text-slate-800 hover:text-indigo-600">{{ $laporan->judul }}</p>
+                                <p class="mt-0.5 truncate text-xs text-slate-500">
+                                    {{ $laporan->kode }} &middot; {{ $laporan->lokasi_ringkas }} &middot;
+                                    {{ $laporan->created_at->translatedFormat('d M Y, H:i') }}
+                                </p>
+                            </a>
+                            <div class="shrink-0 flex items-center gap-2">
+                                <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_status }}">{{ $laporan->label_status }}</span>
+                                <button type="button"
+                                        data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
+                                        data-action="{{ route('laporan.destroy', $laporan) }}"
+                                        class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                @empty
+                    <li class="py-4 text-sm text-slate-500">Belum ada laporan dari warga.</li>
+                @endforelse
+            </ul>
+        </div>
+    </div>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-confirm]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    if (!window.confirm(button.dataset.confirm)) {
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = button.dataset.action;
+
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
+
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'DELETE';
+                    form.appendChild(method);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+            });
+        });
+    </script>
+@endpush
 @endsection
 
 @if ($perTahun->isNotEmpty() || $totalPsuTerdata > 0 || $jenisPsu->isNotEmpty())

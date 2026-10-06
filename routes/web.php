@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KecamatanController;
 use App\Http\Controllers\KelurahanController;
+use App\Http\Controllers\LaporanAdminController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PerumahanController;
 use App\Http\Controllers\PublikController;
 use App\Http\Controllers\UserController;
@@ -19,6 +21,10 @@ Route::get('/perumahan', [PublikController::class, 'index'])->name('publik.perum
 Route::get('/perumahan/{perumahan}', [PublikController::class, 'show'])->name('publik.perumahan.show');
 Route::get('/peta', [PublikController::class, 'peta'])->name('publik.peta');
 Route::get('/peta/geojson', [PublikController::class, 'geojson'])->name('publik.peta.geojson');
+
+// Laporan kerusakan sarana-prasarana dari publik (tanpa login)
+Route::get('/lapor', [LaporanController::class, 'create'])->name('lapor.create');
+Route::post('/lapor', [LaporanController::class, 'store'])->middleware('throttle:10,1')->name('lapor.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +52,12 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/perumahan/geojson', [PerumahanController::class, 'geojson'])->name('perumahan.geojson');
 
     Route::resource('perumahan', PerumahanController::class);
+
+    // Laporan kerusakan sarana-prasarana
+    Route::get('/laporan', [LaporanAdminController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/{laporan}', [LaporanAdminController::class, 'show'])->name('laporan.show');
+    Route::put('/laporan/{laporan}', [LaporanAdminController::class, 'update'])->name('laporan.update');
+    Route::delete('/laporan/{laporan}', [LaporanAdminController::class, 'destroy'])->name('laporan.destroy');
 
     // Master wilayah
     Route::get('/wilayah', [KecamatanController::class, 'index'])->name('wilayah.index');

@@ -122,7 +122,7 @@
                 Peta default menampilkan wilayah <span class="font-medium text-slate-700">{{ config('peta.nama_wilayah') }}</span>.
             </p>
 
-            <div id="map-picker" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100"></div>
+            <div id="map-picker" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100 sm:h-80"></div>
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -180,12 +180,12 @@
                     <p class="text-xs text-slate-500">Rincikan tipe unit yang dibangun beserta jumlahnya.</p>
                 </div>
                 <button type="button" data-add-row
-                        class="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-900">
+                        class="shrink-0 whitespace-nowrap rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-900">
                     + Tambah Tipe
                 </button>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="no-scrollbar overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                         <tr>
@@ -220,10 +220,6 @@
                                     <input type="text" name="tipe_units[{{ $index }}][keterangan]" value="{{ $row['keterangan'] ?? '' }}"
                                            class="{{ $inputClass }} w-40">
                                 </td>
-                                <td class="py-2 pr-2">
-                                    <input type="text" name="tipe_units[{{ $index }}][keterangan]" value="{{ $row['keterangan'] ?? '' }}"
-                                           class="{{ $inputClass }} w-40">
-                                </td>
                                 <td class="py-2 text-right">
                                     <button type="button" data-remove-row class="text-xs font-medium text-rose-600 hover:text-rose-700">Hapus</button>
                                 </td>
@@ -242,12 +238,12 @@
                     <p class="text-xs text-slate-500">Prasarana, sarana, dan utilitas yang tersedia di perumahan.</p>
                 </div>
                 <button type="button" data-add-row
-                        class="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-900">
+                        class="shrink-0 whitespace-nowrap rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-900">
                     + Tambah PSU
                 </button>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="no-scrollbar overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                         <tr>

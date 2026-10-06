@@ -14,12 +14,12 @@
 </head>
 <body class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 lg:px-8">
-            <a href="{{ route('publik.beranda') }}" class="flex items-center gap-3">
-                <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">SP</span>
-                <span class="leading-tight">
-                    <span class="block text-sm font-semibold text-slate-900">Data Perumahan</span>
-                    <span class="block text-xs text-slate-500">{{ config('peta.nama_wilayah') }}</span>
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 lg:px-8">
+            <a href="{{ route('publik.beranda') }}" class="flex min-w-0 items-center gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">SP</span>
+                <span class="min-w-0 leading-tight">
+                    <span class="block truncate text-sm font-semibold text-slate-900">Data Perumahan</span>
+                    <span class="block truncate text-xs text-slate-500">{{ config('peta.nama_wilayah') }}</span>
                 </span>
             </a>
 
@@ -29,6 +29,7 @@
                         ['label' => 'Beranda', 'route' => 'publik.beranda', 'active' => 'publik.beranda'],
                         ['label' => 'Data Perumahan', 'route' => 'publik.perumahan.index', 'active' => 'publik.perumahan.*'],
                         ['label' => 'Peta Sebaran', 'route' => 'publik.peta', 'active' => 'publik.peta'],
+                        ['label' => 'Lapor', 'route' => 'lapor.create', 'active' => 'lapor.*'],
                     ];
                 @endphp
 
@@ -42,12 +43,12 @@
             </nav>
 
             <a href="{{ route('login') }}"
-               class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
-                Masuk Admin
+               class="shrink-0 whitespace-nowrap rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:px-4">
+                <span class="hidden sm:inline">Masuk </span>Admin
             </a>
         </div>
 
-        <nav class="flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden">
+        <nav class="no-scrollbar flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden">
             @foreach ($menu as $item)
                 @php $aktif = request()->routeIs($item['active']); @endphp
                 <a href="{{ route($item['route']) }}"
@@ -63,7 +64,7 @@
     </main>
 
     <footer class="mt-12 border-t border-slate-200 bg-white">
-        <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-4 lg:px-8">
+        <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
             <div class="lg:col-span-2">
                 <div class="flex items-center gap-3">
                     <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">SP</span>
@@ -80,6 +81,7 @@
                 <ul class="mt-3 space-y-2 text-sm text-slate-600">
                     <li><a href="{{ route('publik.perumahan.index') }}" class="hover:text-indigo-600">Daftar Perumahan</a></li>
                     <li><a href="{{ route('publik.peta') }}" class="hover:text-indigo-600">Peta Sebaran</a></li>
+                    <li><a href="{{ route('lapor.create') }}" class="hover:text-indigo-600">Lapor Kerusakan / Pengaduan</a></li>
                     <li><a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener" class="hover:text-indigo-600">Data GeoJSON</a></li>
                 </ul>
             </div>
