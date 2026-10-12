@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Laporan;
 use App\Models\Perumahan;
+use App\Services\DashboardStatistikService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -15,7 +17,7 @@ class LaporanAdminController extends Controller
     {
         $filters = $request->only(['q', 'jenis', 'status', 'tingkat', 'perumahan_id']);
 
-        $query = Laporan::with(['perumahan.kelurahan.kecamatan', 'psu', 'kelurahan.kecamatan'])->filter($filters);
+        $query = Laporan::with(['perumahan.kelurahan.kecamatan', 'psu', 'kelurahan.kecamatan', 'fotos'])->filter($filters);
 
         $ringkasan = [
             'total' => (clone $query)->count(),
@@ -54,6 +56,10 @@ class LaporanAdminController extends Controller
             'ditangani_pada' => now(),
         ]);
 
+        // Statistik dashboard & badge sidebar tergantung status laporan → reset cache.
+        Cache::forget(Laporan::CACHE_BAIK_BARU);
+        Cache::forget(DashboardStatistikService::CACHE_KEY);
+
         // Sinkronkan deskripsi aksi selesai ke foto bukti yang sudah ada.
         if (($laporan->deskripsi_aksi_selesai ?? '') !== ($data['deskripsi_aksi_selesai'] ?? '')) {
             $laporan->fotos()->each(fn (LaporanFoto $foto) => $foto->update([
@@ -76,6 +82,10 @@ class LaporanAdminController extends Controller
 
         $kode = $laporan->kode;
         $laporan->delete();
+
+        // Statistik dashboard & badge sidebar tergantung data laporan → reset cache.
+        Cache::forget(Laporan::CACHE_BAIK_BARU);
+        Cache::forget(DashboardStatistikService::CACHE_KEY);
 
         return redirect()->route('laporan.index')
             ->with('success', 'Laporan '.$kode.' beserta seluruh foto buktinya dan data penanganannya telah dihapus permanen.');

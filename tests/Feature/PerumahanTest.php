@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Kecamatan;
 use App\Models\Kelurahan;
+use App\Models\Laporan;
 use App\Models\Perumahan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -41,8 +42,8 @@ class PerumahanTest extends TestCase
             'alamat' => 'Jl. Uji No. 1',
             'rt' => '001',
             'rw' => '002',
-            'latitude' => -6.9147440,
-            'longitude' => 107.6098100,
+            'latitude' => -6.7320,
+            'longitude' => 108.5523,
             'luas_lahan' => 20000,
             'jumlah_unit' => 100,
             'status' => 'subsidi',
@@ -73,6 +74,63 @@ class PerumahanTest extends TestCase
         $this->assertCount(1, $perumahan->psu);
         $this->assertCount(2, $perumahan->tipeUnits);
         $this->assertSame(100, $perumahan->total_unit_tipe);
+    }
+
+    public function test_edit_perumahan_tidak_memutus_relasi_laporan_ke_psu(): void
+    {
+        $kelurahan = $this->wilayah();
+        $perumahan = Perumahan::create([
+            'nama' => 'Perumahan PSU Terlink',
+            'kelurahan_id' => $kelurahan->id,
+            'luas_lahan' => 5000,
+            'jumlah_unit' => 50,
+            'status' => 'komersil',
+        ]);
+
+        $psuJalan = $perumahan->psu()->create([
+            'jenis' => 'Jalan Lingkungan', 'jumlah' => 1500, 'satuan' => 'meter', 'kondisi' => 'baik',
+        ]);
+        $psuDrainase = $perumahan->psu()->create([
+            'jenis' => 'Saluran Drainase', 'jumlah' => 300, 'satuan' => 'meter', 'kondisi' => 'rusak_ringan',
+        ]);
+
+        $laporan = Laporan::create([
+            'kode' => 'LPR-UJI-0001',
+            'jenis' => 'kerusakan',
+            'perumahan_id' => $perumahan->id,
+            'psu_perumahan_id' => $psuJalan->id,
+            'nama_pelapor' => 'Warga Uji',
+            'judul' => 'Jalan berlubang',
+            'deskripsi' => 'Jalan blok C berlubang.',
+            'tingkat' => 'rusak_ringan',
+            'status' => 'baru',
+        ]);
+
+        // Edit: PSU jalan tetap (di-update), PSU drainase dihapus dari form,
+        // dan satu PSU baru ditambahkan.
+        $this->actingAs($this->petugas())
+            ->put(route('perumahan.update', $perumahan), [
+                'nama' => 'Perumahan PSU Terlink',
+                'kelurahan_id' => $kelurahan->id,
+                'luas_lahan' => 5000,
+                'jumlah_unit' => 50,
+                'status' => 'komersil',
+                'psu' => [
+                    ['id' => $psuJalan->id, 'jenis' => 'Jalan Lingkungan', 'jumlah' => 1600, 'satuan' => 'meter', 'kondisi' => 'baik'],
+                    ['jenis' => 'Penerangan Jalan Umum', 'jumlah' => 10, 'satuan' => 'titik', 'kondisi' => 'baik'],
+                ],
+            ])
+            ->assertRedirect(route('perumahan.show', $perumahan));
+
+        $perumahan->refresh();
+        $this->assertCount(2, $perumahan->psu);
+        // Baris lama dipertahankan dengan id yang sama (bukan delete-create ulang).
+        $this->assertTrue($perumahan->psu->contains('id', $psuJalan->id));
+        $this->assertFalse($perumahan->psu->contains('id', $psuDrainase->id));
+        $this->assertSame(1600.0, (float) $psuJalan->fresh()->jumlah);
+
+        // Relasi laporan -> PSU TIDAK terputus oleh operasi simpan.
+        $this->assertSame($psuJalan->id, $laporan->fresh()->psu_perumahan_id);
     }
 
     public function test_validasi_menolak_tahun_selesai_lebih_awal(): void
@@ -156,6 +214,99 @@ class PerumahanTest extends TestCase
         $this->assertDatabaseMissing('perumahans', ['id' => $perumahan->id]);
         $this->assertDatabaseMissing('psu_perumahans', ['id' => $psu->id]);
         $this->assertDatabaseMissing('tipe_units', ['id' => $tipe->id]);
+    }
+
+    public function test_validasi_bisnis_luas_rth_tidak_boleh_melebihi_luas_lahan(): void
+    {
+        $kelurahan = $this->wilayah();
+
+        $this->actingAs($this->petugas())
+            ->post(route('perumahan.store'), [
+                'nama' => 'Perumahan RTH Melebihi',
+                'kelurahan_id' => $kelurahan->id,
+                'luas_lahan' => 1000,
+                'luas_rth' => 2000,
+                'jumlah_unit' => 10,
+                'status' => 'komersil',
+            ])
+            ->assertSessionHasErrors('luas_rth');
+
+        $this->assertSame(0, Perumahan::count());
+    }
+
+    public function test_validasi_bisnis_total_tipe_unit_harus_cocok_dengan_jumlah_unit(): void
+    {
+        $kelurahan = $this->wilayah();
+
+        // Total tipe unit 90 != jumlah unit 100 -> ditolak.
+        $this->actingAs($this->petugas())
+            ->post(route('perumahan.store'), [
+                'nama' => 'Perumahan Tipe Tidak Cocok',
+                'kelurahan_id' => $kelurahan->id,
+                'luas_lahan' => 5000,
+                'jumlah_unit' => 100,
+                'status' => 'komersil',
+                'tipe_units' => [
+                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 50],
+                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 40],
+                ],
+            ])
+            ->assertSessionHasErrors('tipe_units');
+
+        $this->assertSame(0, Perumahan::count());
+
+        // Total tipe unit 100 == jumlah unit 100 -> diterima.
+        $this->actingAs($this->petugas())
+            ->post(route('perumahan.store'), [
+                'nama' => 'Perumahan Tipe Cocok',
+                'kelurahan_id' => $kelurahan->id,
+                'luas_lahan' => 5000,
+                'jumlah_unit' => 100,
+                'status' => 'komersil',
+                'tipe_units' => [
+                    ['tipe' => 'Tipe 30', 'jumlah_unit' => 50],
+                    ['tipe' => 'Tipe 36', 'jumlah_unit' => 50],
+                ],
+            ])
+            ->assertSessionDoesntHaveErrors('tipe_units');
+
+        $this->assertSame(1, Perumahan::count());
+    }
+
+    public function test_validasi_koordinat_harus_dalam_batas_wilayah_peta(): void
+    {
+        $kelurahan = $this->wilayah();
+        $batas = config('peta.batas');
+
+        // Koordinat di luar batas wilayah kerja -> ditolak.
+        $this->actingAs($this->petugas())
+            ->post(route('perumahan.store'), [
+                'nama' => 'Perumahan Koordinat Liar',
+                'kelurahan_id' => $kelurahan->id,
+                'luas_lahan' => 5000,
+                'jumlah_unit' => 50,
+                'status' => 'komersil',
+                'latitude' => -6.9, // di luar lat_min batas
+                'longitude' => 107.6, // di luar lng_min batas
+            ])
+            ->assertSessionHasErrors(['latitude', 'longitude']);
+
+        $this->assertSame(0, Perumahan::count());
+
+        // Koordinat dalam batas (pusat peta) -> diterima.
+        $this->actingAs($this->petugas())
+            ->post(route('perumahan.store'), [
+                'nama' => 'Perumahan Koordinat Pas',
+                'kelurahan_id' => $kelurahan->id,
+                'luas_lahan' => 5000,
+                'jumlah_unit' => 50,
+                'status' => 'komersil',
+                'latitude' => config('peta.latitude'),
+                'longitude' => config('peta.longitude'),
+            ])
+            ->assertSessionDoesntHaveErrors(['latitude', 'longitude']);
+
+        $this->assertSame(1, Perumahan::count());
     }
 
     public function test_geojson_menyertakan_titik_yang_punya_koordinat(): void

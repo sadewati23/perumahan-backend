@@ -140,6 +140,16 @@
             const bounds = [];
             const formatAngka = (angka) => new Intl.NumberFormat('id-ID').format(angka);
 
+            // Nilai dari data titik dirender APA ADANYA ke HTML popup — escape
+            // dulu agar karakter <, >, &, dan " dari nama/alamat perumahan
+            // tidak dianggap bagian dari HTML di dalam Leaflet popup (XSS).
+            const escapeHtml = (nilai) => String(nilai ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
             titik.forEach((p) => {
                 const warna = colors[p.status] || '#64748b';
                 const icon = L.divIcon({
@@ -151,9 +161,9 @@
 
                 const marker = L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(`
                     <div style="min-width:230px">
-                        <p style="font-weight:600;margin:0 0 2px">${p.nama}</p>
-                        <p style="margin:0 0 6px;color:${warna};font-size:12px">${p.status}</p>
-                        <p style="margin:0 0 6px;color:#475569;font-size:12px">${p.alamat ?? ''}</p>
+                        <p style="font-weight:600;margin:0 0 2px">${escapeHtml(p.nama)}</p>
+                        <p style="margin:0 0 6px;color:${warna};font-size:12px">${escapeHtml(p.status)}</p>
+                        <p style="margin:0 0 6px;color:#475569;font-size:12px">${escapeHtml(p.alamat)}</p>
                         <table style="font-size:12px;color:#334155">
                             <tr><td>Jumlah unit</td><td style="text-align:right;padding-left:8px">${formatAngka(p.unit)}</td></tr>
                             <tr><td>Luas lahan</td><td style="text-align:right;padding-left:8px">${formatAngka(p.luas_lahan)} m&sup2;</td></tr>
@@ -161,7 +171,7 @@
                             <tr><td>KDB / KDH</td><td style="text-align:right;padding-left:8px">${p.kdb ?? '-'}% / ${p.kdh ?? '-'}%</td></tr>
                             <tr><td>Tahun selesai</td><td style="text-align:right;padding-left:8px">${p.tahun_selesai ?? '-'}</td></tr>
                         </table>
-                        <a href="${p.url}" style="display:inline-block;margin-top:8px;color:#4f46e5;font-size:12px;font-weight:500">Lihat detail &rarr;</a>
+                        <a href="${encodeURI(p.url)}" style="display:inline-block;margin-top:8px;color:#4f46e5;font-size:12px;font-weight:500">Lihat detail &rarr;</a>
                     </div>`);
 
                 markers[p.id] = marker;

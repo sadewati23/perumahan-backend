@@ -132,7 +132,11 @@
                     </div>
                     <div>
                         <dt class="text-xs text-slate-500">Kontak</dt>
-                        <dd class="font-medium text-slate-800">{{ $laporan->kontak_pelapor }}</dd>
+                        @if ($laporan->kontak_pelapor)
+                            <dd class="font-medium text-slate-800">{{ $laporan->kontak_pelapor }}</dd>
+                        @else
+                            <dd class="text-slate-400">Tidak dicantumkan</dd>
+                        @endif
                     </div>
                 </dl>
 

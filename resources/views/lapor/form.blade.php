@@ -197,13 +197,11 @@
                                 Pengaduan tidak wajib menyebut lokasi. Bila berkaitan dengan perumahan tertentu,
                                 sebutkan nama perumahannya di uraian laporan.
                             </p>
-                        </div>
-
-                        {{-- 3. Data pelapor --}}
+                        </div>                        {{-- 3. Data pelapor --}}
                         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                             <h2 class="text-sm font-semibold text-slate-900">3. Data Pelapor</h2>
 
-                            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                            <div class="mt-4 grid gap-4">
                                 <div>
                                     <label for="nama_pelapor" class="mb-1.5 block text-sm font-medium text-slate-700">
                                         Nama Lengkap <span class="text-rose-500">*</span>
@@ -212,17 +210,6 @@
                                            value="{{ old('nama_pelapor') }}" maxlength="100" required
                                            placeholder="Contoh: Budi Santoso"
                                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
-                                </div>
-
-                                <div>
-                                    <label for="kontak_pelapor" class="mb-1.5 block text-sm font-medium text-slate-700">
-                                        No. HP / WhatsApp <span class="text-rose-500">*</span>
-                                    </label>
-                                    <input type="text" id="kontak_pelapor" name="kontak_pelapor"
-                                           value="{{ old('kontak_pelapor') }}" maxlength="100" required
-                                           placeholder="Contoh: 0812xxxxxxx"
-                                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
-                                    <p class="mt-1 text-xs text-slate-500">Dipakai petugas untuk menghubungi Anda terkait laporan ini.</p>
                                 </div>
                             </div>
                         </div>
@@ -366,7 +353,7 @@
                 </div>
 
                 <div class="rounded-xl border border-slate-200 bg-white p-6 text-xs text-slate-500 shadow-sm">
-                    Laporan dikirim tanpa perlu membuat akun. Nama dan kontak hanya digunakan untuk
+                    Laporan dikirim tanpa perlu membuat akun. Nama pelapor hanya digunakan untuk
                     tindak lanjut laporan dan tidak ditampilkan pada halaman publik.
                 </div>
             </aside>

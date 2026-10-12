@@ -41,7 +41,13 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // STORAGE_URL dipisah dari APP_URL/ASSET_URL karena project di-serve lewat
+            // subfolder (http://localhost/perumahan-backend/public):
+            // - APP_URL tetap root domain → route()/asset()/@vite berjalan normal, dan
+            //   Laravel test client tidak mem-prefix request test dengan subfolder.
+            // - ASSET_URL TIDAK boleh dipakai (di Laravel 12 itu juga mempengaruhi helper
+            //   asset() global → CSS Vite ikut mengarah ke /storage/build → 404, UI rontok).
+            'url' => rtrim(env('STORAGE_URL', 'http://localhost/perumahan-backend/public/storage'), '/'),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

@@ -295,7 +295,7 @@
                     attribution: PETA.tile_attribution,
                 }).addTo(map);
 
-                L.marker([lat, lng]).addTo(map).bindPopup(@json($perumahan->nama)).openPopup();
+                L.marker([lat, lng]).addTo(map).bindPopup(@json(e($perumahan->nama))).openPopup();
 
                 setTimeout(() => map.invalidateSize(), 200);
             });

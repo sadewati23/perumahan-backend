@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Laporan extends Model
 {
     public const JENIS_KERUSAKAN = 'kerusakan';
+
     public const JENIS_PENGADUAN = 'pengaduan';
+
     public const JENIS_BANGUNAN_LIAR = 'bangunan_liar';
 
     public const JENIS = [
@@ -34,6 +36,11 @@ class Laporan extends Model
         'selesai' => 'Selesai',
         'ditolak' => 'Ditolak',
     ];
+
+    /**
+     * Kunci cache jumlah laporan "baru" untuk badge sidebar.
+     */
+    public const CACHE_BAIK_BARU = 'laporan.baru';
 
     public const TINGKAT = [
         'rusak_ringan' => 'Rusak Ringan',
@@ -234,7 +241,8 @@ class Laporan extends Model
      */
     public function getKontakWaAttribute(): ?string
     {
-        if (preg_match('/^[\d\s+\-().]+$/', $this->kontak_pelapor) !== 1) {
+        // Kontak tidak lagi diisi saat pembuatan laporan (bisa null).
+        if ($this->kontak_pelapor === null || preg_match('/^[\d\s+\-().]+$/', $this->kontak_pelapor) !== 1) {
             return null;
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreLaporanRequest;
 use App\Models\Kelurahan;
 use App\Models\Laporan;
 use App\Models\Perumahan;
@@ -53,127 +54,16 @@ class LaporanController extends Controller
     }
 
     /**
-     * Simpan laporan baru sesuai jenis (validasi kondisional per jenis)
-     * beserta foto bukti (maks. 3 foto).
+     * Simpan laporan baru sesuai jenis (validasi kondisional per jenis dipindah
+     * ke StoreLaporanRequest) beserta foto bukti (maks. 3 foto).
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreLaporanRequest $request): RedirectResponse
     {
-        $jenis = $request->input('jenis', Laporan::JENIS_KERUSAKAN);
+        $data = $request->dataLaporan();
 
-        if (! array_key_exists($jenis, Laporan::JENIS)) {
-            $jenis = Laporan::JENIS_KERUSAKAN;
-        }
-
-        // Aturan dasar yang berlaku untuk semua jenis laporan.
-        $aturan = [
-            'jenis' => ['nullable', 'in:'.implode(',', array_keys(Laporan::JENIS))],
-            'nama_pelapor' => ['required', 'string', 'max:100'],
-            'kontak_pelapor' => ['required', 'string', 'min:6', 'max:100'],
-            'judul' => ['required', 'string', 'max:150'],
-            'deskripsi' => ['required', 'string', 'max:2000'],
-            'foto' => ['nullable', 'array', 'max:3'],
-            'foto.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-        ];
-
-        // Bangunan liar wajib minimal 1 foto; jenis lain foto opsional.
-        if ($jenis === Laporan::JENIS_BANGUNAN_LIAR) {
-            $aturan['foto'] = ['required', 'array', 'min:1', 'max:3'];
-        }
-
-        $pesan = [
-            'jenis.in' => 'Jenis laporan tidak valid.',
-            'nama_pelapor.required' => 'Nama pelapor wajib diisi.',
-            'kontak_pelapor.required' => 'Kontak (HP/WA) wajib diisi agar petugas dapat menghubungi Anda.',
-            'kontak_pelapor.min' => 'Kontak terlalu pendek, isi nomor HP/WA atau email yang valid.',
-            'judul.required' => 'Judul laporan wajib diisi.',
-            'deskripsi.required' => 'Uraian wajib diisi.',
-            'foto.max' => 'Foto bukti maksimal 3 file.',
-            'foto.required' => 'Laporan bangunan liar wajib melampirkan minimal 1 foto.',
-            'foto.min' => 'Laporan bangunan liar wajib melampirkan minimal 1 foto.',
-            'foto.*.image' => 'Lampiran harus berupa gambar.',
-            'foto.*.mimes' => 'Format foto harus JPG, PNG, atau WEBP.',
-            'foto.*.max' => 'Ukuran setiap foto maksimal 2 MB.',
-        ];
-
-        if ($jenis === Laporan::JENIS_BANGUNAN_LIAR) {
-            // Bangunan liar: perumahan opsional, kelurahan wajib, plus lokasi teks & tanggal kejadian.
-            $aturan += [
-                'perumahan_id' => ['nullable', 'exists:perumahans,id'],
-                'kelurahan_id' => ['required', 'exists:kelurahans,id'],
-                'lokasi_teks' => ['required', 'string', 'max:255'],
-                'tanggal_kejadian' => ['nullable', 'date', 'before_or_equal:today'],
-            ];
-
-            $pesan += [
-                'kelurahan_id.required' => 'Kelurahan/kecamatan lokasi wajib dipilih.',
-                'lokasi_teks.required' => 'Lokasi kejadian (nama jalan/gang/titik) wajib diisi.',
-                'tanggal_kejadian.before_or_equal' => 'Tanggal kejadian tidak boleh di masa depan.',
-            ];
-        } elseif ($jenis === Laporan::JENIS_PENGADUAN) {
-            // Pengaduan: teks saja, foto opsional, tanpa perlu lokasi spesifik.
-            $aturan += [
-                'perumahan_id' => ['nullable', 'exists:perumahans,id'],
-                'kelurahan_id' => ['nullable', 'exists:kelurahans,id'],
-                'lokasi_teks' => ['nullable', 'string', 'max:255'],
-            ];
-        } else {
-            // Kerusakan: perumahan wajib + rincian tingkat & ukuran kerusakan.
-            $aturan += [
-                'perumahan_id' => ['required', 'exists:perumahans,id'],
-                'psu_perumahan_id' => ['nullable', 'exists:psu_perumahans,id'],
-                'kelurahan_id' => ['nullable', 'exists:kelurahans,id'],
-                'lokasi_teks' => ['nullable', 'string', 'max:255'],
-                'tingkat' => ['required', 'in:rusak_ringan,rusak_berat'],
-                'persentase_kerusakan' => ['nullable', 'numeric', 'min:0', 'max:100'],
-                'panjang_kerusakan' => ['nullable', 'numeric', 'min:0'],
-            ];
-
-            $pesan += [
-                'perumahan_id.required' => 'Perumahan wajib dipilih.',
-                'tingkat.required' => 'Tingkat kerusakan wajib dipilih.',
-                'persentase_kerusakan.min' => 'Persentase kerusakan tidak boleh negatif.',
-                'persentase_kerusakan.max' => 'Persentase kerusakan maksimal 100.',
-                'panjang_kerusakan.min' => 'Panjang kerusakan tidak boleh negatif.',
-            ];
-        }
-
-        $data = $request->validate($aturan, $pesan);
-
-        // Pastikan PSU yang dipilih benar-benar milik perumahan terpilih.
-        if (! empty($data['psu_perumahan_id'])) {
-            $psuValid = PsuPerumahan::whereKey($data['psu_perumahan_id'])
-                ->where('perumahan_id', $data['perumahan_id'])
-                ->exists();
-
-            if (! $psuValid) {
-                return back()->withInput()->withErrors([
-                    'psu_perumahan_id' => 'Sarana yang dipilih tidak sesuai dengan perumahan yang dilaporkan.',
-                ]);
-            }
-        }
-
-        // Bangunan liar yang memilih perumahan: pakai kelurahan milik perumahan tersebut.
-        if ($jenis === Laporan::JENIS_BANGUNAN_LIAR && ! empty($data['perumahan_id'])) {
-            $kelurahanPerumahan = Perumahan::query()->find($data['perumahan_id'])?->kelurahan_id;
-
-            if ($kelurahanPerumahan) {
-                $data['kelurahan_id'] = $kelurahanPerumahan;
-            }
-        }
-
-        // Normalisasi field yang tidak relevan per jenis sebelum disimpan.
-        $data = match ($jenis) {
-            Laporan::JENIS_PENGADUAN => $data + [
-                'tingkat' => null,
-                'psu_perumahan_id' => null,
-            ],
-            Laporan::JENIS_BANGUNAN_LIAR => $data + ['tingkat' => null, 'psu_perumahan_id' => null],
-            default => $data,
-        };
-
-        $laporan = DB::transaction(function () use ($request, $data, $jenis): Laporan {
+        $laporan = DB::transaction(function () use ($request, $data): Laporan {
             $laporan = Laporan::create($data + [
-                'kode' => Laporan::buatKode($jenis),
+                'kode' => Laporan::buatKode($data['jenis']),
                 'status' => 'baru',
             ]);
 

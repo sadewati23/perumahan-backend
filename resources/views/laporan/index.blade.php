@@ -95,6 +95,7 @@
                         <th class="whitespace-nowrap px-4 py-3">Pelapor</th>
                         <th class="whitespace-nowrap px-4 py-3">Tingkat</th>
                         <th class="whitespace-nowrap px-4 py-3">Ukuran</th>
+                        <th class="whitespace-nowrap px-4 py-3">Detail</th>
                         <th class="whitespace-nowrap px-4 py-3">Status</th>
                         <th class="whitespace-nowrap px-4 py-3">Tanggal</th>
                         <th class="whitespace-nowrap px-4 py-3"></th>
@@ -113,7 +114,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <p class="text-slate-700">{{ $laporan->nama_pelapor }}</p>
-                                <p class="mt-0.5 text-xs text-slate-500">{{ $laporan->kontak_pelapor }}</p>
+                                <p class="mt-0.5 text-xs text-slate-500">{{ $laporan->kontak_pelapor ?? '-' }}</p>
                             </td>
                             <td class="whitespace-nowrap px-4 py-3">
                                 @if ($laporan->label_tingkat)
@@ -123,6 +124,23 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-600">{{ $laporan->ukuran_ringkas }}</td>
+                            <td class="max-w-xs px-4 py-3 text-xs text-slate-600">
+                                <p>{{ $laporan->deskripsi }}</p>
+
+                                @if ($laporan->tanggal_kejadian)
+                                    <p class="mt-1 text-slate-500">Kejadian: {{ $laporan->label_tanggal_kejadian }}</p>
+                                @endif
+
+                                @if ($laporan->fotos->isNotEmpty())
+                                    <a href="{{ route('laporan.show', $laporan) }}"
+                                       class="mt-1 inline-flex items-center gap-1 font-medium text-indigo-600 hover:underline">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0021.75 19.5V4.5A1.5 1.5 0 0020.25 3H3.75A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21z"/>
+                                        </svg>
+                                        {{ $laporan->fotos->count() }} foto bukti
+                                    </a>
+                                @endif
+                            </td>
                             <td class="whitespace-nowrap px-4 py-3">
                                 <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_status }}">{{ $laporan->label_status }}</span>
                             </td>
@@ -140,7 +158,7 @@
                     </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-10 text-center text-sm text-slate-500">
+                            <td colspan="10" class="px-4 py-10 text-center text-sm text-slate-500">
                                 Belum ada laporan @if ($filters['status'] ?? $filters['q'] ?? $filters['perumahan_id'] ?? $filters['tingkat'] ?? $filters['jenis'] ?? null) yang cocok dengan filter @endif .
                             </td>
                         </tr>

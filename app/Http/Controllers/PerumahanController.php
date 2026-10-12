@@ -2,28 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePerumahanRequest;
 use App\Models\Kecamatan;
 use App\Models\Perumahan;
+use App\Services\DashboardStatistikService;
+use App\Services\PerumahanPetaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PerumahanController extends Controller
 {
+    public function __construct(private readonly PerumahanPetaService $peta) {}
+
     public function index(Request $request): View
     {
         $filters = $request->only(['q', 'status', 'kecamatan_id', 'tahun']);
 
         $query = Perumahan::with('kelurahan.kecamatan')->filter($filters);
 
-        $ringkasan = [
-            'jumlah' => (clone $query)->count(),
-            'unit' => (int) (clone $query)->sum('jumlah_unit'),
-            'luas_lahan' => (float) (clone $query)->sum('luas_lahan'),
-            'luas_rth' => (float) (clone $query)->sum('luas_rth'),
-        ];
+        $ringkasan = $this->peta->ringkasan($query);
 
         $perumahans = $query->orderBy('nama')->paginate(10)->withQueryString();
 
@@ -45,12 +46,19 @@ class PerumahanController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StorePerumahanRequest $request): RedirectResponse
     {
-        $data = $this->validated($request);
+        $data = $request->validated();
 
-        $perumahan = Perumahan::create($data);
-        $this->syncDetail($perumahan, $request);
+        $perumahan = DB::transaction(function () use ($data, $request): Perumahan {
+            $perumahan = Perumahan::create($data);
+            $this->syncDetail($perumahan, $request);
+
+            return $perumahan;
+        });
+
+        $this->peta->hapusCache();
+        Cache::forget(DashboardStatistikService::CACHE_KEY);
 
         return redirect()->route('perumahan.show', $perumahan)
             ->with('success', 'Data perumahan "'.$perumahan->nama.'" berhasil disimpan.');
@@ -73,12 +81,17 @@ class PerumahanController extends Controller
         ]);
     }
 
-    public function update(Request $request, Perumahan $perumahan): RedirectResponse
+    public function update(StorePerumahanRequest $request, Perumahan $perumahan): RedirectResponse
     {
-        $data = $this->validated($request);
+        $data = $request->validated();
 
-        $perumahan->update($data);
-        $this->syncDetail($perumahan, $request);
+        DB::transaction(function () use ($data, $perumahan, $request): void {
+            $perumahan->update($data);
+            $this->syncDetail($perumahan, $request);
+        });
+
+        $this->peta->hapusCache();
+        Cache::forget(DashboardStatistikService::CACHE_KEY);
 
         return redirect()->route('perumahan.show', $perumahan)
             ->with('success', 'Data perumahan "'.$perumahan->nama.'" berhasil diperbarui.');
@@ -92,6 +105,9 @@ class PerumahanController extends Controller
         // tipe_units ikut terhapus lewat foreign key cascadeOnDelete().
         $perumahan->delete();
 
+        $this->peta->hapusCache();
+        Cache::forget(DashboardStatistikService::CACHE_KEY);
+
         return redirect()->route('perumahan.index')
             ->with('success', 'Data perumahan "'.$nama.'" beserta seluruh detailnya telah dihapus permanen.');
     }
@@ -101,11 +117,9 @@ class PerumahanController extends Controller
      */
     public function peta(Request $request): View
     {
-        $perumahans = Perumahan::with('kelurahan.kecamatan')->orderBy('nama')->get();
+        $perumahans = $this->peta->perumahanDenganWilayah();
 
-        $titik = $perumahans->whereNotNull('latitude')->whereNotNull('longitude')
-            ->map(fn (Perumahan $p) => $p->titikPeta() + ['url' => route('perumahan.show', $p)])
-            ->values();
+        $titik = $this->peta->titik($perumahans, 'perumahan.show');
 
         // Kelompokkan koordinat titik lokasi per kecamatan agar peta bisa
         // fokus ke satu kecamatan saat chip-nya diklik.
@@ -142,105 +156,81 @@ class PerumahanController extends Controller
      */
     public function geojson(): JsonResponse
     {
-        return response()->json(Perumahan::featureCollection());
+        return response()->json($this->peta->featureCollection());
     }
 
-    private function validated(Request $request): array
-    {
-        $request->merge([
-            'ada_lahan_pemakaman' => $request->boolean('ada_lahan_pemakaman'),
-        ]);
-
-        $tahunSekarang = (int) date('Y');
-
-        $data = $request->validate([
-            'nama' => ['required', 'string', 'max:150'],
-            'pengembang' => ['nullable', 'string', 'max:150'],
-            'kelurahan_id' => ['required', 'exists:kelurahans,id'],
-            'alamat' => ['nullable', 'string', 'max:255'],
-            'rt' => ['nullable', 'string', 'max:5'],
-            'rw' => ['nullable', 'string', 'max:5'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'luas_lahan' => ['required', 'numeric', 'min:0'],
-            'jumlah_unit' => ['required', 'integer', 'min:0'],
-            'status' => ['required', 'in:subsidi,komersil'],
-            'tahun_pembuatan' => ['nullable', 'integer', 'min:1900', 'max:'.($tahunSekarang + 1)],
-            'tahun_selesai' => ['nullable', 'integer', 'min:1900', 'max:'.($tahunSekarang + 10)],
-            'jumlah_rth' => ['nullable', 'integer', 'min:0'],
-            'luas_rth' => ['nullable', 'numeric', 'min:0'],
-            'kdb' => ['nullable', 'numeric', 'between:0,100'],
-            'kdh' => ['nullable', 'numeric', 'between:0,100'],
-            'ada_lahan_pemakaman' => ['boolean'],
-            'luas_lahan_pemakaman' => ['nullable', 'numeric', 'min:0'],
-            'lokasi_lahan_pemakaman' => ['nullable', 'string', 'max:255'],
-            'keterangan' => ['nullable', 'string', 'max:2000'],
-            'psu' => ['nullable', 'array'],
-            'psu.*.jenis' => ['nullable', 'string', 'max:100'],
-            'psu.*.jumlah' => ['nullable', 'numeric', 'min:0'],
-            'psu.*.satuan' => ['nullable', 'string', 'max:30'],
-            'psu.*.kondisi' => ['nullable', 'in:baik,rusak_ringan,rusak_berat'],
-            'psu.*.keterangan' => ['nullable', 'string', 'max:255'],
-            'tipe_units' => ['nullable', 'array'],
-            'tipe_units.*.tipe' => ['nullable', 'string', 'max:50'],
-            'tipe_units.*.jumlah_unit' => ['nullable', 'integer', 'min:0'],
-            'tipe_units.*.luas_tanah' => ['nullable', 'numeric', 'min:0'],
-            'tipe_units.*.luas_bangunan' => ['nullable', 'numeric', 'min:0'],
-
-            'tipe_units.*.keterangan' => ['nullable', 'string', 'max:255'],
-        ], [
-            'nama.required' => 'Nama perumahan wajib diisi.',
-            'kelurahan_id.required' => 'Kelurahan wajib dipilih.',
-            'luas_lahan.required' => 'Luas lahan wajib diisi.',
-            'jumlah_unit.required' => 'Jumlah unit wajib diisi.',
-            'status.required' => 'Status perumahan wajib dipilih.',
-        ]);
-
-        if (! empty($data['tahun_pembuatan']) && ! empty($data['tahun_selesai'])
-            && $data['tahun_selesai'] < $data['tahun_pembuatan']) {
-            throw ValidationException::withMessages([
-                'tahun_selesai' => 'Tahun selesai tidak boleh lebih awal dari tahun pembuatan.',
-            ]);
-        }
-
-        if (! $data['ada_lahan_pemakaman']) {
-            $data['luas_lahan_pemakaman'] = null;
-            $data['lokasi_lahan_pemakaman'] = null;
-        }
-
-        return $data;
-    }
-
+    /**
+     * Sinkronkan baris PSU & tipe unit dari form. Baris lama yang masih ada
+     * di form (dikenali dari hidden input id) di-update tanpa mengganti id;
+     * hanya baris yang memang dihapus dari form yang di-delete.
+     *
+     * PENTING: jangan delete-all + create ulang — FK laporans.psu_perumahan_id
+     * memakai nullOnDelete, jadi delete-all akan memutus relasi laporan -> PSU
+     * setiap kali data perumahan disimpan.
+     */
     private function syncDetail(Perumahan $perumahan, Request $request): void
     {
-        $perumahan->psu()->delete();
-        foreach ((array) $request->input('psu', []) as $row) {
+        $this->syncPsu($perumahan, (array) $request->input('psu', []));
+        $this->syncTipeUnits($perumahan, (array) $request->input('tipe_units', []));
+    }
+
+    private function syncPsu(Perumahan $perumahan, array $rows): void
+    {
+        $idPertahankan = [];
+
+        foreach ($rows as $row) {
             if (blank($row['jenis'] ?? null)) {
                 continue;
             }
 
-            $perumahan->psu()->create([
+            $data = [
                 'jenis' => $row['jenis'],
                 'jumlah' => $row['jumlah'] ?? 0,
                 'satuan' => $row['satuan'] ?? null,
                 'kondisi' => $row['kondisi'] ?? null,
                 'keterangan' => $row['keterangan'] ?? null,
-            ]);
+            ];
+
+            $psu = $perumahan->psu()->find((int) ($row['id'] ?? 0));
+
+            if ($psu) {
+                $psu->update($data);
+                $idPertahankan[] = $psu->id;
+            } else {
+                $idPertahankan[] = $perumahan->psu()->create($data)->id;
+            }
         }
 
-        $perumahan->tipeUnits()->delete();
-        foreach ((array) $request->input('tipe_units', []) as $row) {
+        $perumahan->psu()->whereNotIn('id', $idPertahankan)->delete();
+    }
+
+    private function syncTipeUnits(Perumahan $perumahan, array $rows): void
+    {
+        $idPertahankan = [];
+
+        foreach ($rows as $row) {
             if (blank($row['tipe'] ?? null)) {
                 continue;
             }
 
-            $perumahan->tipeUnits()->create([
+            $data = [
                 'tipe' => $row['tipe'],
                 'jumlah_unit' => $row['jumlah_unit'] ?? 0,
                 'luas_tanah' => $row['luas_tanah'] ?? null,
                 'luas_bangunan' => $row['luas_bangunan'] ?? null,
                 'keterangan' => $row['keterangan'] ?? null,
-            ]);
+            ];
+
+            $tipeUnit = $perumahan->tipeUnits()->find((int) ($row['id'] ?? 0));
+
+            if ($tipeUnit) {
+                $tipeUnit->update($data);
+                $idPertahankan[] = $tipeUnit->id;
+            } else {
+                $idPertahankan[] = $perumahan->tipeUnits()->create($data)->id;
+            }
         }
+
+        $perumahan->tipeUnits()->whereNotIn('id', $idPertahankan)->delete();
     }
 }

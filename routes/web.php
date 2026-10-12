@@ -34,14 +34,20 @@ Route::post('/lapor', [LaporanController::class, 'store'])->middleware('throttle
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+
+    // Lupa password
+    Route::get('/lupa-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/lupa-password', [AuthController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:5,1');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:5,1');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Area Admin (butuh login)
+| Area Admin (butuh login + akun aktif)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->prefix('admin')->group(function () {
+Route::middleware(['auth', 'active'])->prefix('admin')->group(function () {
     Route::get('/', fn () => redirect()->route('dashboard'));
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

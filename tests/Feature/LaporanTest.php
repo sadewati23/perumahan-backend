@@ -52,7 +52,6 @@ class LaporanTest extends TestCase
             'jenis' => 'kerusakan',
             'perumahan_id' => $perumahan->id,
             'nama_pelapor' => 'Budi Santoso',
-            'kontak_pelapor' => '081234567890',
             'judul' => 'PJU blok C mati semua',
             'deskripsi' => 'Lampu penerangan jalan di blok C mati sejak Senin lalu.',
             'tingkat' => 'rusak_ringan',
@@ -64,7 +63,6 @@ class LaporanTest extends TestCase
         return array_merge([
             'jenis' => 'pengaduan',
             'nama_pelapor' => 'Siti Aminah',
-            'kontak_pelapor' => '089876543210',
             'judul' => 'Usulan penambahan tong sampah',
             'deskripsi' => 'Mohon ditambah tong sampah di ujung jalan, sering penuh.',
         ], $overrides);
@@ -75,7 +73,6 @@ class LaporanTest extends TestCase
         return array_merge([
             'jenis' => 'bangunan_liar',
             'nama_pelapor' => 'Agus Wijaya',
-            'kontak_pelapor' => '081211223344',
             'judul' => 'Bangunan tambah tanpa izin di bantaran jalan',
             'deskripsi' => 'Ada bangunan tambah dua lantai dibangun di bantaran jalan tanpa papan nama pengembang.',
             'lokasi_teks' => 'Jl. Kenanga gang 4, di samping warung Bu Yati',
@@ -97,6 +94,8 @@ class LaporanTest extends TestCase
         $this->assertSame('baru', $laporan->status);
         $this->assertStringStartsWith('LPR-', $laporan->kode);
         $this->assertSame(0, $laporan->fotos()->count());
+        // Kontak HP/WA tidak lagi diminta saat membuat laporan.
+        $this->assertNull($laporan->kontak_pelapor);
     }
 
     public function test_form_lapor_bisa_dibuka_tanpa_login_dan_mendukung_prefill_perumahan(): void
@@ -139,7 +138,7 @@ class LaporanTest extends TestCase
         $perumahan = $this->buatPerumahan();
 
         $this->post(route('lapor.store'), ['perumahan_id' => $perumahan->id])
-            ->assertSessionHasErrors(['nama_pelapor', 'kontak_pelapor', 'judul', 'deskripsi', 'tingkat']);
+            ->assertSessionHasErrors(['nama_pelapor', 'judul', 'deskripsi', 'tingkat']);
 
         $this->assertSame(0, Laporan::count());
     }
@@ -244,6 +243,45 @@ class LaporanTest extends TestCase
     public function test_tamu_tidak_bisa_membuka_kelola_laporan(): void
     {
         $this->get(route('laporan.index'))->assertRedirect(route('login'));
+    }
+
+    public function test_tabel_laporan_admin_menampilkan_detail_data_dari_warga(): void
+    {
+        Storage::fake('public');
+        $perumahan = $this->buatPerumahan();
+
+        // Laporan kerusakan berfoto: foto wajib namun pengaduan tidak.
+        $this->post(route('lapor.store'), $this->dataLaporan($perumahan, [
+            'foto' => [UploadedFile::fake()->image('bukti.jpg')],
+        ]));
+        $kerusakan = Laporan::where('jenis', 'kerusakan')->first();
+
+        $this->post(route('lapor.store'), $this->dataPengaduan());
+        $pengaduan = Laporan::where('jenis', 'pengaduan')->first();
+
+        // Laporan bangunan liar selalu menyimpan tanggal kejadian.
+        $this->post(route('lapor.store'), $this->dataBangunanLiar([
+            'kelurahan_id' => $this->buatKelurahan()->id,
+            'tanggal_kejadian' => '2026-10-01',
+            'lokasi_teks' => 'Jl. Kenanga gang 4',
+            'foto' => [UploadedFile::fake()->image('bukti-bangunan.jpg')],
+        ]));
+        $bangunanLiar = Laporan::where('jenis', 'bangunan_liar')->first();
+
+        $petugas = User::factory()->create(['role' => 'petugas']);
+
+        $this->actingAs($petugas)->get(route('laporan.index'))
+            ->assertOk()
+            // Isi pengaduan tampil utuh (bukan cuma judul).
+            ->assertSee('Mohon ditambah tong sampah di ujung jalan, sering penuh.')
+            // Tanggal kejadian muncul untuk bangunan liar.
+            ->assertSee('Kejadian:')
+            // Jumlah foto tampil untuk laporan berfoto.
+            ->assertSee('1 foto bukti');
+
+        $this->assertNotNull($kerusakan);
+        $this->assertNotNull($pengaduan);
+        $this->assertNotNull($bangunanLiar);
     }
 
     public function test_petugas_bisa_membuka_daftar_dan_detail_laporan(): void
@@ -414,7 +452,6 @@ class LaporanTest extends TestCase
         $this->post(route('lapor.store'), [
             'jenis' => 'kerusakan',
             'nama_pelapor' => 'Budi',
-            'kontak_pelapor' => '081234567890',
             'judul' => 'Jalan rusak',
             'deskripsi' => 'Berlubang.',
         ])->assertSessionHasErrors(['perumahan_id', 'tingkat']);

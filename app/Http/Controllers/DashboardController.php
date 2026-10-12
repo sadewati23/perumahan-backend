@@ -5,26 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Kecamatan;
 use App\Models\Laporan;
 use App\Models\Perumahan;
-use App\Models\PsuPerumahan;
+use App\Services\DashboardStatistikService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly DashboardStatistikService $statistik) {}
+
     public function index(): View
     {
-        $statistik = [
-            'total_perumahan' => Perumahan::count(),
-            'total_unit' => (int) Perumahan::sum('jumlah_unit'),
-            'total_luas_lahan' => (float) Perumahan::sum('luas_lahan'),
-            'total_luas_rth' => (float) Perumahan::sum('luas_rth'),
-            'jumlah_subsidi' => Perumahan::where('status', 'subsidi')->count(),
-            'jumlah_komersil' => Perumahan::where('status', 'komersil')->count(),
-            'jumlah_pemakaman' => Perumahan::where('ada_lahan_pemakaman', true)->count(),
-            'belum_koordinat' => Perumahan::whereNull('latitude')->orWhereNull('longitude')->count(),
-            'total_psu' => PsuPerumahan::count(),
-            'psu_rusak' => PsuPerumahan::whereIn('kondisi', ['rusak_ringan', 'rusak_berat'])->count(),
-        ];
+        // Agregat berat (perumahan + laporan + PSU) di-cache sekali ambil;
+        // detail daftar (per kecamatan, per tahun, terbaru) tetap live.
+        $ringkasan = $this->statistik->ambil();
+
+        $statistik = $ringkasan['perumahan'];
+        $laporanStatistik = $ringkasan['laporan'];
+        $kondisiPsu = $ringkasan['kondisi_psu'];
+        $jenisPsu = $ringkasan['jenis_psu'];
+
+        $totalPsuTerdata = (int) $kondisiPsu->sum();
 
         $perKecamatan = Kecamatan::query()
             ->withCount('perumahans')
@@ -42,36 +42,7 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        // Komposisi kondisi PSU untuk grafik donat.
-        $kondisiPsu = PsuPerumahan::query()
-            ->select('kondisi', DB::raw('COUNT(*) as jumlah'))
-            ->whereNotNull('kondisi')
-            ->groupBy('kondisi')
-            ->pluck('jumlah', 'kondisi');
-
-        $totalPsuTerdata = (int) $kondisiPsu->sum();
-
-        // Jenis PSU terbanyak (top 6) untuk grafik bar horizontal.
-        $jenisPsu = PsuPerumahan::query()
-            ->select('jenis', DB::raw('COUNT(*) as jumlah'))
-            ->whereNotNull('jenis')
-            ->groupBy('jenis')
-            ->orderByDesc('jumlah')
-            ->take(6)
-            ->pluck('jumlah', 'jenis');
-
         $terbaru = Perumahan::with('kelurahan.kecamatan')->latest()->take(5)->get();
-
-        // Ringkasan laporan warga (semua jenis: kerusakan, pengaduan, bangunan liar).
-        $laporanStatistik = [
-            'total' => Laporan::count(),
-            'baru' => Laporan::where('status', 'baru')->count(),
-            'diproses' => Laporan::where('status', 'diproses')->count(),
-            'selesai' => Laporan::where('status', 'selesai')->count(),
-            'kerusakan' => Laporan::where('jenis', Laporan::JENIS_KERUSAKAN)->count(),
-            'pengaduan' => Laporan::where('jenis', Laporan::JENIS_PENGADUAN)->count(),
-            'bangunan_liar' => Laporan::where('jenis', Laporan::JENIS_BANGUNAN_LIAR)->count(),
-        ];
 
         $laporanTerbaru = Laporan::with(['perumahan', 'kelurahan.kecamatan'])->latest()->take(5)->get();
 

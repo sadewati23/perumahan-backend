@@ -5,6 +5,7 @@
     $labelClass = 'mb-1.5 block text-sm font-medium text-slate-700';
 
     $psuRows = old('psu', $perumahan->psu->map(fn ($row) => [
+        'id' => $row->id,
         'jenis' => $row->jenis,
         'jumlah' => $angka($row->jumlah),
         'satuan' => $row->satuan,
@@ -13,6 +14,7 @@
     ])->all());
 
     $tipeRows = old('tipe_units', $perumahan->tipeUnits->map(fn ($row) => [
+        'id' => $row->id,
         'tipe' => $row->tipe,
         'jumlah_unit' => $row->jumlah_unit,
         'luas_tanah' => $angka($row->luas_tanah),
@@ -201,6 +203,8 @@
                         @foreach ($tipeRows as $index => $row)
                             <tr>
                                 <td class="py-2 pr-2">
+                                    {{-- id baris lama agar sinkronisasi tidak mengganti id baris --}}
+                                    <input type="hidden" name="tipe_units[{{ $index }}][id]" value="{{ $row['id'] ?? '' }}">
                                     <input type="text" name="tipe_units[{{ $index }}][tipe]" value="{{ $row['tipe'] ?? '' }}"
                                            placeholder="Tipe 36" class="{{ $inputClass }}">
                                 </td>
@@ -259,6 +263,8 @@
                         @foreach ($psuRows as $index => $row)
                             <tr>
                                 <td class="py-2 pr-2">
+                                    {{-- id baris lama agar laporan yang menunjuk PSU ini tidak terputus saat save --}}
+                                    <input type="hidden" name="psu[{{ $index }}][id]" value="{{ $row['id'] ?? '' }}">
                                     <input type="text" list="jenis-psu" name="psu[{{ $index }}][jenis]" value="{{ $row['jenis'] ?? '' }}"
                                            placeholder="Jalan Lingkungan" class="{{ $inputClass }} w-52">
                                 </td>

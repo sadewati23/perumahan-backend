@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Kecamatan;
 use App\Models\Perumahan;
+use App\Services\PerumahanPetaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class PublikController extends Controller
 {
+    public function __construct(private readonly PerumahanPetaService $peta) {}
+
     public function beranda(): View
     {
         $statistik = [
@@ -35,7 +37,10 @@ class PublikController extends Controller
             ->take(6)
             ->get();
 
-        $titik = $this->titikPeta();
+        $titik = $this->peta->titik(
+            $this->peta->perumahanDenganWilayah(),
+            'publik.perumahan.show'
+        );
 
         return view('publik.beranda', compact('statistik', 'perKecamatan', 'terbaru', 'titik'));
     }
@@ -46,12 +51,7 @@ class PublikController extends Controller
 
         $query = Perumahan::with('kelurahan.kecamatan')->filter($filters);
 
-        $ringkasan = [
-            'jumlah' => (clone $query)->count(),
-            'unit' => (int) (clone $query)->sum('jumlah_unit'),
-            'luas_lahan' => (float) (clone $query)->sum('luas_lahan'),
-            'luas_rth' => (float) (clone $query)->sum('luas_rth'),
-        ];
+        $ringkasan = $this->peta->ringkasan($query);
 
         $perumahans = $query->orderBy('nama')->paginate(12)->withQueryString();
         $kecamatans = Kecamatan::orderBy('nama')->get();
@@ -77,11 +77,17 @@ class PublikController extends Controller
     {
         $filters = $request->only(['q', 'status', 'kecamatan_id']);
 
-        $perumahans = Perumahan::with('kelurahan.kecamatan')->filter($filters)->orderBy('nama')->get();
+        // Tanpa filter: pakai daftar ber-cache; dengan filter: query langsung.
+        if (array_filter($filters, fn ($v) => filled($v)) === []) {
+            $perumahans = $this->peta->perumahanDenganWilayah();
+        } else {
+            $perumahans = Perumahan::with('kelurahan.kecamatan')
+                ->filter($filters)
+                ->orderBy('nama')
+                ->get();
+        }
 
-        $titik = $perumahans->whereNotNull('latitude')->whereNotNull('longitude')
-            ->map(fn (Perumahan $p) => $p->titikPeta() + ['url' => route('publik.perumahan.show', $p)])
-            ->values();
+        $titik = $this->peta->titik($perumahans, 'publik.perumahan.show');
 
         return view('publik.peta', [
             'titik' => $titik,
@@ -93,17 +99,6 @@ class PublikController extends Controller
 
     public function geojson(): JsonResponse
     {
-        return response()->json(Perumahan::featureCollection());
-    }
-
-    private function titikPeta(): Collection
-    {
-        return Perumahan::with('kelurahan.kecamatan')
-            ->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->orderBy('nama')
-            ->get()
-            ->map(fn (Perumahan $p) => $p->titikPeta() + ['url' => route('publik.perumahan.show', $p)])
-            ->values();
+        return response()->json($this->peta->featureCollection());
     }
 }

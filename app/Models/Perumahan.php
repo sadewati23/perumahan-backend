@@ -26,6 +26,7 @@ class Perumahan extends Model
         'Pos Keamanan / Pos Jaga',
         'Pemadam Kebakaran / Hydrant',
         'Sarana Ibadah',
+        'Balai Pertemuan Masyarakat',
         'Sarana Pendidikan',
         'Sarana Kesehatan',
         'Sarana Olahraga',

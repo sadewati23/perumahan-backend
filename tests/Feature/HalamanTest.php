@@ -98,6 +98,22 @@ class HalamanTest extends TestCase
             ->assertSee('grafik-jenis-psu');
     }
 
+    public function test_kecamatan_yang_masih_punya_kelurahan_tidak_bisa_dihapus(): void
+    {
+        $admin = $this->admin();
+        $kecamatan = Kecamatan::create(['nama' => 'Mandalasari']);
+        Kelurahan::create(['kecamatan_id' => $kecamatan->id, 'nama' => 'Cibangkong']);
+
+        $this->actingAs($admin)
+            ->delete(route('kecamatan.destroy', $kecamatan))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        // Kecamatan dan kelurahannya tetap utuh.
+        $this->assertDatabaseHas('kecamatans', ['id' => $kecamatan->id]);
+        $this->assertDatabaseHas('kelurahans', ['nama' => 'Cibangkong']);
+    }
+
     public function test_admin_bisa_menambah_kecamatan_dan_kelurahan(): void
     {
         $admin = $this->admin();

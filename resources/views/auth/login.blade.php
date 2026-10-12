@@ -60,6 +60,12 @@
                         class="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
                     Masuk
                 </button>
+
+                <p class="text-center text-sm text-slate-500">
+                    <a href="{{ route('password.request') }}" class="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
+                        Lupa password?
+                    </a>
+                </p>
             </form>
         </div>
 

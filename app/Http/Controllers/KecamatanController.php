@@ -53,6 +53,14 @@ class KecamatanController extends Controller
 
     public function destroy(Kecamatan $kecamatan): RedirectResponse
     {
+        // Kelurahan milik kecamatan ini ikut terhapus lewat FK cascadeOnDelete
+        // bila kecamatan dihapus — dan laporan (mis. bangunan liar) yang
+        // menunjuk kelurahan tersebut kehilangan referensinya (nullOnDelete).
+        // Karena itu kecamatan yang masih punya kelurahan tidak boleh dihapus.
+        if ($kecamatan->kelurahans()->exists()) {
+            return back()->with('error', 'Kecamatan tidak bisa dihapus karena masih memiliki data kelurahan. Hapus atau pindahkan kelurahannya terlebih dahulu.');
+        }
+
         if ($kecamatan->perumahans()->exists()) {
             return back()->with('error', 'Kecamatan tidak bisa dihapus karena masih memiliki data perumahan.');
         }
