@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -60,6 +61,13 @@ class UserController extends Controller
         }
 
         $user->update($data);
+
+        // Ketika akun dinonaktifkan, cabut semua sesi aktifnya (driver: database).
+        if (! $data['is_active'] && $user->wasChanged('is_active')) {
+            DB::table(config('session.table', 'sessions'))
+                ->where('user_id', $user->id)
+                ->delete();
+        }
 
         return back()->with('success', 'Data pengguna berhasil diperbarui.');
     }
