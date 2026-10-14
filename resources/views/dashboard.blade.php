@@ -28,13 +28,28 @@
         $kondisiWarna = $kondisiPsu->keys()->map(fn ($k) => $warnaKondisi[$k] ?? '#64748b')->values();
     @endphp
 
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        @foreach ($kartu as $item)
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <span class="inline-flex rounded-md px-2 py-1 text-xs font-medium {{ $item['warna'] }}">{{ $item['label'] }}</span>
-                <p class="mt-3 text-2xl font-semibold text-slate-900">{{ $item['value'] }}</p>
-                <p class="text-xs text-slate-500">{{ $item['satuan'] }}</p>
+    <div class="rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Laporan menunggu penanganan</p>
+                <p class="mt-1 text-3xl font-semibold text-amber-900">{{ number_format($laporanStatistik['baru'], 0, ',', '.') }}</p>
+                <p class="text-xs text-amber-700">laporan baru menunggu tindak lanjut</p>
             </div>
+            <a href="{{ route('laporan.index', ['status' => 'baru']) }}"
+               class="rounded-control bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700">
+                Tangani sekarang
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        @foreach ($kartu as $item)
+            <a href="{{ route('perumahan.index') }}"
+               class="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-300 hover:shadow-card">
+                <p class="text-3xl font-semibold text-slate-900">{{ $item['value'] }}</p>
+                <p class="mt-1 text-sm font-medium text-slate-700">{{ $item['label'] }}</p>
+                <p class="text-xs text-slate-500">{{ $item['satuan'] }}</p>
+            </a>
         @endforeach
     </div>
 
@@ -128,7 +143,8 @@
             @if ($perTahun->isEmpty())
                 <p class="mt-6 text-sm text-slate-500">Belum ada data tahun selesai pembangunan.</p>
             @else
-                <div class="mt-4 h-64"><canvas id="grafik-tahun"></canvas></div>
+                <div class="mt-4 h-64"><canvas id="grafik-tahun" role="img" aria-label="Grafik batang jumlah perumahan yang selesai dibangun dan unit rumah per tahun" class="h-64 w-full"></canvas></div>
+                <p class="sr-only">Grafik menampilkan jumlah perumahan yang selesai dibangun dan jumlah unit rumah per tahun dari data terdata.</p>
             @endif
         </div>
 
@@ -139,7 +155,8 @@
                 <p class="mt-6 text-sm text-slate-500">Belum ada data kondisi PSU.</p>
             @else
                 <div class="mt-4 flex h-64 items-center">
-                    <div class="relative h-full w-1/2"><canvas id="grafik-kondisi"></canvas></div>
+                    <div class="relative h-full w-1/2"><canvas id="grafik-kondisi" role="img" aria-label="Diagram kondisi prasarana dan sarana umum"></canvas></div>
+                    <p class="sr-only">Diagram lingkaran menunjukkan jumlah PSU dengan kondisi baik, rusak ringan, dan rusak berat.</p>
                     <ul class="w-1/2 space-y-2 pl-4 text-sm">
                         @foreach ($kondisiPsu as $kondisi => $jumlah)
                             <li class="flex items-center justify-between gap-2">
@@ -163,7 +180,8 @@
             @if ($jenisPsu->isEmpty())
                 <p class="mt-6 text-sm text-slate-500">Belum ada data PSU.</p>
             @else
-                <div class="mt-4 h-56"><canvas id="grafik-jenis-psu"></canvas></div>
+                <div class="mt-4 h-56"><canvas id="grafik-jenis-psu" role="img" aria-label="Grafik jenis prasarana dan sarana umum terbanyak"></canvas></div>
+                <p class="sr-only">Grafik batang menampilkan jenis PSU dengan jumlah entri terbanyak.</p>
             @endif
         </div>
 
@@ -305,7 +323,7 @@
 
 @if ($perTahun->isNotEmpty() || $totalPsuTerdata > 0 || $jenisPsu->isNotEmpty())
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.js" integrity="sha384-4W8gMhOYqk0FPg9sAMkb3g/P2fXtzbUyDUUgMlA1EEig8z/U/13EYUjErc1H382b" crossorigin="anonymous"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const opsiDasar = { responsive: true, maintainAspectRatio: false };

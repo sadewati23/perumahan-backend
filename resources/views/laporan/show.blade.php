@@ -14,10 +14,16 @@
             @endif
         </div>
 
-        <a href="{{ route('laporan.index') }}"
-           class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-            &larr; Kembali ke Daftar
-        </a>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('laporan.cetak', $laporan) }}" target="_blank" rel="noopener"
+               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                🖨 Cetak Laporan
+            </a>
+            <a href="{{ route('laporan.index') }}"
+               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                &larr; Kembali ke Daftar
+            </a>
+        </div>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-3">
@@ -48,6 +54,15 @@
                         <div>
                             <dt class="text-xs text-slate-500">Titik / alamat kejadian</dt>
                             <dd class="text-sm font-medium text-slate-800">{{ $laporan->lokasi_teks }}</dd>
+                        </div>
+                    @endif
+                    @if ($laporan->punyaTitik())
+                        <div>
+                            <dt class="text-xs text-slate-500">Titik GPS dari pelapor</dt>
+                            <dd class="text-sm font-medium text-slate-800">
+                                {{ number_format((float) $laporan->latitude, 7, '.') }}, {{ number_format((float) $laporan->longitude, 7, '.') }}
+                                <a href="{{ $laporan->tautan_peta }}" target="_blank" rel="noopener" class="ml-1 text-indigo-600 hover:underline">buka di peta ↗</a>
+                            </dd>
                         </div>
                     @endif
                     <div>
@@ -96,10 +111,10 @@
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h2 class="text-sm font-semibold text-slate-800">
                     Foto Bukti
-                    <span class="ml-1 font-normal text-slate-500">({{ $laporan->fotos->count() }} lampiran)</span>
+                    <span class="ml-1 font-normal text-slate-500">({{ $laporan->fotosLaporan->count() }} lampiran warga)</span>
                 </h2>
 
-                @if ($laporan->fotos->isEmpty())
+                @if ($laporan->fotosLaporan->isEmpty())
                     <p class="mt-3 text-sm text-slate-500">
                         @if ($laporan->jenis === 'bangunan_liar')
                             Tidak ada foto terlampir.
@@ -109,7 +124,7 @@
                     </p>
                 @else
                     <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        @foreach ($laporan->fotos as $foto)
+                        @foreach ($laporan->fotosLaporan as $foto)
                             <a href="{{ $foto->url }}" target="_blank" rel="noopener"
                                class="group block overflow-hidden rounded-lg border border-slate-200">
                                 <img src="{{ $foto->url }}" alt="Foto bukti {{ $laporan->kode }} #{{ $loop->iteration }}"
@@ -118,6 +133,88 @@
                             </a>
                         @endforeach
                     </div>
+                @endif
+            </div>
+
+            {{-- Peringatan bila laporan sudah selesai tapi belum ada bukti hasil perbaikan. --}}
+            @if ($laporan->status === 'selesai' && $laporan->fotosPerbaikan->isEmpty())
+                <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                    Laporan sudah ditandai <strong>selesai</strong>, tetapi belum ada foto hasil perbaikan.
+                    Unggah dokumentasi hasil kerja di bawah agar arsip penanganan lengkap.
+                </div>
+            @endif
+
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 class="text-sm font-semibold text-slate-800">
+                    Foto Hasil Perbaikan
+                    <span class="ml-1 font-normal text-slate-500">({{ $laporan->fotosPerbaikan->count() }}/10)</span>
+                </h2>
+
+                @if ($laporan->status === 'ditolak')
+                    <p class="mt-3 text-sm text-slate-500">Laporan ditolak — unggahan foto hasil perbaikan tidak tersedia.</p>
+                @else
+                    @if ($laporan->fotosPerbaikan->isEmpty())
+                        <p class="mt-3 text-sm text-slate-500">Belum ada foto hasil perbaikan.</p>
+                    @else
+                        <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                            @foreach ($laporan->fotosPerbaikan as $foto)
+                                <div class="group overflow-hidden rounded-lg border border-slate-200">
+                                    <a href="{{ $foto->url }}" target="_blank" rel="noopener">
+                                        <img src="{{ $foto->url }}" alt="Foto perbaikan {{ $laporan->kode }} #{{ $loop->iteration }}"
+                                             loading="lazy"
+                                             class="h-36 w-full object-cover transition group-hover:scale-105">
+                                    </a>
+                                    <div class="flex items-start justify-between gap-2 px-2 py-2">
+                                        <p class="text-xs text-slate-600">
+                                            {{ $foto->keterangan ?? 'Tanpa keterangan' }}
+                                            @if ($foto->pengunggah)
+                                                <span class="block text-slate-400">oleh {{ $foto->pengunggah->name }}</span>
+                                            @endif
+                                        </p>
+                                        <button type="button" data-confirm="Hapus foto hasil perbaikan ini?\nFile akan dihapus permanen dari penyimpanan."
+                                                data-action="{{ route('laporan.foto-perbaikan.destroy', [$laporan, $foto]) }}"
+                                                class="shrink-0 rounded-lg border border-rose-300 px-2 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- Form unggah multi-foto hasil perbaikan. --}}
+                    <form action="{{ route('laporan.foto-perbaikan.store', $laporan) }}" method="POST" enctype="multipart/form-data"
+                          class="mt-4 space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                        @csrf
+                        <div>
+                            <label for="foto_perbaikan" class="mb-1.5 block text-sm font-medium text-slate-700">
+                                Tambah Foto Hasil Perbaikan <span class="font-normal text-slate-500">(maks. 5 foto, 5 MB / foto)</span>
+                            </label>
+                            <input type="file" id="foto_perbaikan" name="foto_perbaikan[]" accept=".jpg,.jpeg,.png,.webp" multiple required
+                                   class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-indigo-700">
+                            @error('foto_perbaikan.*')
+                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            @enderror
+                            @error('foto_perbaikan')
+                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="keterangan_foto" class="mb-1.5 block text-sm font-medium text-slate-700">
+                                Keterangan foto <span class="font-normal text-slate-500">(opsional, berlaku untuk semua foto di unggahan ini)</span>
+                            </label>
+                            <input type="text" id="keterangan_foto" name="keterangan" value="{{ old('keterangan') }}" maxlength="255"
+                                   placeholder="Contoh: PJU blok C sudah diganti tegangan baru"
+                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                            @error('keterangan')
+                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <button type="submit"
+                                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
+                            Unggah Foto Perbaikan
+                        </button>
+                    </form>
                 @endif
             </div>
         </div>
@@ -211,3 +308,38 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pola konfirmasi hapus yang sama dengan halaman daftar: tombol memuat
+            // data-confirm + data-action, lalu form DELETE dibuat dinamis.
+            document.querySelectorAll('[data-confirm]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    if (!window.confirm(button.dataset.confirm)) {
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = button.dataset.action;
+
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
+
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'DELETE';
+                    form.appendChild(method);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+            });
+        });
+    </script>
+@endpush

@@ -12,6 +12,18 @@
             'selesai' => ['label' => 'Selesai', 'warna' => 'bg-emerald-100 text-emerald-800 ring-emerald-600/20'],
             'ditolak' => ['label' => 'Ditolak', 'warna' => 'bg-rose-100 text-rose-800 ring-rose-600/20'],
         ];
+
+        $activeFilters = collect($filters)->filter(fn ($v) => filled($v));
+        $hasFilter = $activeFilters->isNotEmpty();
+        $resultCount = $laporans->total();
+
+        $filterLabels = [
+            'q' => 'Pencarian',
+            'jenis' => 'Jenis',
+            'status' => 'Status',
+            'tingkat' => 'Tingkat',
+            'perumahan_id' => 'Perumahan',
+        ];
     @endphp
 
     <div class="flex flex-wrap gap-3">
@@ -27,8 +39,13 @@
         @endforeach
     </div>
 
-    <div class="mt-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <form method="GET" action="{{ route('laporan.index') }}" class="flex flex-wrap items-end gap-3">
+    <details class="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm" open>
+        <summary class="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-700 md:cursor-default md:after:hidden">
+            Filter laporan
+            <span class="text-xs font-normal text-slate-500 md:hidden">ketuk untuk buka/tutup</span>
+        </summary>
+
+        <form method="GET" action="{{ route('laporan.index') }}" class="mt-3 flex flex-wrap items-end gap-3">
             @if ($filters['status'] ?? '')
                 <input type="hidden" name="status" value="{{ $filters['status'] }}">
             @endif
@@ -73,21 +90,127 @@
                 </select>
             </div>
 
-            <button type="submit"
-                    class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
-                Terapkan
-            </button>
-            <a href="{{ route('laporan.index') }}"
-               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                Reset
-            </a>
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
+                    Terapkan
+                </button>
+                <a href="{{ route('laporan.index') }}"
+                   class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                    Reset
+                </a>
+            </div>
         </form>
+    </details>
+
+    @if ($hasFilter)
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+            @foreach ($activeFilters as $key => $value)
+                @php
+                    if ($key === 'perumahan_id') {
+                        $labelNilai = optional($perumahans->firstWhere('id', $value))->nama ?? $value;
+                    } elseif ($key === 'jenis') {
+                        $labelNilai = \App\Models\Laporan::JENIS[$value] ?? $value;
+                    } elseif ($key === 'status') {
+                        $labelNilai = \App\Models\Laporan::STATUS[$value] ?? $value;
+                    } elseif ($key === 'tingkat') {
+                        $labelNilai = \App\Models\Laporan::TINGKAT[$value] ?? $value;
+                    } else {
+                        $labelNilai = $value;
+                    }
+                @endphp
+                <a href="{{ route('laporan.index', $activeFilters->except($key)->all()) }}"
+                   class="inline-flex items-center gap-1 rounded-pill bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 transition hover:bg-brand-100">
+                    {{ $filterLabels[$key] ?? $key }}: {{ $labelNilai }}
+                    <span aria-hidden="true">&times;</span>
+                </a>
+            @endforeach
+            <a href="{{ route('laporan.index') }}" class="text-xs font-medium text-slate-500 hover:text-slate-800">Hapus semua filter</a>
+        </div>
+    @endif
+
+    <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+        <p>
+            Menampilkan <span class="font-semibold text-slate-900">{{ $laporans->firstItem() ?? 0 }}</span>–<span class="font-semibold text-slate-900">{{ $laporans->lastItem() ?? 0 }}</span>
+            dari <span class="font-semibold text-slate-900">{{ $resultCount }}</span> data
+        </p>
     </div>
 
-    <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
+    {{-- Cetak rekap membawa seluruh filter aktif agar hasil cetak sama dengan daftar di layar. --}}
+    <div class="mt-2 flex justify-end">
+        <x-button href="{{ route('laporan.cetak-rekap', request()->query()) }}" variant="secondary" size="sm">🖨 Cetak Rekap</x-button>
+    </div>
+
+    {{-- Daftar kartu untuk layar kecil --}}
+    <div class="mt-4 space-y-3 md:hidden">
+        @forelse ($laporans as $laporan)
+            <x-card>
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <a href="{{ route('laporan.show', $laporan) }}" class="font-mono text-xs font-semibold text-slate-700 hover:text-brand-700">{{ $laporan->kode }}</a>
+                        <p class="mt-1 font-medium text-slate-800">{{ $laporan->judul }}</p>
+                        <p class="mt-0.5 text-xs text-slate-500">{{ $laporan->lokasi_ringkas }}</p>
+                    </div>
+                    <x-badge :tone="match ($laporan->status) { 'selesai' => 'success', 'ditolak' => 'danger', 'diproses' => 'info', default => 'warning' }" size="sm">
+                        {{ $laporan->label_status }}
+                    </x-badge>
+                </div>
+
+                <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                        <dt class="text-xs text-slate-500">Jenis</dt>
+                        <dd class="mt-0.5">
+                            <x-badge :tone="match ($laporan->jenis) { 'pengaduan' => 'info', 'bangunan_liar' => 'danger', default => 'warning' }" size="sm">
+                                {{ $laporan->label_jenis }}
+                            </x-badge>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-500">Tingkat</dt>
+                        <dd class="mt-0.5 text-slate-700">{{ $laporan->label_tingkat ?: '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-500">Pelapor</dt>
+                        <dd class="mt-0.5 text-slate-700">{{ $laporan->nama_pelapor }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-500">Tanggal</dt>
+                        <dd class="mt-0.5 text-xs text-slate-500">{{ $laporan->created_at->translatedFormat('d M Y, H:i') }}</dd>
+                    </div>
+                </dl>
+
+                @if ($laporan->deskripsi)
+                    <p class="mt-3 text-xs text-slate-600">{{ $laporan->deskripsi }}</p>
+                @endif
+
+                @if ($laporan->fotosLaporan->isNotEmpty())
+                    <a href="{{ route('laporan.show', $laporan) }}" class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline">
+                        {{ $laporan->fotosLaporan->count() }} foto bukti
+                    </a>
+                @endif
+
+                <div class="mt-3 border-t border-slate-100 pt-3 text-right">
+                    <button type="button"
+                            data-confirm="Hapus laporan {{ $laporan->kode }} ini?&#10;Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
+                            data-action="{{ route('laporan.destroy', $laporan) }}"
+                            class="text-xs font-medium text-danger-600 hover:text-danger-700">
+                        Hapus
+                    </button>
+                </div>
+            </x-card>
+        @empty
+            <x-empty-state
+                title="{{ $hasFilter ? 'Tidak ada laporan yang cocok' : 'Belum ada laporan' }}"
+                description="{{ $hasFilter ? 'Ubah atau hapus filter untuk melihat laporan lain.' : 'Laporan warga yang masuk akan tampil di sini.' }}"
+                iconPath="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        @endforelse
+    </div>
+
+    {{-- Tabel untuk layar sedang ke atas --}}
+    <div class="mt-4 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:block">
+        <div class="no-scrollbar overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <thead class="sticky top-0 z-10 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="whitespace-nowrap px-4 py-3">Kode</th>
                         <th class="whitespace-nowrap px-4 py-3">Laporan</th>
@@ -98,7 +221,7 @@
                         <th class="whitespace-nowrap px-4 py-3">Detail</th>
                         <th class="whitespace-nowrap px-4 py-3">Status</th>
                         <th class="whitespace-nowrap px-4 py-3">Tanggal</th>
-                        <th class="whitespace-nowrap px-4 py-3"></th>
+                        <th class="whitespace-nowrap px-4 py-3 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -110,7 +233,9 @@
                                 <p class="mt-0.5 text-xs text-slate-500">{{ $laporan->lokasi_ringkas }}</p>
                             </td>
                             <td class="whitespace-nowrap px-4 py-3">
-                                <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_jenis }}">{{ $laporan->label_jenis }}</span>
+                                <x-badge :tone="match ($laporan->jenis) { 'pengaduan' => 'info', 'bangunan_liar' => 'danger', default => 'warning' }" size="sm">
+                                    {{ $laporan->label_jenis }}
+                                </x-badge>
                             </td>
                             <td class="px-4 py-3">
                                 <p class="text-slate-700">{{ $laporan->nama_pelapor }}</p>
@@ -118,7 +243,7 @@
                             </td>
                             <td class="whitespace-nowrap px-4 py-3">
                                 @if ($laporan->label_tingkat)
-                                    <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_tingkat }}">{{ $laporan->label_tingkat }}</span>
+                                    <x-badge tone="warning" size="sm">{{ $laporan->label_tingkat }}</x-badge>
                                 @else
                                     <span class="text-xs text-slate-400">-</span>
                                 @endif
@@ -131,79 +256,48 @@
                                     <p class="mt-1 text-slate-500">Kejadian: {{ $laporan->label_tanggal_kejadian }}</p>
                                 @endif
 
-                                @if ($laporan->fotos->isNotEmpty())
+                                @if ($laporan->fotosLaporan->isNotEmpty())
                                     <a href="{{ route('laporan.show', $laporan) }}"
                                        class="mt-1 inline-flex items-center gap-1 font-medium text-indigo-600 hover:underline">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0021.75 19.5V4.5A1.5 1.5 0 0020.25 3H3.75A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21z"/>
-                                        </svg>
-                                        {{ $laporan->fotos->count() }} foto bukti
+                                        {{ $laporan->fotosLaporan->count() }} foto bukti
                                     </a>
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-4 py-3">
-                                <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_status }}">{{ $laporan->label_status }}</span>
+                                <x-badge :tone="match ($laporan->status) { 'selesai' => 'success', 'ditolak' => 'danger', 'diproses' => 'info', default => 'warning' }" size="sm">
+                                    {{ $laporan->label_status }}
+                                </x-badge>
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-500">
                                 {{ $laporan->created_at->translatedFormat('d M Y, H:i') }}
-                            </td>                        <td class="whitespace-nowrap px-4 py-3 text-right">
-                            <button type="button"
-                                    data-confirm="Hapus laporan {{ $laporan->kode }} ini?
-                                                    Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
-                                    data-action="{{ route('laporan.destroy', $laporan) }}"
-                                    class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                Hapus
-                            </button>
-                        </td>
-                    </tr>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-right">
+                                <button type="button"
+                                        data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
+                                        data-action="{{ route('laporan.destroy', $laporan) }}"
+                                        class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="px-4 py-10 text-center text-sm text-slate-500">
-                                Belum ada laporan @if ($filters['status'] ?? $filters['q'] ?? $filters['perumahan_id'] ?? $filters['tingkat'] ?? $filters['jenis'] ?? null) yang cocok dengan filter @endif .
+                            <td colspan="10" class="p-4">
+                                <x-empty-state
+                                    title="{{ $hasFilter ? 'Tidak ada laporan yang cocok' : 'Belum ada laporan' }}"
+                                    description="{{ $hasFilter ? 'Ubah atau hapus filter untuk melihat laporan lain.' : 'Laporan warga yang masuk akan tampil di sini.' }}"
+                                    iconPath="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-
-        @if ($laporans->hasPages())
-            <div class="border-t border-slate-100 px-4 py-3">
-                {{ $laporans->links() }}
-            </div>
-        @endif
     </div>
+
+    <div class="mt-4">
+        {{ $laporans->links() }}
+    </div>
+
+    {{-- inline script remove; confirm dialog handled globally --}}
 @endsection
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-confirm]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    if (!window.confirm(button.dataset.confirm)) {
-                        return;
-                    }
-
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = button.dataset.action;
-
-                    const csrf = document.createElement('input');
-                    csrf.type = 'hidden';
-                    csrf.name = '_token';
-                    csrf.value = '{{ csrf_token() }}';
-                    form.appendChild(csrf);
-
-                    const method = document.createElement('input');
-                    method.type = 'hidden';
-                    method.name = '_method';
-                    method.value = 'DELETE';
-                    form.appendChild(method);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                });
-            });
-        });
-    </script>
-@endpush

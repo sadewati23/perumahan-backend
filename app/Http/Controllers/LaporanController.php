@@ -7,9 +7,11 @@ use App\Models\Kelurahan;
 use App\Models\Laporan;
 use App\Models\Perumahan;
 use App\Models\PsuPerumahan;
+use App\Support\FotoBersih;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class LaporanController extends Controller
@@ -59,24 +61,46 @@ class LaporanController extends Controller
      */
     public function store(StoreLaporanRequest $request): RedirectResponse
     {
+        // Honeypot: field palsu di luar layar hanya diisi bot. Balas layanan
+        // "sukses" tanpa menyimpan apa pun agar bot tidak tahu bahwa ia lolos.
+        if ($request->filled('jawaban_cadangan')) {
+            return redirect()->route('lapor.create')->with('success', 'Laporan berhasil dikirim.');
+        }
+
         $data = $request->dataLaporan();
 
-        $laporan = DB::transaction(function () use ($request, $data): Laporan {
-            $laporan = Laporan::create($data + [
-                'kode' => Laporan::buatKode($data['jenis']),
-                'status' => 'baru',
-            ]);
+        // Re-encode foto di LUAR transaksi: operasi berat (decode/encode GD)
+        // tidak dipanjangkan di dalam transaksi DB. Path sudah tersimpan di
+        // disk sejak awal, sehingga bila transaksi gagal tinggal dibersihkan.
+        $paths = [];
 
+        try {
             foreach ((array) $request->file('foto', []) as $foto) {
                 if ($foto && $foto->isValid()) {
-                    $laporan->fotos()->create([
-                        'path' => $foto->store('laporan', 'public'),
-                    ]);
+                    $paths[] = FotoBersih::simpan($foto);
                 }
             }
 
-            return $laporan;
-        });
+            $laporan = DB::transaction(function () use ($data, $paths): Laporan {
+                $laporan = Laporan::create($data + [
+                    'kode' => Laporan::buatKode($data['jenis']),
+                    'status' => 'baru',
+                ]);
+
+                foreach ($paths as $path) {
+                    $laporan->fotos()->create(['path' => $path]);
+                }
+
+                return $laporan;
+            });
+        } catch (\Throwable $e) {
+            // Jangan tinggalkan file yatim di disk bila ada langkah yang gagal.
+            if ($paths !== []) {
+                Storage::disk('public')->delete($paths);
+            }
+
+            throw $e;
+        }
 
         return redirect()
             ->route('lapor.create')

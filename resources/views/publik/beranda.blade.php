@@ -4,7 +4,7 @@
 @section('description', 'Portal informasi data perumahan: lokasi, luasan lahan, jumlah unit, RTH, KDB/KDH, PSU, dan status subsidi atau komersil.')
 
 @push('head')
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 @endpush
 
 @section('content')
@@ -23,24 +23,22 @@
                 tahun pembangunan, tipe unit, dan status subsidi/komersil.
             </p>
 
-            <form method="GET" action="{{ route('publik.perumahan.index') }}" class="mt-8 flex max-w-2xl flex-col gap-2 sm:flex-row">
-                <input type="text" name="q" placeholder="Cari nama perumahan, pengembang, kelurahan, atau kecamatan..."
-                       class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder-slate-300 outline-none backdrop-blur focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30">
-                <button type="submit" class="rounded-lg bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400">
-                    Cari Perumahan
-                </button>
-            </form>
-
-            <div class="mt-6 flex flex-wrap gap-3 text-sm">
-                <a href="{{ route('publik.peta') }}" class="rounded-lg border border-white/20 px-4 py-2 font-medium text-white transition hover:bg-white/10">
-                    Lihat Peta Sebaran
+            <div class="mt-8 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center">
+                <a href="{{ route('lapor.create') }}"
+                   class="rounded-lg bg-rose-500 px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-rose-400">
+                    Lapor Kerusakan / Pengaduan
                 </a>
-                <a href="{{ route('publik.perumahan.index', ['status' => 'subsidi']) }}" class="rounded-lg border border-white/20 px-4 py-2 font-medium text-white transition hover:bg-white/10">
-                    Perumahan Subsidi
+                <a href="{{ route('publik.peta') }}"
+                   class="rounded-lg border border-white/20 px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10">
+                    Lihat Peta
                 </a>
-                <a href="{{ route('publik.perumahan.index', ['status' => 'komersil']) }}" class="rounded-lg border border-white/20 px-4 py-2 font-medium text-white transition hover:bg-white/10">
-                    Perumahan Komersil
-                </a>
+                <form method="GET" action="{{ route('publik.perumahan.index') }}" class="flex flex-1 gap-2">
+                    <input type="text" name="q" placeholder="Cari nama perumahan..."
+                           class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder-slate-300 outline-none backdrop-blur focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30">
+                    <button type="submit" class="rounded-lg bg-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400">
+                        Cari
+                    </button>
+                </form>
             </div>
         </div>
     </section>
@@ -173,7 +171,7 @@
 @endsection
 
 @push('scripts')
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const el = document.getElementById('peta-beranda');

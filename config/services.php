@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // Proteksi form lapor publik (nonaktif otomatis bila secret kosong).
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
 ];

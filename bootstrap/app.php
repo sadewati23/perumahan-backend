@@ -26,14 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Hanya IP proxy sebenarnya yang boleh memengaruhi $request->ip(),
-        // scheme, dan host — dipetakan dari env TRUSTED_PROXIES.
-        $trustedProxies = array_values(array_filter(array_map(
-            fn (string $ip) => trim($ip),
-            explode(',', (string) env('TRUSTED_PROXIES', '')),
-        )));
-
-        $middleware->trustProxies(at: $trustedProxies);
+        // Daftar proxy terpercaya TIDAK dibaca dari env() di sini, karena
+        // callback ini dieksekusi saat kernel di-resolve — masih sebelum .env
+        // di-bootstrap (env() selalu null). TrustProxies sendiri yang
+        // memanggil config('trustedproxy.proxies') pada saat request diproses,
+        // sehingga cukup diisi lewat config/trustedproxy.php.
 
         $middleware->alias([
             'role'   => \App\Http\Middleware\EnsureUserHasRole::class,

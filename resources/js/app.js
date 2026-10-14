@@ -1,4 +1,10 @@
 import './bootstrap';
+import { initFlashMessages } from './flash';
+import { initConfirmDialog } from './confirm-dialog';
+import { initSubmitGuard } from './form-submit';
+import { initFormFields } from './form-fields';
+import { initFotoUpload } from './foto-upload';
+import { initCopyTicket } from './copy-ticket';
 
 /**
  * Baris dinamis (PSU & tipe unit) + helper kecil untuk halaman perumahan.
@@ -13,9 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.toggle('-translate-x-full', !open);
         backdrop?.classList.toggle('hidden', !open);
         document.body.classList.toggle('overflow-hidden', open);
+        document.querySelectorAll('[data-toggle-sidebar]').forEach((btn) => {
+            btn.setAttribute('aria-expanded', String(open));
+        });
     };
 
     document.querySelectorAll('[data-toggle-sidebar]').forEach((btn) => {
+        btn.setAttribute('aria-expanded', 'false');
         btn.addEventListener('click', () => setSidebar(sidebar?.classList.contains('-translate-x-full')));
     });
     backdrop?.addEventListener('click', () => setSidebar(false));
@@ -82,12 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Konfirmasi hapus ---
-    document.querySelectorAll('form[data-confirm]').forEach((form) => {
-        form.addEventListener('submit', (event) => {
-            if (!window.confirm(form.dataset.confirm)) {
-                event.preventDefault();
-            }
-        });
-    });
+    // --- Fondasi UI/UX: flash, dialog konfirmasi, anti klik ganda ---
+    initFlashMessages();
+    initConfirmDialog();
+    initSubmitGuard();
+
+    // --- Fase 2 (formulir): aria field, counter, toggle password, guard belum disimpan, unggah foto ---
+    initFormFields();
+    initFotoUpload();
+    initCopyTicket();
 });

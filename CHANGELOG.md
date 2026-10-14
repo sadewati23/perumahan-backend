@@ -21,6 +21,7 @@ Dokumentasi riwayat pekerjaan pada proyek ini, mencatat setiap perubahan fitur y
 | 2026-10-06 | Fitur lupa password | Admin/petugas yang lupa password bisa meminta tautan reset via email dengan token sekali pakai (tabel `password_reset_tokens` dipulihkan) |
 | 2026-10-06 | Perbaikan 4 temuan review | Throttle login anti brute-force, sinkronisasi PSU/tipe unit tanpa delete-all, guard hapus kecamatan berkelurahan, dan pembersihan route API |
 | 2026-10-06 | Perbaikan Stored XSS popup peta | Nilai perumahan (nama/alamat/status) yang diinterpolasi ke HTML popup Leaflet kini di-escape di 3 halaman peta (penemuan user) |
+| 2026-10-12 | SRI pada CDN Leaflet & Chart.js | Tag CDN di 8 view kini pakai `integrity` + `crossorigin` agar browser memverifikasi checksum file eksternal (penemuan user) |
 
 ---
 
@@ -383,6 +384,40 @@ Catatan: interpolasi angka (`p.unit`, `p.luas_lahan`, `p.kdb`, `p.kdh`) sudah am
 
 ---
 
+## 14. Subresource Integrity (SRI) untuk Aset CDN (2026-10-12)
+
+**Status: selesai (belum di-commit).** Temuan dari user — script CDN dimuat tanpa atribut `integrity`, sehingga browser tidak memverifikasi integritas file yang dikirim CDN (risiko kebocoran konten bila CDN disusupi/ter-combine dengan versi yang disuntik).
+
+Permintaan: tambahkan `integrity` + `crossorigin`, atau bundle lewat Vite. Dipilih **SRI** karena versi sudah dipin (`leaflet@1.9.4`, `chart.js@4.4.9`) sehingga hash-nya stabil — tanpa mengubah pipeline build `npm run build`.
+
+### Perubahan
+
+| Area | Rincian |
+|---|---|
+| `perumahan/{create,edit,show,peta}.blade.php` | Tag `leaflet.css` & `leaflet.js` dari unpkg diberi `integrity="sha384-..."` + `crossorigin="anonymous"` |
+| `publik/{beranda,show,peta}.blade.php` | Sama — tag Leaflet identik dengan halaman admin |
+| `dashboard.blade.php` | Tag `chart.umd.js` 4.4.9 dari jsDelivr diberi `integrity="sha384-..."` + `crossorigin="anonymous"` (foll-up: `chart.umd.min.js` bukan file asli paket npm — jsDelivr meminify ulang otomatis sehingga hash-nya tak bisa diverifikasi; `chart.umd.js` sudah minified) |
+| `tests/Feature/HalamanTest.php` | Test regresi `test_script_cdn_memakai_sri_integrity_dan_crossorigin` — memeriksa setiap tag `<script>/<link>` ke unpkg/jsDelivr di 5 halaman admin + 3 halaman publik wajib punya `integrity="sha384-..."` dan `crossorigin="anonymous"`, plus guard agar test gagal bila tag CDN-nya sendiri hilang |
+| `README.md` | Catatan teknis: SRI aktif + cara menghitung ulang hash saat naik versi |
+
+Hash dihitung dari byte yang benar-benar disajikan CDN (bukan ditulis manual). Folll-up 2026-10-13: tag Leaflet dipakai `integrity="sha256-..."` (hash resmi dari docs Leaflet 1.9.4), Chart.js dipakai file asli `chart.umd.js` + hash sha384 yang terverifikasi:
+
+```
+leaflet.js   sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=
+leaflet.css  sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=
+chart.umd.js sha384-4W8gMhOYqk0FPg9sAMkb3g/P2fXtzbUyDUUgMlA1EEig8z/U/13EYUjErc1H382b
+```
+
+### Verifikasi
+- Re-download 3 file dari CDN + `openssl dgst -sha384` → cocok persis dengan hash yang tertanam di view ✅
+- Header CORS: unpkg & jsDelivr sama-sama mengirim `Access-Control-Allow-Origin: *` (wajib ada karena `crossorigin="anonymous"`) ✅
+- Chrome headless dengan tag persis dari view: `typeof L = object`, `typeof Chart = function`, `L.map()` sukses, tanpa pelanggaran SRI ✅
+- **Kontrol negatif**: hash sengaja dipalsukan → browser memblokir Leaflet (`L is not defined`) — atribut SRI aktif, bukan hiasan ✅
+- E2E login admin sungguhan (Chrome + server `php artisan serve`): dashboard memuat Chart.js 200 & 3 chart instance terpasang (`grafik-tahun`, `grafik-kondisi`, `grafik-jenis-psu`); `/admin/perumahan/peta` memuat Leaflet 1.9.4 & peta aktif; 0 console error, 0 request gagal ✅
+- 67 test lulus (383 assertions) ✅ — termasuk test regresi baru (46 assertion)
+
+---
+
 ## Struktur Akhir `tipe_units`
 
 ```
@@ -403,3 +438,11 @@ tipe_units
 |---|---|---|
 | admin@perumahan.test | password | Administrator |
 | petugas@perumahan.test | password | Petugas |
+## 2026-10-14 — Perbaikan UI/UX bertahap (Fase 1–5)
+
+- Fondasi: token @theme, komponen Blade, flash toast, modal confirm native, guard submit, aksesibilitas dasar, skip link, welcome.blade.php dihapus.
+- Formulir: x-field di seluruh form, section/action bar, counter karakter, toggle password, upload foto dengan pratinjau.
+- Daftar & tabel: responsif kartu/mobile + tabel sticky header, filter collapsible + chip aktif + reset + jumlah hasil, pagination Tailwind Indonesia, empty-state terdiferensiasi.
+- Admin & dashboard: topbar breadcrumb + menu pengguna, sidebar berkelompok, KPI dashboard + panel laporan menunggu penanganan, chart aksesibel.
+- Publik: hero CTA lapor/peta, lapor/form kartu radio, halaman sukses dengan salin tiket, placeholder gambar, bobot aksesibilitas.
+- Audit CSS/JS lintas halaman; npm run build dan php artisan test lulus.

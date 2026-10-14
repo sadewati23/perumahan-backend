@@ -6,6 +6,7 @@ use App\Http\Controllers\KecamatanController;
 use App\Http\Controllers\KelurahanController;
 use App\Http\Controllers\LaporanAdminController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\LaporanPerbaikanController;
 use App\Http\Controllers\PerumahanController;
 use App\Http\Controllers\PublikController;
 use App\Http\Controllers\UserController;
@@ -24,7 +25,7 @@ Route::get('/peta/geojson', [PublikController::class, 'geojson'])->name('publik.
 
 // Laporan kerusakan sarana-prasarana dari publik (tanpa login)
 Route::get('/lapor', [LaporanController::class, 'create'])->name('lapor.create');
-Route::post('/lapor', [LaporanController::class, 'store'])->middleware('throttle:10,1')->name('lapor.store');
+Route::post('/lapor', [LaporanController::class, 'store'])->middleware('throttle:lapor')->name('lapor.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +62,16 @@ Route::middleware(['auth', 'active'])->prefix('admin')->group(function () {
 
     // Laporan kerusakan sarana-prasarana
     Route::get('/laporan', [LaporanAdminController::class, 'index'])->name('laporan.index');
+
+    // Rute statis /laporan/... didaftarkan SEBELUM rute parametrik /laporan/{laporan}
+    // agar tidak tertangkap sebagai parameter {laporan}.
+    Route::get('/laporan/cetak-rekap', [LaporanAdminController::class, 'cetakRekap'])->name('laporan.cetak-rekap');
+    Route::get('/laporan/{laporan}/cetak', [LaporanAdminController::class, 'cetak'])->name('laporan.cetak');
+
+    // Foto hasil perbaikan petugas (dipisah dari foto bukti warga).
+    Route::post('/laporan/{laporan}/foto-perbaikan', [LaporanPerbaikanController::class, 'store'])->name('laporan.foto-perbaikan.store');
+    Route::delete('/laporan/{laporan}/foto-perbaikan/{foto}', [LaporanPerbaikanController::class, 'destroy'])->name('laporan.foto-perbaikan.destroy');
+
     Route::get('/laporan/{laporan}', [LaporanAdminController::class, 'show'])->name('laporan.show');
     Route::put('/laporan/{laporan}', [LaporanAdminController::class, 'update'])->name('laporan.update');
     Route::delete('/laporan/{laporan}', [LaporanAdminController::class, 'destroy'])->name('laporan.destroy');

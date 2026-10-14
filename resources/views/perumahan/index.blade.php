@@ -22,7 +22,12 @@
         </div>
     </div>
 
-    <form method="GET" class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <details class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm" open>
+        <summary class="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-700 md:cursor-default">
+            Filter perumahan
+            <span class="text-xs font-normal text-slate-500 md:hidden">ketuk untuk buka/tutup</span>
+        </summary>
+        <form method="GET" class="mt-3">
         <div class="grid gap-3 md:grid-cols-3">
             <div class="md:col-span-2">
                 <label class="mb-1 block text-xs font-medium text-slate-600">Pencarian</label>
@@ -65,7 +70,41 @@
                 Reset
             </a>
         </div>
-    </form>
+        </form>
+    </details>
+
+    @php
+        $activePerumahanFilters = collect($filters)->filter(fn ($v) => filled($v));
+    @endphp
+
+    @if ($activePerumahanFilters->isNotEmpty())
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+            @foreach ($activePerumahanFilters as $key => $value)
+                @php
+                    if ($key === 'kecamatan_id') {
+                        $labelNilai = optional($kecamatans->firstWhere('id', $value))->nama ?? $value;
+                    } elseif ($key === 'status') {
+                        $labelNilai = \App\Models\Perumahan::STATUS[$value] ?? $value;
+                    } elseif ($key === 'tahun') {
+                        $labelNilai = $value;
+                    } else {
+                        $labelNilai = $value;
+                    }
+                @endphp
+                <a href="{{ route('perumahan.index', $activePerumahanFilters->except($key)->all()) }}"
+                   class="inline-flex items-center gap-1 rounded-pill bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 transition hover:bg-brand-100">
+                    {{ ucfirst(str_replace('_', ' ', $key)) }}: {{ $labelNilai }}
+                    <span aria-hidden="true">&times;</span>
+                </a>
+            @endforeach
+            <a href="{{ route('perumahan.index') }}" class="text-xs font-medium text-slate-500 hover:text-slate-800">Hapus semua filter</a>
+        </div>
+    @endif
+
+    <div class="mb-4 text-sm text-slate-600">
+        Menampilkan <span class="font-semibold text-slate-900">{{ $perumahans->firstItem() ?? 0 }}</span>–<span class="font-semibold text-slate-900">{{ $perumahans->lastItem() ?? 0 }}</span>
+        dari <span class="font-semibold text-slate-900">{{ $perumahans->total() }}</span> data
+    </div>
 
     {{-- Tampilan kartu untuk layar kecil (HP) --}}
     <div class="space-y-3 md:hidden">
@@ -78,9 +117,9 @@
                         </a>
                         <p class="truncate text-xs text-slate-500">{{ $perumahan->pengembang ?: 'Pengembang belum diisi' }}</p>
                     </div>
-                    <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->badge_status }}">
+                    <x-badge :tone="$perumahan->status === 'subsidi' ? 'success' : 'primary'" size="sm">
                         {{ $perumahan->label_status }}
-                    </span>
+                    </x-badge>
                 </div>
 
                 <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
@@ -144,9 +183,9 @@
                 </div>
             </div>
         @empty
-            <div class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-                Belum ada data perumahan yang cocok dengan pencarian.
-            </div>
+            <x-empty-state
+                title="{{ $activePerumahanFilters->isNotEmpty() ? 'Tidak ada perumahan yang cocok' : 'Belum ada data perumahan' }}"
+                description="{{ $activePerumahanFilters->isNotEmpty() ? 'Ubah atau hapus filter untuk melihat data lain.' : 'Tambahkan perumahan pertama melalui tombol di atas.' }}" />
         @endforelse
     </div>
 
@@ -154,7 +193,7 @@
     <div class="hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:block">
         <div class="no-scrollbar overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <thead class="sticky top-0 z-10 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="px-4 py-3">Perumahan</th>
                         <th class="px-4 py-3">Lokasi (Kel./Kec. &middot; RT/RW)</th>
@@ -204,9 +243,9 @@
                                 <p class="text-xs text-slate-500">&rarr; {{ $perumahan->tahun_selesai ?: '-' }}</p>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->badge_status }}">
+                                <x-badge :tone="$perumahan->status === 'subsidi' ? 'success' : 'primary'" size="sm">
                                     {{ $perumahan->label_status }}
-                                </span>
+                                </x-badge>
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-end gap-2">
@@ -237,8 +276,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-10 text-center text-slate-500">
-                                Belum ada data perumahan yang cocok dengan pencarian.
+                            <td colspan="9" class="p-4">
+                                <x-empty-state
+                                    title="{{ $activePerumahanFilters->isNotEmpty() ? 'Tidak ada perumahan yang cocok' : 'Belum ada data perumahan' }}"
+                                    description="{{ $activePerumahanFilters->isNotEmpty() ? 'Ubah atau hapus filter untuk melihat data lain.' : 'Tambahkan perumahan pertama melalui tombol di atas.' }}" />
                             </td>
                         </tr>
                     @endforelse

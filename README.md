@@ -85,6 +85,7 @@ Mencakup autentikasi, hak akses role, CRUD perumahan, validasi rentang tahun, pe
 
 - Peta memakai Leaflet 1.9.4 dari CDN (Unpkg) dan tile OpenStreetMap, sehingga browser perlu akses internet.
 - Grafik dashboard memakai Chart.js 4 dari CDN (jsDelivr).
+- Kedua CDN memakai **Subresource Integrity** (`integrity="sha256/sha384-..."` + `crossorigin="anonymous"`), jadi file yang dimodifikasi pihak ketiga akan ditolak browser. Saat menaikkan versi Leaflet/Chart.js, hash harus dihitung ulang: `curl -sSL <url> | openssl dgst -sha384 -binary | openssl base64 -A` (Chart.js: pakai file asli `chart.umd.js`, bukan `chart.umd.min.js` karena minify ulang otomatis jsDelivr membuat hash tak bisa divalidasi).
 - Filter pencarian publik dan admin memakai scope yang sama (`Perumahan::filter()`), jadi hasil pencarian konsisten.
 - Kolom harga pada tipe unit telah dihapus sepenuhnya dari fitur (form, filter, tampilan, dan kolom database).
 - Endpoint GeoJSON tersedia di publik (`/peta/geojson`) maupun admin (`/admin/perumahan/geojson`).

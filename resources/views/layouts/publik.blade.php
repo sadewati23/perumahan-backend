@@ -13,6 +13,12 @@
     @stack('head')
 </head>
 <body class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+    {{-- Skip link untuk navigasi keyboard --}}
+    <a href="#main"
+       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg">
+        Lewati ke konten utama
+    </a>
+
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 lg:px-8">
             <a href="{{ route('publik.beranda') }}" class="flex min-w-0 items-center gap-3">
@@ -23,7 +29,7 @@
                 </span>
             </a>
 
-            <nav class="hidden items-center gap-1 md:flex">
+            <nav class="hidden items-center gap-1 md:flex" aria-label="Menu utama">
                 @php
                     $menu = [
                         ['label' => 'Beranda', 'route' => 'publik.beranda', 'active' => 'publik.beranda'],
@@ -36,6 +42,7 @@
                 @foreach ($menu as $item)
                     @php $aktif = request()->routeIs($item['active']); @endphp
                     <a href="{{ route($item['route']) }}"
+                       @if ($aktif) aria-current="page" @endif
                        class="rounded-lg px-3 py-2 text-sm font-medium transition {{ $aktif ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
                         {{ $item['label'] }}
                     </a>
@@ -48,10 +55,11 @@
             </a>
         </div>
 
-        <nav class="no-scrollbar flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden">
+        <nav class="no-scrollbar flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden" aria-label="Menu utama">
             @foreach ($menu as $item)
                 @php $aktif = request()->routeIs($item['active']); @endphp
                 <a href="{{ route($item['route']) }}"
+                   @if ($aktif) aria-current="page" @endif
                    class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition {{ $aktif ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600' }}">
                     {{ $item['label'] }}
                 </a>
@@ -59,7 +67,23 @@
         </nav>
     </header>
 
-    <main class="flex-1">
+    <main id="main" class="flex-1">
+        @if (session('success'))
+            <div class="mx-auto max-w-7xl px-4 pt-4 lg:px-8">
+                <x-flash-message tone="success" auto-dismiss>
+                    {{ session('success') }}
+                </x-flash-message>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="mx-auto max-w-7xl px-4 pt-4 lg:px-8">
+                <x-flash-message tone="error">
+                    {{ session('error') }}
+                </x-flash-message>
+            </div>
+        @endif
+
         @yield('content')
     </main>
 

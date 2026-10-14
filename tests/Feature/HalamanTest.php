@@ -98,6 +98,65 @@ class HalamanTest extends TestCase
             ->assertSee('grafik-jenis-psu');
     }
 
+    public function test_script_cdn_memakai_sri_integrity_dan_crossorigin(): void
+    {
+        $perumahan = $this->perumahan();
+        $admin = $this->admin();
+
+        // Halaman admin (butuh login) + halaman publik yang memuat Leaflet/Chart.js.
+        $halamanAdmin = [
+            route('dashboard'),
+            route('perumahan.create'),
+            route('perumahan.edit', $perumahan),
+            route('perumahan.show', $perumahan),
+            route('perumahan.peta'),
+        ];
+        $halamanPublik = [
+            route('publik.beranda'),
+            route('publik.peta'),
+            route('publik.perumahan.show', $perumahan),
+        ];
+
+        foreach ($halamanAdmin as $url) {
+            $this->assertCdnPakaiSri($this->actingAs($admin)->get($url)->assertOk()->getContent(), $url);
+        }
+
+        foreach ($halamanPublik as $url) {
+            $this->assertCdnPakaiSri($this->get($url)->assertOk()->getContent(), $url);
+        }
+    }
+
+    /**
+     * Semua tag <script>/<link> ke CDN js (unpkg/jsDelivr) wajib punya integrity + crossorigin.
+     */
+    private function assertCdnPakaiSri(string $html, string $url): void
+    {
+        preg_match_all('#<(?:script|link)\b[^>]*>#i', $html, $tags);
+
+        $ditemukan = 0;
+
+        foreach ($tags[0] as $tag) {
+            if (! preg_match('#(?:src|href)="https?://(?:unpkg\.com|cdn\.jsdelivr\.net)[^"]*"#', $tag)) {
+                continue;
+            }
+
+            $ditemukan++;
+
+            $this->assertMatchesRegularExpression(
+                '#\bintegrity="sha(?:256|384)-[A-Za-z0-9+/=]+"#',
+                $tag,
+                "Tag CDN tanpa integrity sha256/sha384 yang valid di {$url}: {$tag}"
+            );
+            $this->assertStringContainsString(
+                'crossorigin="anonymous"',
+                $tag,
+                "Tag CDN tanpa atribut crossorigin di {$url}: {$tag}"
+            );
+        }
+
+        $this->assertGreaterThan(0, $ditemukan, "Tidak ada tag CDN Leaflet/Chart.js di {$url} — pengecekan jadi tidak berarti.");
+    }
+
     public function test_kecamatan_yang_masih_punya_kelurahan_tidak_bisa_dihapus(): void
     {
         $admin = $this->admin();

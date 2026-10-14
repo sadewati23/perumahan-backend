@@ -49,18 +49,20 @@ class Laporan extends Model
 
     protected $fillable = [
         'kode', 'jenis', 'perumahan_id', 'kelurahan_id', 'psu_perumahan_id',
-        'lokasi_teks',
+        'lokasi_teks', 'latitude', 'longitude',
         'nama_pelapor', 'kontak_pelapor',
         'judul', 'deskripsi', 'tingkat',
         'tanggal_kejadian',
+        'catatan_petugas', 'deskripsi_aksi_selesai', 'selesai_pada',
         'persentase_kerusakan', 'panjang_kerusakan',
-        'status', 'catatan_petugas', 'ditangani_oleh', 'ditangani_pada',
+        'status', 'ditangani_oleh', 'ditangani_pada',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal_kejadian' => 'date',
+            'selesai_pada' => 'datetime',
             'persentase_kerusakan' => 'decimal:2',
             'panjang_kerusakan' => 'decimal:2',
             'ditangani_pada' => 'datetime',
@@ -82,9 +84,22 @@ class Laporan extends Model
         return $this->belongsTo(PsuPerumahan::class);
     }
 
+    /** Semua foto milik laporan: bukti warga maupun hasil perbaikan petugas. */
     public function fotos(): HasMany
     {
         return $this->hasMany(LaporanFoto::class);
+    }
+
+    /** Foto kondisi awal (bukti) yang diunggah pelapor warga. */
+    public function fotosLaporan(): HasMany
+    {
+        return $this->fotos()->where('tipe', LaporanFoto::TIPE_LAPORAN);
+    }
+
+    /** Foto hasil perbaikan yang diunggah petugas. */
+    public function fotosPerbaikan(): HasMany
+    {
+        return $this->fotos()->where('tipe', LaporanFoto::TIPE_PERBAIKAN);
     }
 
     public function penangan(): BelongsTo
@@ -171,6 +186,24 @@ class Laporan extends Model
             'rusak_ringan' => 'bg-amber-100 text-amber-700 ring-amber-600/20',
             default => 'bg-slate-100 text-slate-700 ring-slate-600/20',
         };
+    }
+
+    /**
+     * Laporan punya titik GPS valid (dipilih pelapor di peta).
+     */
+    public function punyaTitik(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
+    }
+
+    /**
+     * Tautan peta eksternal (Google Maps) bila laporan punya titik GPS.
+     */
+    public function getTautanPetaAttribute(): ?string
+    {
+        return $this->punyaTitik()
+            ? 'https://www.google.com/maps?q='.number_format((float) $this->latitude, 7, '.','.').','.number_format((float) $this->longitude, 7, '.')
+            : null;
     }
 
     public function getLabelTanggalKejadianAttribute(): string

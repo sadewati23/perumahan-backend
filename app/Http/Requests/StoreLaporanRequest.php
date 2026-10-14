@@ -6,6 +6,9 @@ use App\Models\Laporan;
 use App\Models\Perumahan;
 use App\Models\PsuPerumahan;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Validator;
 
 class StoreLaporanRequest extends FormRequest
@@ -48,8 +51,16 @@ class StoreLaporanRequest extends FormRequest
             'judul' => ['required', 'string', 'max:150'],
             'deskripsi' => ['required', 'string', 'max:2000'],
             'foto' => ['nullable', 'array', 'max:3'],
-            'foto.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'foto.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:max_width=6000,max_height=6000'],
+            // Titik GPS opsional dari pemilih peta: dua-duanya harus terisi bersamaan
+            // (dicek di after()) dan berada dalam rentang nilai koordinat dunia.
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
+
+        // Proteksi Cloudflare Turnstile aktif hanya bila secret dikonfigurasi;
+        // tanpa secret form tetap dapat dipakai (hanya dijaga honeypot + rate limit).
+        $aturan['cf-turnstile-response'] = $this->aturanTurnstile();
 
         // Bangunan liar wajib minimal 1 foto; jenis lain foto opsional.
         if ($this->jenis === Laporan::JENIS_BANGUNAN_LIAR) {
@@ -100,6 +111,8 @@ class StoreLaporanRequest extends FormRequest
             'foto.*.image' => 'Lampiran harus berupa gambar.',
             'foto.*.mimes' => 'Format foto harus JPG, PNG, atau WEBP.',
             'foto.*.max' => 'Ukuran setiap foto maksimal 2 MB.',
+            'foto.*.dimensions' => 'Dimensi foto terlalu besar (maksimal 6000 × 6000 piksel).',
+            'cf-turnstile-response.required' => 'Selesaikan verifikasi keamanan terlebih dahulu.',
             'kelurahan_id.required' => 'Kelurahan/kecamatan lokasi wajib dipilih.',
             'lokasi_teks.required' => 'Lokasi kejadian (nama jalan/gang/titik) wajib diisi.',
             'tanggal_kejadian.before_or_equal' => 'Tanggal kejadian tidak boleh di masa depan.',
@@ -135,6 +148,15 @@ class StoreLaporanRequest extends FormRequest
                     );
                 }
             },
+            function (Validator $validator): void {
+                // Titik GPS buatan pasangan: hanya satu yang terisi = data tak lengkap.
+                if (filled($this->input('latitude')) !== filled($this->input('longitude'))) {
+                    $validator->errors()->add(
+                        'latitude',
+                        'Titik lokasi tidak lengkap — silakan pilih ulang titiknya di peta.'
+                    );
+                }
+            },
         ];
     }
 
@@ -149,11 +171,47 @@ class StoreLaporanRequest extends FormRequest
     }
 
     /**
+     * Aturan Cloudflare Turnstile: [] bila secret kosong (fitur nonaktif),
+     * jika tidak wajib diisi + verifikasi token ke endpoint siteverify.
+     */
+    private function aturanTurnstile(): array
+    {
+        $secret = config('services.turnstile.secret');
+
+        if (blank($secret)) {
+            return [];
+        }
+
+        return [
+            'required',
+            function (string $attribute, mixed $value, callable $fail): void {
+                try {
+                    $verifikasi = Http::asForm()->timeout(5)
+                        ->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+                            'secret' => config('services.turnstile.secret'),
+                            'response' => (string) $value,
+                            'remoteip' => $this->ip(),
+                        ])->json();
+                } catch (ConnectionException) {
+                    $fail('Verifikasi keamanan gagal. Silakan muat ulang halaman dan coba lagi.');
+
+                    return;
+                }
+
+                if (! is_array($verifikasi) || ($verifikasi['success'] ?? false) !== true) {
+                    $fail('Verifikasi keamanan gagal. Silakan muat ulang halaman dan coba lagi.');
+                }
+            },
+        ];
+    }
+
+    /**
      * Data siap simpan: normalisasi field yang tidak relevan per jenis.
+     * Field internal antifraud (token Turnstile) tidak boleh tersimpan.
      */
     public function dataLaporan(): array
     {
-        $data = $this->validated();
+        $data = Arr::except($this->validated(), ['cf-turnstile-response']);
 
         return match ($this->validated('jenis')) {
             Laporan::JENIS_PENGADUAN, Laporan::JENIS_BANGUNAN_LIAR => $data + [

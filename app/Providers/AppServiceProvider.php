@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Laporan;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,5 +35,12 @@ class AppServiceProvider extends ServiceProvider
                 fn () => Laporan::where('status', 'baru')->count()
             ));
         });
+
+        // Form lapor publik rawan spam: batasi per menit (mencegah burst)
+        // dan per hari (mencegah kiriman massal dari satu IP), dihitung per IP.
+        RateLimiter::for('lapor', fn (Request $request) => [
+            Limit::perMinute(10)->by($request->ip()),
+            Limit::perDay(30)->by($request->ip()),
+        ]);
     }
 }
