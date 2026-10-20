@@ -62,12 +62,14 @@
                                 </form>
                             </details>
 
-                            <form method="POST" action="{{ route('kecamatan.destroy', $kecamatan) }}"
-                                  data-confirm="Hapus Kec. {{ $kecamatan->nama }} beserta seluruh kelurahannya?">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
-                            </form>
+                            @if (auth()->user()->isAdmin())
+                                <form method="POST" action="{{ route('kecamatan.destroy', $kecamatan) }}"
+                                      data-confirm="Hapus Kec. {{ $kecamatan->nama }} beserta seluruh kelurahannya?">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
+                                </form>
+                            @endif
                         </div>
                     </div>
 
@@ -115,12 +117,14 @@
                                             </form>
                                         </details>
 
-                                        <form method="POST" action="{{ route('kelurahan.destroy', $kelurahan) }}"
-                                              data-confirm="Hapus Kel. {{ $kelurahan->nama }}?">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
-                                        </form>
+                                        @if (auth()->user()->isAdmin())
+                                            <form method="POST" action="{{ route('kelurahan.destroy', $kelurahan) }}"
+                                                  data-confirm="Hapus Kel. {{ $kelurahan->nama }}?">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </li>
                             @endforeach

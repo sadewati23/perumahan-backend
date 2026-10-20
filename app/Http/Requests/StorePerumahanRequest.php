@@ -26,6 +26,7 @@ class StorePerumahanRequest extends FormRequest
 
         return [
             'nama' => ['required', 'string', 'max:150'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=6000,max_height=6000'],
             'pengembang' => ['nullable', 'string', 'max:150'],
             'kelurahan_id' => ['required', 'exists:kelurahans,id'],
             'alamat' => ['nullable', 'string', 'max:255'],
@@ -71,6 +72,11 @@ class StorePerumahanRequest extends FormRequest
             'luas_lahan.required' => 'Luas lahan wajib diisi.',
             'jumlah_unit.required' => 'Jumlah unit wajib diisi.',
             'status.required' => 'Status perumahan wajib dipilih.',
+            'foto.uploaded' => 'Foto gagal diunggah. Ukuran file kemungkinan melebihi batas server. Coba kecilkan fotonya.',
+            'foto.image' => 'Foto harus berupa gambar yang valid.',
+            'foto.mimes' => 'Foto harus berformat JPG, PNG, atau WEBP.',
+            'foto.max' => 'Ukuran foto maksimal 5 MB.',
+            'foto.dimensions' => 'Ukuran foto maksimal 6000 × 6000 piksel.',
         ];
     }
 

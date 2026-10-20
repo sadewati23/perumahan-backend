@@ -185,7 +185,7 @@ class LaporanTest extends TestCase
         $laporan->fotos()->create(['path' => $pathFoto1]);
         $laporan->fotos()->create(['path' => UploadedFile::fake()->image('bukti2.png')->store('laporan', 'public')]);
 
-        $this->actingAs(User::factory()->create(['role' => 'petugas']));
+        $this->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]));
 
         $this->delete(route('laporan.destroy', $laporan))
             ->assertRedirect(route('laporan.index'));

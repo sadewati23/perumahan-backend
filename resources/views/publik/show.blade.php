@@ -46,6 +46,11 @@
                 </div>
             </div>
 
+            @if ($perumahan->foto_url)
+                <img src="{{ $perumahan->foto_url }}" alt="Foto {{ $perumahan->nama }}"
+                     class="mt-6 h-64 w-full rounded-xl object-cover ring-1 ring-slate-200 sm:h-80">
+            @endif
+
             <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="rounded-xl bg-slate-50 p-4">
                     <p class="text-xs text-slate-500">Luas Lahan</p>

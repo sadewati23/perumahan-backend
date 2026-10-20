@@ -27,6 +27,7 @@
         .no-print button:hover { background: #e2e8f0 }
 
         .kop { border-bottom: 3px double #334155; padding-bottom: 8px; text-align: center }
+        .kop img { display: block; margin: 0 auto 4px; height: 48px; }
         .kop h1 { font-size: 15px; margin: 0; text-transform: uppercase; letter-spacing: .5px }
         .kop p { margin: 2px 0 0; font-size: 11px; color: #64748b }
 
@@ -60,6 +61,7 @@
     </div>
 
     <div class="kop">
+        <img src="{{ asset('images/logo.png') }}" alt="">
         <h1>Sistem Data Perumahan — {{ config('peta.nama_wilayah') }}</h1>
         <p>Rekapitulasi Laporan Warga</p>
     </div>

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\FilterQuery;
 
 class Laporan extends Model
 {
@@ -111,13 +112,15 @@ class Laporan extends Model
     {
         return $query
             ->when($filters['q'] ?? null, function (Builder $q, $keyword) {
+                $keyword = FilterQuery::likeAman($keyword);
                 $q->where(function (Builder $sub) use ($keyword) {
-                    $sub->where('kode', 'like', "%{$keyword}%")
-                        ->orWhere('judul', 'like', "%{$keyword}%")
-                        ->orWhere('nama_pelapor', 'like', "%{$keyword}%")
-                        ->orWhere('deskripsi', 'like', "%{$keyword}%")
-                        ->orWhere('lokasi_teks', 'like', "%{$keyword}%")
-                        ->orWhereHas('perumahan', fn (Builder $p) => $p->where('nama', 'like', "%{$keyword}%"));
+                    $like = "%{$keyword}%";
+                    $sub->where('kode', 'like', $like)
+                        ->orWhere('judul', 'like', $like)
+                        ->orWhere('nama_pelapor', 'like', $like)
+                        ->orWhere('deskripsi', 'like', $like)
+                        ->orWhere('lokasi_teks', 'like', $like)
+                        ->orWhereHas('perumahan', fn (Builder $p) => $p->where('nama', 'like', $like));
                 });
             })
             ->when($filters['jenis'] ?? null, fn (Builder $q, $jenis) => $q->where('jenis', $jenis))

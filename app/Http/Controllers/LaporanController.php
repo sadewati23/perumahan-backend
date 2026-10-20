@@ -45,12 +45,10 @@ class LaporanController extends Controller
                 'kecamatan' => $k->kecamatan->nama ?? '-',
             ]);
 
-        $perumahanTerpilih = (int) $request->query('perumahan', 0) ?: null;
-        $jenisTerpilih = $request->query('jenis');
-
-        if (! array_key_exists($jenisTerpilih, Laporan::JENIS)) {
-            $jenisTerpilih = null;
-        }
+        $jenis = $request->query('jenis');
+        $jenisTerpilih = is_string($jenis) && array_key_exists($jenis, Laporan::JENIS) ? $jenis : null;
+        $perumahan = $request->query('perumahan');
+        $perumahanTerpilih = is_numeric($perumahan) && (float) $perumahan > 0 ? (int) $perumahan : null;
 
         return view('lapor.form', compact('perumahans', 'kelurahans', 'perumahanTerpilih', 'jenisTerpilih'));
     }

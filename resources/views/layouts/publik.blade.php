@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Beranda') — {{ config('app.name') }}</title>
+    @include('partials.favicon')
     <meta name="description" content="@yield('description', 'Informasi data perumahan: lokasi, luasan lahan, jumlah unit, RTH, KDB/KDH, PSU, dan status perumahan.')">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -12,7 +13,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
-<body class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+<body class="flex min-h-screen flex-col bg-neutral-50 font-sans text-slate-800 antialiased">
     {{-- Skip link untuk navigasi keyboard --}}
     <a href="#main"
        class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg">
@@ -22,7 +23,7 @@
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 lg:px-8">
             <a href="{{ route('publik.beranda') }}" class="flex min-w-0 items-center gap-3">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">SP</span>
+                <x-logo />
                 <span class="min-w-0 leading-tight">
                     <span class="block truncate text-sm font-semibold text-slate-900">Data Perumahan</span>
                     <span class="block truncate text-xs text-slate-500">{{ config('peta.nama_wilayah') }}</span>
@@ -91,7 +92,7 @@
         <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
             <div class="lg:col-span-2">
                 <div class="flex items-center gap-3">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">SP</span>
+                    <x-logo ukuran="h-9 w-9" />
                     <span class="font-semibold text-slate-900">{{ config('app.name') }}</span>
                 </div>
                 <p class="mt-3 max-w-md text-sm text-slate-600">

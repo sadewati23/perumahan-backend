@@ -58,7 +58,9 @@ Route::middleware(['auth', 'active'])->prefix('admin')->group(function () {
     Route::get('/perumahan/peta', [PerumahanController::class, 'peta'])->name('perumahan.peta');
     Route::get('/perumahan/geojson', [PerumahanController::class, 'geojson'])->name('perumahan.geojson');
 
-    Route::resource('perumahan', PerumahanController::class);
+    Route::resource('perumahan', PerumahanController::class)->except('destroy');
+    Route::delete('/perumahan/{perumahan}', [PerumahanController::class, 'destroy'])
+        ->name('perumahan.destroy')->middleware('role:admin');
 
     // Laporan kerusakan sarana-prasarana
     Route::get('/laporan', [LaporanAdminController::class, 'index'])->name('laporan.index');
@@ -74,17 +76,17 @@ Route::middleware(['auth', 'active'])->prefix('admin')->group(function () {
 
     Route::get('/laporan/{laporan}', [LaporanAdminController::class, 'show'])->name('laporan.show');
     Route::put('/laporan/{laporan}', [LaporanAdminController::class, 'update'])->name('laporan.update');
-    Route::delete('/laporan/{laporan}', [LaporanAdminController::class, 'destroy'])->name('laporan.destroy');
+    Route::delete('/laporan/{laporan}', [LaporanAdminController::class, 'destroy'])->name('laporan.destroy')->middleware('role:admin');
 
     // Master wilayah
     Route::get('/wilayah', [KecamatanController::class, 'index'])->name('wilayah.index');
     Route::post('/wilayah/kecamatan', [KecamatanController::class, 'store'])->name('kecamatan.store');
     Route::put('/wilayah/kecamatan/{kecamatan}', [KecamatanController::class, 'update'])->name('kecamatan.update');
-    Route::delete('/wilayah/kecamatan/{kecamatan}', [KecamatanController::class, 'destroy'])->name('kecamatan.destroy');
+    Route::delete('/wilayah/kecamatan/{kecamatan}', [KecamatanController::class, 'destroy'])->name('kecamatan.destroy')->middleware('role:admin');
 
     Route::post('/wilayah/kelurahan', [KelurahanController::class, 'store'])->name('kelurahan.store');
     Route::put('/wilayah/kelurahan/{kelurahan}', [KelurahanController::class, 'update'])->name('kelurahan.update');
-    Route::delete('/wilayah/kelurahan/{kelurahan}', [KelurahanController::class, 'destroy'])->name('kelurahan.destroy');
+    Route::delete('/wilayah/kelurahan/{kelurahan}', [KelurahanController::class, 'destroy'])->name('kelurahan.destroy')->middleware('role:admin');
 
     // Khusus administrator
     Route::middleware('role:admin')->prefix('pengguna')->name('users.')->group(function () {

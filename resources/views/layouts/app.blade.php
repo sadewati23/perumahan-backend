@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — {{ config('app.name') }}</title>
+    @include('partials.favicon')
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet">
@@ -27,9 +28,7 @@
     <aside id="sidebar"
            class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-slate-900 text-slate-300 transition-transform duration-200 lg:static lg:translate-x-0">
         <div class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-lg font-bold text-white">
-                SP
-            </div>
+            <x-logo tile />
             <div class="min-w-0 leading-tight">
                 <p class="truncate text-sm font-semibold text-white">Sistem Data</p>
                 <p class="truncate text-xs text-slate-400">Perumahan</p>

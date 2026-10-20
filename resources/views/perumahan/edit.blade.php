@@ -8,7 +8,7 @@
 @endpush
 
 @section('content')
-    <form method="POST" action="{{ route('perumahan.update', $perumahan) }}"
+    <form method="POST" action="{{ route('perumahan.update', $perumahan) }}" enctype="multipart/form-data"
           data-unsaved-guard="Ada perubahan yang belum disimpan.">
         @csrf
         @method('PUT')

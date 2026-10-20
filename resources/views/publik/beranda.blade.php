@@ -9,21 +9,28 @@
 
 @section('content')
     {{-- Hero --}}
-    <section class="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-900 text-white">
-        <div class="mx-auto max-w-7xl px-4 py-14 lg:px-8 lg:py-20">
-            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-200 ring-1 ring-inset ring-white/20">
+    <section class="relative isolate overflow-hidden bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800 text-white">
+        <div class="pointer-events-none absolute right-0 top-1/2 -z-10 hidden -translate-y-1/2 xl:block" aria-hidden="true">
+            <div class="absolute left-1/2 top-1/2 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-400/15 blur-3xl"></div>
+            <img src="{{ asset('images/logo-latar.png') }}" alt="" width="512" height="512" decoding="async"
+                 class="relative mr-8 h-auto w-[28rem] select-none opacity-25 drop-shadow-[0_0_48px_rgba(251,191,36,0.4)] [mask-image:linear-gradient(to_left,black_45%,transparent)] [-webkit-mask-image:linear-gradient(to_left,black_45%,transparent)] 2xl:mr-24 2xl:w-[34rem]">
+        </div>
+
+        <div class="relative z-10 mx-auto max-w-7xl px-4 py-14 lg:px-8 lg:py-20">
+            <x-logo tile ukuran="h-14 w-14" class="mb-4 xl:hidden" />
+            <span class="inline-flex masuk-naik items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-amber-200 ring-1 ring-inset ring-white/20">
                 Portal Data Terbuka &middot; {{ config('peta.nama_wilayah') }}
             </span>
-            <h1 class="mt-4 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
-                Informasi Data Perumahan {{ config('peta.nama_wilayah') }}
+            <h1 class="mt-4 max-w-3xl masuk-naik tunda-1 text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
+                Informasi Data Perumahan <span class="teks-kilau">{{ config('peta.nama_wilayah') }}</span>
             </h1>
-            <p class="mt-4 max-w-2xl text-sm text-slate-300 sm:text-base">
+            <p class="mt-4 max-w-2xl masuk-naik tunda-2 text-sm text-neutral-300 sm:text-base">
                 Telusuri data perumahan beserta lokasi kelurahan dan kecamatan, RT/RW, titik koordinat,
                 luas lahan, jumlah unit, RTH, KDB/KDH, lahan pemakaman, prasarana-sarana-utilitas (PSU),
                 tahun pembangunan, tipe unit, dan status subsidi/komersil.
             </p>
 
-            <div class="mt-8 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="mt-8 flex max-w-2xl masuk-naik tunda-3 flex-col gap-3 sm:flex-row sm:items-center">
                 <a href="{{ route('lapor.create') }}"
                    class="rounded-lg bg-rose-500 px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-rose-400">
                     Lapor Kerusakan / Pengaduan
@@ -34,8 +41,8 @@
                 </a>
                 <form method="GET" action="{{ route('publik.perumahan.index') }}" class="flex flex-1 gap-2">
                     <input type="text" name="q" placeholder="Cari nama perumahan..."
-                           class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder-slate-300 outline-none backdrop-blur focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30">
-                    <button type="submit" class="rounded-lg bg-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400">
+                           class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder-neutral-300 outline-none backdrop-blur focus:border-amber-300 focus:ring-2 focus:ring-amber-300/40">
+                    <button type="submit" class="rounded-lg bg-amber-400 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-amber-300">
                         Cari
                     </button>
                 </form>
@@ -43,31 +50,58 @@
         </div>
     </section>
 
-    <div class="mx-auto max-w-7xl px-4 py-10 lg:px-8">
+    <div class="relative isolate overflow-hidden border-t-4 border-amber-400 bg-gradient-to-b from-amber-100 via-amber-50 to-orange-100">
+        <div class="pointer-events-none absolute -left-24 top-24 -z-10 h-80 w-80 rounded-full bg-amber-300/40 blur-3xl" aria-hidden="true"></div>
+        <div class="pointer-events-none absolute -right-24 bottom-24 -z-10 h-80 w-80 rounded-full bg-orange-300/30 blur-3xl" aria-hidden="true"></div>
+        <div class="mx-auto max-w-7xl px-4 py-10 lg:px-8">
         {{-- Statistik --}}
         @php
             $kartu = [
-                ['label' => 'Perumahan Terdata', 'value' => number_format($statistik['total_perumahan'], 0, ',', '.'), 'satuan' => 'lokasi'],
-                ['label' => 'Total Unit Rumah', 'value' => number_format($statistik['total_unit'], 0, ',', '.'), 'satuan' => 'unit'],
-                ['label' => 'Luas Lahan', 'value' => number_format($statistik['total_luas_lahan'] / 10000, 2, ',', '.'), 'satuan' => 'hektar'],
-                ['label' => 'Luas RTH', 'value' => number_format($statistik['total_luas_rth'] / 10000, 2, ',', '.'), 'satuan' => 'hektar'],
+                ['label' => 'Perumahan Terdata', 'value' => number_format($statistik['total_perumahan'], 0, ',', '.'), 'satuan' => 'lokasi', 'ikon' => 'rumah', 'kelas' => 'bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg shadow-amber-500/20', 'kelas_angka' => 'text-neutral-950', 'kelas_teks' => 'text-neutral-900', 'kelas_ikon' => 'bg-neutral-950/10 text-neutral-950'],
+                ['label' => 'Total Unit Rumah', 'value' => number_format($statistik['total_unit'], 0, ',', '.'), 'satuan' => 'unit', 'ikon' => 'unit', 'kelas' => 'bg-neutral-900 shadow-lg shadow-neutral-900/20', 'kelas_angka' => 'text-amber-300', 'kelas_teks' => 'text-neutral-300', 'kelas_ikon' => 'bg-amber-400/15 text-amber-300'],
+                ['label' => 'Luas Lahan', 'value' => number_format($statistik['total_luas_lahan'] / 10000, 2, ',', '.'), 'satuan' => 'hektar', 'ikon' => 'lahan', 'kelas' => 'bg-gradient-to-br from-amber-700 to-amber-800 shadow-lg shadow-amber-800/20', 'kelas_angka' => 'text-white', 'kelas_teks' => 'text-white', 'kelas_ikon' => 'bg-white/15 text-white'],
+                ['label' => 'Luas RTH', 'value' => number_format($statistik['total_luas_rth'] / 10000, 2, ',', '.'), 'satuan' => 'hektar', 'ikon' => 'daun', 'kelas' => 'bg-gradient-to-br from-neutral-700 to-neutral-900 shadow-lg shadow-neutral-900/20', 'kelas_angka' => 'text-amber-300', 'kelas_teks' => 'text-neutral-300', 'kelas_ikon' => 'bg-amber-400/15 text-amber-300'],
             ];
         @endphp
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ($kartu as $item)
-                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <p class="text-xs font-medium text-slate-500">{{ $item['label'] }}</p>
-                    <p class="mt-2 text-2xl font-semibold text-slate-900">{{ $item['value'] }}</p>
-                    <p class="text-xs text-slate-500">{{ $item['satuan'] }}</p>
+                <div class="kartu-muncul {{ $item['kelas'] }} rounded-2xl p-5 transition motion-safe:hover:-translate-y-1 hover:shadow-xl">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl {{ $item['kelas_ikon'] }}">
+                        @if ($item['ikon'] === 'rumah')
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path d="m3 10 9-7 9 7" />
+                                <path d="M5 9v12h14V9M9 21v-6h6v6" />
+                            </svg>
+                        @elseif ($item['ikon'] === 'unit')
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path d="M3 21V9l6-3v15M9 21V3l6 3v15M15 21V11l6-3v13" />
+                                <path d="M6 12h.01M6 16h.01M12 9h.01M12 13h.01M18 14h.01M18 18h.01" />
+                            </svg>
+                        @elseif ($item['ikon'] === 'lahan')
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z" />
+                                <path d="M9 3v15M15 6v15" />
+                            </svg>
+                        @else
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path d="M20 4C12 4 6 8 6 15c0 3 2 5 5 5 7 0 9-8 9-16Z" />
+                                <path d="M4 20c3-5 7-8 13-11" />
+                            </svg>
+                        @endif
+                    </div>
+                    <p class="mt-4 text-sm font-medium {{ $item['kelas_teks'] }}">{{ $item['label'] }}</p>
+                    <p class="mt-1 text-3xl font-bold tracking-tight {{ $item['kelas_angka'] }} tabular-nums">{{ $item['value'] }}</p>
+                    <p class="text-sm {{ $item['kelas_teks'] }}">{{ $item['satuan'] }}</p>
                 </div>
             @endforeach
         </div>
 
         {{-- Komposisi status --}}
         <div class="mt-4 grid gap-4 lg:grid-cols-3">
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-semibold text-slate-800">Komposisi Status</p>
+            <div class="kartu-muncul overflow-hidden rounded-2xl bg-amber-50 shadow-md ring-1 ring-amber-300/70">
+                <div class="flex items-center justify-between bg-neutral-900 px-6 py-3.5"><p class="flex items-center gap-2 text-sm font-semibold text-white"><span class="h-2 w-2 rounded-full bg-amber-400" aria-hidden="true"></span>Komposisi Status</p></div>
+                <div class="p-6">
                 @php
                     $totalStatus = max(1, $statistik['total_perumahan']);
                     $persenSubsidi = round($statistik['jumlah_subsidi'] / $totalStatus * 100);
@@ -76,52 +110,55 @@
                 <div class="mt-4 space-y-4">
                     <div>
                         <div class="flex items-center justify-between text-sm">
-                            <span class="font-medium text-emerald-700">Subsidi</span>
-                            <span class="text-slate-600">{{ $statistik['jumlah_subsidi'] }} ({{ $persenSubsidi }}%)</span>
+                            <span class="flex items-center gap-2 font-medium text-amber-800"><span class="h-2.5 w-2.5 rounded-full bg-amber-500" aria-hidden="true"></span>Subsidi</span>
+                            <span class="text-neutral-700">{{ $statistik['jumlah_subsidi'] }} <span class="font-semibold text-neutral-900">({{ $persenSubsidi }}%)</span></span>
                         </div>
-                        <div class="mt-1 h-2 rounded-full bg-slate-100">
-                            <div class="h-2 rounded-full bg-emerald-500" style="width: {{ $persenSubsidi }}%"></div>
+                        <div class="mt-1 h-2.5 rounded-full bg-stone-200">
+                            <div class="batang h-2.5 rounded-full bg-amber-500" style="width: {{ $persenSubsidi }}%"></div>
                         </div>
                     </div>
                     <div>
                         <div class="flex items-center justify-between text-sm">
-                            <span class="font-medium text-indigo-700">Komersil</span>
-                            <span class="text-slate-600">{{ $statistik['jumlah_komersil'] }} ({{ $persenKomersil }}%)</span>
+                            <span class="flex items-center gap-2 font-medium text-neutral-800"><span class="h-2.5 w-2.5 rounded-full bg-neutral-800" aria-hidden="true"></span>Komersil</span>
+                            <span class="text-neutral-700">{{ $statistik['jumlah_komersil'] }} <span class="font-semibold text-neutral-900">({{ $persenKomersil }}%)</span></span>
                         </div>
-                        <div class="mt-1 h-2 rounded-full bg-slate-100">
-                            <div class="h-2 rounded-full bg-indigo-500" style="width: {{ $persenKomersil }}%"></div>
+                        <div class="mt-1 h-2.5 rounded-full bg-stone-200">
+                            <div class="batang h-2.5 rounded-full bg-neutral-800" style="width: {{ $persenKomersil }}%"></div>
                         </div>
                     </div>
                 </div>
-                <p class="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                <p class="mt-4 border-t border-amber-200 pt-3 text-sm text-neutral-700">
                     Tersebar di {{ $statistik['jumlah_kecamatan'] }} kecamatan.
                 </p>
+                </div>
             </div>
 
             {{-- Sebaran per kecamatan --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-semibold text-slate-800">Sebaran per Kecamatan</p>
-                    <a href="{{ route('publik.perumahan.index') }}" class="text-xs font-medium text-indigo-600 hover:underline">Lihat semua</a>
+            <div class="kartu-muncul overflow-hidden rounded-2xl bg-amber-50 shadow-md ring-1 ring-amber-300/70 lg:col-span-2">
+                <div class="flex items-center justify-between bg-neutral-900 px-6 py-3.5">
+                    <p class="flex items-center gap-2 text-sm font-semibold text-white"><span class="h-2 w-2 rounded-full bg-amber-400" aria-hidden="true"></span>Sebaran per Kecamatan</p>
+                    <a href="{{ route('publik.perumahan.index') }}" class="text-sm font-medium text-amber-300 underline-offset-4 hover:text-amber-200 hover:underline focus-visible:outline-2 focus-visible:outline-amber-400">Lihat semua <span aria-hidden="true">→</span></a>
                 </div>
+                <div class="p-6">
 
                 @php $maxKecamatan = max(1, (int) $perKecamatan->max('perumahans_count')); @endphp
 
                 <div class="mt-4 space-y-3">
                     @forelse ($perKecamatan as $kecamatan)
-                        <a href="{{ route('publik.perumahan.index', ['kecamatan_id' => $kecamatan->id]) }}" class="block">
+                        <a href="{{ route('publik.perumahan.index', ['kecamatan_id' => $kecamatan->id]) }}" class="group -mx-2 block rounded-lg px-2 py-1.5 transition hover:bg-amber-50 focus-visible:outline-2 focus-visible:outline-amber-500">
                             <div class="flex items-center justify-between text-sm">
-                                <span class="font-medium text-slate-700">{{ $kecamatan->nama }}</span>
-                                <span class="text-slate-500">{{ $kecamatan->perumahans_count }} perumahan</span>
+                                <span class="flex min-w-0 items-center gap-2"><span class="w-5 shrink-0 text-xs font-semibold text-neutral-600">{{ $loop->iteration }}</span><span class="font-medium text-neutral-900">{{ $kecamatan->nama }}</span></span>
+                                <span class="text-neutral-700">{{ $kecamatan->perumahans_count }} perumahan</span>
                             </div>
-                            <div class="mt-1 h-2 rounded-full bg-slate-100">
-                                <div class="h-2 rounded-full bg-indigo-500"
+                            <div class="mt-1 h-2.5 rounded-full bg-stone-200">
+                                <div class="batang h-2.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-600"
                                      style="width: {{ round($kecamatan->perumahans_count / $maxKecamatan * 100) }}%"></div>
                             </div>
                         </a>
                     @empty
-                        <p class="text-sm text-slate-500">Belum ada data kecamatan.</p>
+                        <p class="text-sm text-neutral-700">Belum ada data kecamatan.</p>
                     @endforelse
+                </div>
                 </div>
             </div>
         </div>
@@ -130,22 +167,30 @@
         <section class="mt-10">
             <div class="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-900">Peta Sebaran Perumahan</h2>
-                    <p class="text-sm text-slate-600">Klik marker untuk melihat ringkasan perumahan.</p>
+                    <h2 class="border-l-4 border-amber-400 pl-3 text-lg font-semibold text-neutral-900">Peta Sebaran Perumahan</h2>
+                    <p class="text-sm text-neutral-700">Klik marker untuk melihat ringkasan perumahan.</p>
                 </div>
                 <a href="{{ route('publik.peta') }}"
-                   class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                    Buka peta lengkap
+                   class="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-amber-300 shadow transition hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">
+                     Buka peta lengkap <span aria-hidden="true">→</span>
                 </a>
             </div>
 
-            <div id="peta-beranda" class="mt-4 h-80 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm"></div>
+            <div id="peta-beranda" class="mt-4 h-80 w-full overflow-hidden rounded-2xl border-2 border-amber-300 bg-neutral-100 shadow-lg"></div>
+
+            <div class="mt-2 flex flex-wrap items-center gap-2" aria-label="Legenda status peta">
+                <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-amber-500" aria-hidden="true">●</span>Subsidi</span>
+                <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-neutral-800" aria-hidden="true">●</span>Komersil</span>
+            </div>
 
             @if ($titik->isEmpty())
-                <p class="mt-3 text-sm text-slate-500">Belum ada perumahan dengan titik koordinat.</p>
+                <p class="mt-3 text-sm text-neutral-700">Belum ada perumahan dengan titik koordinat.</p>
             @endif
         </section>
+        </div>
+    </div>
 
+    <div class="mx-auto max-w-7xl px-4 py-10 lg:px-8">
         {{-- Perumahan terbaru --}}
         <section class="mt-10">
             <div class="flex flex-wrap items-end justify-between gap-3">
@@ -187,7 +232,7 @@
                 attribution: PETA.tile_attribution,
             }).addTo(map);
 
-            const colors = { Subsidi: '#10b981', Komersil: '#6366f1' };
+            const colors = { Subsidi: '#f59e0b', Komersil: '#262626' };
             const bounds = [];
             const formatAngka = (angka) => new Intl.NumberFormat('id-ID').format(angka);
 

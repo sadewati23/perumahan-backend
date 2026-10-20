@@ -122,7 +122,7 @@
                 attribution: PETA.tile_attribution,
             }).addTo(map);
 
-            const colors = { Subsidi: '#10b981', Komersil: '#6366f1' };
+            const colors = { Subsidi: '#f59e0b', Komersil: '#262626' };
             const markers = {};
             const formatAngka = (angka) => new Intl.NumberFormat('id-ID').format(angka);
 

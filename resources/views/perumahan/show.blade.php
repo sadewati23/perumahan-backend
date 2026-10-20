@@ -263,15 +263,17 @@
                     </div>
                 </dl>
 
-                <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}" class="mt-4"
-                      data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            class="w-full rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">
-                        Hapus Perumahan
-                    </button>
-                </form>
+                @if (auth()->user()->isAdmin())
+                    <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}" class="mt-4"
+                          data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="w-full rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">
+                            Hapus Perumahan
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>

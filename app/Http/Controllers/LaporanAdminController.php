@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Laporan;
 use App\Models\Perumahan;
 use App\Services\DashboardStatistikService;
+use App\Support\FilterQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -15,7 +16,13 @@ class LaporanAdminController extends Controller
 {
     public function index(Request $request): View
     {
-        $filters = $request->only(['q', 'jenis', 'status', 'tingkat', 'perumahan_id']);
+        $filters = FilterQuery::ambil($request, [
+            'q' => ['nullable', 'string', 'max:100'],
+            'jenis' => ['nullable', 'in:'.implode(',', array_keys(Laporan::JENIS))],
+            'status' => ['nullable', 'in:'.implode(',', array_keys(Laporan::STATUS))],
+            'tingkat' => ['nullable', 'in:'.implode(',', array_keys(Laporan::TINGKAT))],
+            'perumahan_id' => ['nullable', 'integer', 'min:1'],
+        ]);
 
         $query = Laporan::with(['perumahan.kelurahan.kecamatan', 'psu', 'kelurahan.kecamatan', 'fotosLaporan'])->filter($filters);
 
@@ -27,7 +34,7 @@ class LaporanAdminController extends Controller
             'ditolak' => (clone $query)->where('status', 'ditolak')->count(),
         ];
 
-        $laporans = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
+        $laporans = $query->orderByDesc('created_at')->paginate(15)->appends($filters);
 
         $perumahans = Perumahan::orderBy('nama')->get(['id', 'nama']);
 

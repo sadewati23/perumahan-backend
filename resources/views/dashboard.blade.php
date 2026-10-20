@@ -271,12 +271,14 @@
                             </a>
                             <div class="shrink-0 flex items-center gap-2">
                                 <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_status }}">{{ $laporan->label_status }}</span>
-                                <button type="button"
-                                        data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
-                                        data-action="{{ route('laporan.destroy', $laporan) }}"
-                                        class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                    Hapus
-                                </button>
+                                @if (auth()->user()->isAdmin())
+                                    <button type="button"
+                                            data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
+                                            data-action="{{ route('laporan.destroy', $laporan) }}"
+                                            class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                                        Hapus
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     </li>

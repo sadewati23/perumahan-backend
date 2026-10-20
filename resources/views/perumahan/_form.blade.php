@@ -41,6 +41,22 @@
                            class="input">
                 </x-field>
 
+                <x-field name="foto" label="Foto Perumahan" for="foto" optional class="sm:col-span-2">
+                    @unless (file_exists(public_path('storage')))
+                        <div role="status" class="mb-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                            Tautan <code>public/storage</code> belum dibuat, sehingga foto yang diunggah tidak akan tampil di halaman publik.
+                            Jalankan <code>php artisan storage:link</code> di terminal, lalu muat ulang halaman ini.
+                        </div>
+                    @endunless
+                    <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png,.webp"
+                           class="input file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white">
+                    <p class="mt-1 text-xs text-slate-500">JPG, PNG, atau WEBP, maksimal 5 MB.</p>
+                    @if ($perumahan->foto_url)
+                        <img src="{{ $perumahan->foto_url }}" alt="Foto {{ $perumahan->nama }}"
+                             class="mt-3 h-32 w-48 rounded-lg object-cover ring-1 ring-slate-200">
+                    @endif
+                </x-field>
+
                 <x-field name="pengembang" label="Pengembang / Developer" for="pengembang" optional>
                     <input type="text" id="pengembang" name="pengembang" value="{{ $val('pengembang') }}"
                            autocomplete="organization" enterkeyhint="next" placeholder="Contoh: PT Karya Bangun"

@@ -173,12 +173,14 @@
                     <div class="flex items-center gap-3">
                         <a href="{{ route('perumahan.show', $perumahan) }}" class="text-xs font-medium text-slate-600 hover:text-indigo-600">Detail</a>
                         <a href="{{ route('perumahan.edit', $perumahan) }}" class="text-xs font-medium text-amber-600 hover:text-amber-700">Ubah</a>
-                        <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}"
-                              data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-xs font-medium text-rose-600 hover:text-rose-700">Hapus</button>
-                        </form>
+                        @if (auth()->user()->isAdmin())
+                            <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}"
+                                  data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-xs font-medium text-rose-600 hover:text-rose-700">Hapus</button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -265,12 +267,14 @@
 
                                     <a href="{{ route('perumahan.show', $perumahan) }}" class="text-xs font-medium text-slate-600 hover:text-indigo-600">Detail</a>
                                     <a href="{{ route('perumahan.edit', $perumahan) }}" class="text-xs font-medium text-amber-600 hover:text-amber-700">Ubah</a>
-                                    <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}"
-                                          data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-xs font-medium text-rose-600 hover:text-rose-700">Hapus</button>
-                                    </form>
+                                    @if (auth()->user()->isAdmin())
+                                        <form method="POST" action="{{ route('perumahan.destroy', $perumahan) }}"
+                                              data-confirm="Hapus PERMANEN data perumahan {{ $perumahan->nama }}? Data tidak bisa dikembalikan.">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs font-medium text-rose-600 hover:text-rose-700">Hapus</button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

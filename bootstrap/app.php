@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 
 /*
 |----------------------------------------------------------------------
@@ -41,5 +42,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/admin/dashboard');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (PostTooLargeException $exception, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return null;
+            }
+
+            return back()->withInput()->withErrors([
+                'foto' => 'Ukuran total unggahan melebihi batas server ('.ini_get('post_max_size').'). Kecilkan ukuran foto lalu coba lagi.',
+            ]);
+        });
     })->create();

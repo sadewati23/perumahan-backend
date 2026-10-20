@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePerumahanRequest;
 use App\Models\Kecamatan;
+use App\Models\Laporan;
+use App\Models\LaporanFoto;
 use App\Models\Perumahan;
 use App\Services\DashboardStatistikService;
 use App\Services\PerumahanPetaService;
+use App\Support\FilterQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
 
 class PerumahanController extends Controller
 {
@@ -20,13 +25,18 @@ class PerumahanController extends Controller
 
     public function index(Request $request): View
     {
-        $filters = $request->only(['q', 'status', 'kecamatan_id', 'tahun']);
+        $filters = FilterQuery::ambil($request, [
+            'q' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:'.implode(',', array_keys(Perumahan::STATUS))],
+            'kecamatan_id' => ['nullable', 'integer', 'min:1'],
+            'tahun' => ['nullable', 'integer', 'between:1900,2200'],
+        ]);
 
         $query = Perumahan::with('kelurahan.kecamatan')->filter($filters);
 
         $ringkasan = $this->peta->ringkasan($query);
 
-        $perumahans = $query->orderBy('nama')->paginate(10)->withQueryString();
+        $perumahans = $query->orderBy('nama')->paginate(10)->appends($filters);
 
         $kecamatans = Kecamatan::orderBy('nama')->get();
         $tahunList = Perumahan::query()
@@ -48,14 +58,37 @@ class PerumahanController extends Controller
 
     public function store(StorePerumahanRequest $request): RedirectResponse
     {
+        $this->pastikanFotoValid($request);
         $data = $request->validated();
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            try {
+                $fotoPath = \App\Support\FotoBersih::simpan($request->file('foto'), 'perumahan');
+            } catch (\RuntimeException) {
+                throw ValidationException::withMessages([
+                    'foto' => 'Foto tidak dapat diproses. Gunakan file JPG, PNG, atau WEBP yang valid.',
+                ]);
+            }
+        }
+        unset($data['foto']);
+        if ($fotoPath) {
+            $data['foto_path'] = $fotoPath;
+        }
 
-        $perumahan = DB::transaction(function () use ($data, $request): Perumahan {
-            $perumahan = Perumahan::create($data);
-            $this->syncDetail($perumahan, $request);
+        try {
+            $perumahan = DB::transaction(function () use ($data, $request): Perumahan {
+                $perumahan = Perumahan::create($data);
+                $this->syncDetail($perumahan, $request);
 
-            return $perumahan;
-        });
+                return $perumahan;
+            });
+        } catch (\Throwable $exception) {
+            if ($fotoPath) {
+                Storage::disk('public')->delete($fotoPath);
+            }
+
+            throw $exception;
+        }
 
         $this->peta->hapusCache();
         Cache::forget(DashboardStatistikService::CACHE_KEY);
@@ -83,12 +116,39 @@ class PerumahanController extends Controller
 
     public function update(StorePerumahanRequest $request, Perumahan $perumahan): RedirectResponse
     {
+        $this->pastikanFotoValid($request);
         $data = $request->validated();
+        $fotoLama = $perumahan->foto_path;
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            try {
+                $fotoPath = \App\Support\FotoBersih::simpan($request->file('foto'), 'perumahan');
+            } catch (\RuntimeException) {
+                throw ValidationException::withMessages([
+                    'foto' => 'Foto tidak dapat diproses. Gunakan file JPG, PNG, atau WEBP yang valid.',
+                ]);
+            }
+        }
+        unset($data['foto']);
+        if ($fotoPath) {
+            $data['foto_path'] = $fotoPath;
+        }
 
-        DB::transaction(function () use ($data, $perumahan, $request): void {
-            $perumahan->update($data);
-            $this->syncDetail($perumahan, $request);
-        });
+        try {
+            DB::transaction(function () use ($data, $perumahan, $request): void {
+                $perumahan->update($data);
+                $this->syncDetail($perumahan, $request);
+            });
+        } catch (\Throwable $exception) {
+            if ($fotoPath) {
+                Storage::disk('public')->delete($fotoPath);
+            }
+
+            throw $exception;
+        }
+        if ($fotoPath && $fotoLama) {
+            Storage::disk('public')->delete($fotoLama);
+        }
 
         $this->peta->hapusCache();
         Cache::forget(DashboardStatistikService::CACHE_KEY);
@@ -100,10 +160,18 @@ class PerumahanController extends Controller
     public function destroy(Perumahan $perumahan): RedirectResponse
     {
         $nama = $perumahan->nama;
+        $paths = LaporanFoto::whereIn(
+            'laporan_id',
+            Laporan::where('perumahan_id', $perumahan->id)->select('id'),
+        )->pluck('path')->all();
+        if ($perumahan->foto_path) {
+            $paths[] = $perumahan->foto_path;
+        }
 
         // Hard delete permanen: baris induk dihapus, psu_perumahans &
         // tipe_units ikut terhapus lewat foreign key cascadeOnDelete().
-        $perumahan->delete();
+        DB::transaction(fn () => $perumahan->delete());
+        Storage::disk('public')->delete($paths);
 
         $this->peta->hapusCache();
         Cache::forget(DashboardStatistikService::CACHE_KEY);
@@ -147,7 +215,9 @@ class PerumahanController extends Controller
             'titik' => $titik,
             'perumahans' => $perumahans,
             'kecamatanFokus' => $kecamatanFokus,
-            'fokusAktif' => (int) $request->query('kecamatan', 0) ?: null,
+            'fokusAktif' => (int) (FilterQuery::ambil($request, [
+                'kecamatan' => ['nullable', 'integer', 'min:1'],
+            ])['kecamatan'] ?? 0) ?: null,
         ]);
     }
 
@@ -172,6 +242,17 @@ class PerumahanController extends Controller
     {
         $this->syncPsu($perumahan, (array) $request->input('psu', []));
         $this->syncTipeUnits($perumahan, (array) $request->input('tipe_units', []));
+    }
+
+    private function pastikanFotoValid(StorePerumahanRequest $request): void
+    {
+        $foto = $request->file('foto');
+
+        if ($foto !== null && ! $foto->isValid()) {
+            throw ValidationException::withMessages([
+                'foto' => 'Foto gagal diunggah. Ukuran file kemungkinan melebihi batas server. Coba kecilkan fotonya.',
+            ]);
+        }
     }
 
     private function syncPsu(Perumahan $perumahan, array $rows): void

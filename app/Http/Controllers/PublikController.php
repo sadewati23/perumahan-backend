@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kecamatan;
 use App\Models\Perumahan;
 use App\Services\PerumahanPetaService;
+use App\Support\FilterQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -47,13 +48,17 @@ class PublikController extends Controller
 
     public function index(Request $request): View
     {
-        $filters = $request->only(['q', 'status', 'kecamatan_id']);
+        $filters = FilterQuery::ambil($request, [
+            'q' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:'.implode(',', array_keys(Perumahan::STATUS))],
+            'kecamatan_id' => ['nullable', 'integer', 'min:1'],
+        ]);
 
         $query = Perumahan::with('kelurahan.kecamatan')->filter($filters);
 
         $ringkasan = $this->peta->ringkasan($query);
 
-        $perumahans = $query->orderBy('nama')->paginate(12)->withQueryString();
+        $perumahans = $query->orderBy('nama')->paginate(12)->appends($filters);
         $kecamatans = Kecamatan::orderBy('nama')->get();
 
         return view('publik.index', compact('perumahans', 'kecamatans', 'filters', 'ringkasan'));
@@ -75,7 +80,11 @@ class PublikController extends Controller
 
     public function peta(Request $request): View
     {
-        $filters = $request->only(['q', 'status', 'kecamatan_id']);
+        $filters = FilterQuery::ambil($request, [
+            'q' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:'.implode(',', array_keys(Perumahan::STATUS))],
+            'kecamatan_id' => ['nullable', 'integer', 'min:1'],
+        ]);
 
         // Tanpa filter: pakai daftar ber-cache; dengan filter: query langsung.
         if (array_filter($filters, fn ($v) => filled($v)) === []) {

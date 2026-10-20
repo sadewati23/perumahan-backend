@@ -189,14 +189,16 @@
                     </a>
                 @endif
 
-                <div class="mt-3 border-t border-slate-100 pt-3 text-right">
-                    <button type="button"
-                            data-confirm="Hapus laporan {{ $laporan->kode }} ini?&#10;Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
-                            data-action="{{ route('laporan.destroy', $laporan) }}"
-                            class="text-xs font-medium text-danger-600 hover:text-danger-700">
-                        Hapus
-                    </button>
-                </div>
+                @if (auth()->user()->isAdmin())
+                    <div class="mt-3 border-t border-slate-100 pt-3 text-right">
+                        <button type="button"
+                                data-confirm="Hapus laporan {{ $laporan->kode }} ini?&#10;Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
+                                data-action="{{ route('laporan.destroy', $laporan) }}"
+                                class="text-xs font-medium text-danger-600 hover:text-danger-700">
+                            Hapus
+                        </button>
+                    </div>
+                @endif
             </x-card>
         @empty
             <x-empty-state
@@ -272,12 +274,14 @@
                                 {{ $laporan->created_at->translatedFormat('d M Y, H:i') }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-right">
-                                <button type="button"
-                                        data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
-                                        data-action="{{ route('laporan.destroy', $laporan) }}"
-                                        class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                    Hapus
-                                </button>
+                                @if (auth()->user()->isAdmin())
+                                    <button type="button"
+                                            data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
+                                            data-action="{{ route('laporan.destroy', $laporan) }}"
+                                            class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                                        Hapus
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @empty

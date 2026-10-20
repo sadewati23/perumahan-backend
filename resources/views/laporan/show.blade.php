@@ -171,11 +171,13 @@
                                                 <span class="block text-slate-400">oleh {{ $foto->pengunggah->name }}</span>
                                             @endif
                                         </p>
-                                        <button type="button" data-confirm="Hapus foto hasil perbaikan ini?\nFile akan dihapus permanen dari penyimpanan."
-                                                data-action="{{ route('laporan.foto-perbaikan.destroy', [$laporan, $foto]) }}"
-                                                class="shrink-0 rounded-lg border border-rose-300 px-2 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                            Hapus
-                                        </button>
+                                        @if (auth()->user()->isAdmin() || $foto->diunggah_oleh === auth()->id())
+                                            <button type="button" data-confirm="Hapus foto hasil perbaikan ini?\nFile akan dihapus permanen dari penyimpanan."
+                                                    data-action="{{ route('laporan.foto-perbaikan.destroy', [$laporan, $foto]) }}"
+                                                    class="shrink-0 rounded-lg border border-rose-300 px-2 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                                                Hapus
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach

@@ -94,6 +94,7 @@ class LaporanPerbaikanController extends Controller
         if ($foto->laporan_id !== $laporan->id || $foto->tipe !== LaporanFoto::TIPE_PERBAIKAN) {
             abort(404);
         }
+        abort_unless(auth()->user()->isAdmin() || $foto->diunggah_oleh === auth()->id(), 403);
 
         Storage::disk('public')->delete($foto->path);
         $foto->delete();

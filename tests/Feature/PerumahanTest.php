@@ -175,7 +175,7 @@ class PerumahanTest extends TestCase
 
         $this->assertSame('Perumahan Baru', $perumahan->fresh()->nama);
 
-        $this->actingAs($this->petugas())
+        $this->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]))
             ->delete(route('perumahan.destroy', $perumahan))
             ->assertRedirect(route('perumahan.index'));
 
@@ -206,7 +206,7 @@ class PerumahanTest extends TestCase
             'jumlah_unit' => 50,
         ]);
 
-        $this->actingAs($this->petugas())
+        $this->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]))
             ->delete(route('perumahan.destroy', $perumahan))
             ->assertRedirect(route('perumahan.index'));
 

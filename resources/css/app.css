@@ -1,5 +1,53 @@
 @import 'tailwindcss';
 
+/* Teks muncul bertahap dari bawah */
+@keyframes naik-masuk {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .masuk-naik { animation: naik-masuk .7s cubic-bezier(.22, 1, .36, 1) both; }
+    .tunda-1 { animation-delay: .1s; }
+    .tunda-2 { animation-delay: .25s; }
+    .tunda-3 { animation-delay: .4s; }
+    .tunda-4 { animation-delay: .55s; }
+}
+
+/* Kilau emas yang bergerak pelan pada teks sorotan */
+@keyframes kilau-teks { to { background-position: 200% center; } }
+.teks-kilau {
+    color: #fde68a;
+    background-image: linear-gradient(90deg, #fde68a, #ffffff, #fcd34d, #fde68a);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .teks-kilau { animation: kilau-teks 4s linear infinite; }
+}
+
+@keyframes batang-tumbuh { from { transform: scaleX(0); } }
+@keyframes kartu-muncul { from { opacity: 0; transform: translateY(20px); } }
+
+@media (prefers-reduced-motion: no-preference) {
+    .batang { transform-origin: left center; animation: batang-tumbuh 1s cubic-bezier(.22, 1, .36, 1) both; }
+    .kartu-muncul { animation: kartu-muncul .6s cubic-bezier(.22, 1, .36, 1) both; }
+
+    @supports not (animation-timeline: view()) {
+        .kartu-muncul:nth-child(2) { animation-delay: .08s; }
+        .kartu-muncul:nth-child(3) { animation-delay: .16s; }
+        .kartu-muncul:nth-child(4) { animation-delay: .24s; }
+    }
+
+    @supports (animation-timeline: view()) {
+        .batang, .kartu-muncul {
+            animation-timeline: view();
+            animation-range: entry 0% entry 70%;
+        }
+    }
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';

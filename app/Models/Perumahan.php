@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
+use App\Support\FilterQuery;
 
 class Perumahan extends Model
 {
@@ -41,7 +43,7 @@ class Perumahan extends Model
     ];
 
     protected $fillable = [
-        'nama', 'pengembang', 'kelurahan_id', 'alamat', 'rt', 'rw',
+        'nama', 'foto_path', 'pengembang', 'kelurahan_id', 'alamat', 'rt', 'rw',
         'latitude', 'longitude', 'luas_lahan', 'jumlah_unit', 'status',
         'tahun_pembuatan', 'tahun_selesai', 'jumlah_rth', 'luas_rth',
         'kdb', 'kdh', 'ada_lahan_pemakaman', 'luas_lahan_pemakaman',
@@ -83,12 +85,14 @@ class Perumahan extends Model
     {
         return $query
             ->when($filters['q'] ?? null, function (Builder $q, $keyword) {
+                $keyword = FilterQuery::likeAman($keyword);
                 $q->where(function (Builder $sub) use ($keyword) {
-                    $sub->where('nama', 'like', "%{$keyword}%")
-                        ->orWhere('pengembang', 'like', "%{$keyword}%")
-                        ->orWhere('alamat', 'like', "%{$keyword}%")
-                        ->orWhereHas('kelurahan', fn (Builder $k) => $k->where('nama', 'like', "%{$keyword}%"))
-                        ->orWhereHas('kelurahan.kecamatan', fn (Builder $k) => $k->where('nama', 'like', "%{$keyword}%"));
+                    $like = "%{$keyword}%";
+                    $sub->where('nama', 'like', $like)
+                        ->orWhere('pengembang', 'like', $like)
+                        ->orWhere('alamat', 'like', $like)
+                        ->orWhereHas('kelurahan', fn (Builder $k) => $k->where('nama', 'like', $like))
+                        ->orWhereHas('kelurahan.kecamatan', fn (Builder $k) => $k->where('nama', 'like', $like));
                 });
             })
             ->when($filters['status'] ?? null, fn (Builder $q, $status) => $q->where('status', $status))
@@ -100,6 +104,11 @@ class Perumahan extends Model
     public function getLabelStatusAttribute(): string
     {
         return self::STATUS[$this->status] ?? $this->status;
+    }
+
+    public function getFotoUrlAttribute(): ?string
+    {
+        return $this->foto_path ? Storage::disk('public')->url($this->foto_path) : null;
     }
 
     public function getBadgeStatusAttribute(): string

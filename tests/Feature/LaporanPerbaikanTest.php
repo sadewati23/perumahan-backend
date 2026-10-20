@@ -115,6 +115,7 @@ class LaporanPerbaikanTest extends TestCase
     {
         Storage::fake('public');
         $petugas = $this->petugas();
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         $laporan = $this->buatLaporan();
 
         // 1) File bukan gambar.
@@ -159,6 +160,7 @@ class LaporanPerbaikanTest extends TestCase
     {
         Storage::fake('public');
         $petugas = $this->petugas();
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         $laporan = $this->buatLaporan();
 
         $this->actingAs($petugas)
@@ -174,7 +176,7 @@ class LaporanPerbaikanTest extends TestCase
         $this->assertTrue(Storage::disk('public')->exists($path));
 
         // Hapus foto perbaikan menghapus file + baris.
-        $this->actingAs($petugas)
+        $this->actingAs($admin)
             ->delete(route('laporan.foto-perbaikan.destroy', [$laporan, $foto]))
             ->assertRedirect();
 
@@ -185,7 +187,7 @@ class LaporanPerbaikanTest extends TestCase
         $buktiWarga = $this->tandaiBuktiPelapor($laporan);
         Storage::disk('public')->put($buktiWarga->path, 'data-warga');
 
-        $this->actingAs($petugas)
+        $this->actingAs($admin)
             ->delete(route('laporan.foto-perbaikan.destroy', [$laporan, $buktiWarga]))
             ->assertStatus(404); // abort(404) di controller: cegah IDOR & hapus foto bukti warga
         $this->assertTrue(Storage::disk('public')->exists($buktiWarga->path));
@@ -201,7 +203,7 @@ class LaporanPerbaikanTest extends TestCase
             'tipe' => LaporanFoto::TIPE_PERBAIKAN,
         ]);
 
-        $this->actingAs($petugas)
+        $this->actingAs($admin)
             ->delete(route('laporan.foto-perbaikan.destroy', [$laporan, LaporanFoto::latest('id')->first()]))
             ->assertStatus(404);
         $this->assertTrue(LaporanFoto::where('laporan_id', $laporanLain->id)->exists());
@@ -334,7 +336,7 @@ class LaporanPerbaikanTest extends TestCase
 
         $this->assertTrue(Storage::disk('public')->exists($foto->path));
 
-        $this->actingAs($petugas)
+        $this->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]))
             ->delete(route('laporan.destroy', $laporan))
             ->assertRedirect(route('laporan.index'));
 
