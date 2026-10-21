@@ -12,8 +12,8 @@
         <div>
             <div class="flex flex-wrap items-center gap-2">
                 <h2 class="text-lg font-semibold text-slate-900">{{ $perumahan->nama }}</h2>
-                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->badge_status }}">
-                    {{ $perumahan->label_status }}
+                                 <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->status_badge_class }}">
+                                     {{ $perumahan->status_label }}
                 </span>
                 @if ($perumahan->punya_koordinat)
                     <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-300">

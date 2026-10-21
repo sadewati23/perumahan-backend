@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kecamatan;
 use App\Models\Perumahan;
 use App\Services\PerumahanPetaService;
+use App\Services\DashboardStatistikService;
 use App\Support\FilterQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,19 +13,15 @@ use Illuminate\View\View;
 
 class PublikController extends Controller
 {
-    public function __construct(private readonly PerumahanPetaService $peta) {}
+    public function __construct(
+        private readonly PerumahanPetaService $peta,
+        private readonly DashboardStatistikService $statistikService,
+    ) {}
 
     public function beranda(): View
     {
-        $statistik = [
-            'total_perumahan' => Perumahan::count(),
-            'total_unit' => (int) Perumahan::sum('jumlah_unit'),
-            'total_luas_lahan' => (float) Perumahan::sum('luas_lahan'),
-            'total_luas_rth' => (float) Perumahan::sum('luas_rth'),
-            'jumlah_subsidi' => Perumahan::where('status', 'subsidi')->count(),
-            'jumlah_komersil' => Perumahan::where('status', 'komersil')->count(),
-            'jumlah_kecamatan' => Kecamatan::count(),
-        ];
+        $statistik = $this->statistikService->ambil()['perumahan'];
+        $statistik['jumlah_kecamatan'] = Kecamatan::count();
 
         $perKecamatan = Kecamatan::withCount('perumahans')
             ->orderByDesc('perumahans_count')

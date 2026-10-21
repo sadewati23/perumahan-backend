@@ -1,7 +1,7 @@
 @extends('layouts.publik')
 
 @section('title', 'Peta Sebaran')
-@section('description', 'Peta sebaran lokasi perumahan beserta status subsidi atau komersil.')
+@section('description', 'Peta sebaran lokasi perumahan beserta status subsidi, komersil, atau campuran.')
 
 @push('head')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
@@ -25,8 +25,9 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3 text-sm">
-                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-emerald-500"></span> Subsidi</span>
-                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-indigo-500"></span> Komersil</span>
+                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-amber-500"></span> Subsidi</span>
+                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-neutral-800"></span> Komersil</span>
+                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-rose-800"></span> Campuran</span>
                     <a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener"
                        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         GeoJSON
@@ -88,7 +89,7 @@
                                 <button type="button" data-fokus="{{ $item['id'] }}"
                                         class="w-full py-2 text-left transition hover:text-indigo-600">
                                     <span class="flex items-center gap-2">
-                                        <span class="h-2 w-2 shrink-0 rounded-full {{ $item['status'] === 'Subsidi' ? 'bg-emerald-500' : 'bg-indigo-500' }}"></span>
+                                         <span class="h-2 w-2 shrink-0 rounded-full {{ match ($item['status']) { 'Subsidi' => 'bg-amber-500', 'Komersil' => 'bg-neutral-800', 'Campuran' => 'bg-rose-800', default => 'bg-slate-500' } }}"></span>
                                         <span class="truncate font-medium text-slate-700">{{ $item['nama'] }}</span>
                                     </span>
                                     <span class="block truncate pl-4 text-xs text-slate-500">{{ $item['alamat'] }}</span>
@@ -135,7 +136,7 @@
                 attribution: PETA.tile_attribution,
             }).addTo(map);
 
-            const colors = { Subsidi: '#f59e0b', Komersil: '#262626' };
+             const colors = @json(\App\Models\Perumahan::warnaPerLabel());
             const markers = {};
             const bounds = [];
             const formatAngka = (angka) => new Intl.NumberFormat('id-ID').format(angka);

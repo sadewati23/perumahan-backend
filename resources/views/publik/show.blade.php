@@ -22,8 +22,8 @@
                 <div>
                     <div class="flex flex-wrap items-center gap-2">
                         <h1 class="text-2xl font-semibold text-slate-900">{{ $perumahan->nama }}</h1>
-                        <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->badge_status }}">
-                            {{ $perumahan->label_status }}
+                        <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->status_badge_class }}">
+                            {{ $perumahan->status_label }}
                         </span>
                     </div>
                     <p class="mt-2 text-sm text-slate-600">{{ $perumahan->alamat_lengkap ?: 'Alamat belum dilengkapi' }}</p>
@@ -47,8 +47,7 @@
             </div>
 
             @if ($perumahan->foto_url)
-                <img src="{{ $perumahan->foto_url }}" alt="Foto {{ $perumahan->nama }}"
-                     class="mt-6 h-64 w-full rounded-xl object-cover ring-1 ring-slate-200 sm:h-80">
+                <x-foto-perumahan :perumahan="$perumahan" :lazy="false" class="mt-6 h-72 w-full rounded-xl ring-1 ring-slate-200 sm:h-96" />
             @endif
 
             <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -259,7 +258,7 @@
                                 <a href="{{ route('publik.perumahan.show', $item) }}" class="block">
                                     <p class="text-sm font-medium text-slate-800 hover:text-indigo-600">{{ $item->nama }}</p>
                                     <p class="text-xs text-slate-500">
-                                        {{ $item->label_status }} &middot; {{ $item->jumlah_unit }} unit &middot;
+                                        {{ $item->status_label }} &middot; {{ $item->jumlah_unit }} unit &middot;
                                         Kel. {{ $item->kelurahan->nama ?? '-' }}
                                     </p>
                                 </a>

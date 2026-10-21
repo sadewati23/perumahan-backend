@@ -1,7 +1,7 @@
 @extends('layouts.publik')
 
 @section('title', 'Beranda')
-@section('description', 'Portal informasi data perumahan: lokasi, luasan lahan, jumlah unit, RTH, KDB/KDH, PSU, dan status subsidi atau komersil.')
+@section('description', 'Portal informasi data perumahan: lokasi, luasan lahan, jumlah unit, RTH, KDB/KDH, PSU, dan status subsidi, komersil, atau campuran.')
 
 @push('head')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
@@ -27,7 +27,7 @@
             <p class="mt-4 max-w-2xl masuk-naik tunda-2 text-sm text-neutral-300 sm:text-base">
                 Telusuri data perumahan beserta lokasi kelurahan dan kecamatan, RT/RW, titik koordinat,
                 luas lahan, jumlah unit, RTH, KDB/KDH, lahan pemakaman, prasarana-sarana-utilitas (PSU),
-                tahun pembangunan, tipe unit, dan status subsidi/komersil.
+                tahun pembangunan, tipe unit, dan status subsidi/komersil/campuran.
             </p>
 
             <div class="mt-8 flex max-w-2xl masuk-naik tunda-3 flex-col gap-3 sm:flex-row sm:items-center">
@@ -106,6 +106,7 @@
                     $totalStatus = max(1, $statistik['total_perumahan']);
                     $persenSubsidi = round($statistik['jumlah_subsidi'] / $totalStatus * 100);
                     $persenKomersil = round($statistik['jumlah_komersil'] / $totalStatus * 100);
+                    $persenCampuran = round($statistik['jumlah_campuran'] / $totalStatus * 100);
                 @endphp
                 <div class="mt-4 space-y-4">
                     <div>
@@ -124,6 +125,15 @@
                         </div>
                         <div class="mt-1 h-2.5 rounded-full bg-stone-200">
                             <div class="batang h-2.5 rounded-full bg-neutral-800" style="width: {{ $persenKomersil }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-sm">
+                        <span class="flex items-center gap-2 font-medium text-rose-800"><span class="h-2.5 w-2.5 rounded-full bg-rose-800" aria-hidden="true"></span>Campuran</span>
+                            <span class="text-neutral-700">{{ $statistik['jumlah_campuran'] }} <span class="font-semibold text-neutral-900">({{ $persenCampuran }}%)</span></span>
+                        </div>
+                        <div class="mt-1 h-2.5 rounded-full bg-stone-200">
+                            <div class="batang h-2.5 rounded-full bg-rose-800" style="width: {{ $persenCampuran }}%"></div>
                         </div>
                     </div>
                 </div>
@@ -181,6 +191,7 @@
             <div class="mt-2 flex flex-wrap items-center gap-2" aria-label="Legenda status peta">
                 <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-amber-500" aria-hidden="true">●</span>Subsidi</span>
                 <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-neutral-800" aria-hidden="true">●</span>Komersil</span>
+                <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-rose-200"><span class="text-rose-800" aria-hidden="true">●</span>Campuran</span>
             </div>
 
             @if ($titik->isEmpty())
@@ -232,7 +243,7 @@
                 attribution: PETA.tile_attribution,
             }).addTo(map);
 
-            const colors = { Subsidi: '#f59e0b', Komersil: '#262626' };
+             const colors = @json(\App\Models\Perumahan::warnaPerLabel());
             const bounds = [];
             const formatAngka = (angka) => new Intl.NumberFormat('id-ID').format(angka);
 

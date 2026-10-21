@@ -117,9 +117,9 @@
                         </a>
                         <p class="truncate text-xs text-slate-500">{{ $perumahan->pengembang ?: 'Pengembang belum diisi' }}</p>
                     </div>
-                    <x-badge :tone="$perumahan->status === 'subsidi' ? 'success' : 'primary'" size="sm">
-                        {{ $perumahan->label_status }}
-                    </x-badge>
+                    <span class="inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset {{ $perumahan->status_badge_class }}">
+                        {{ $perumahan->status_label }}
+                    </span>
                 </div>
 
                 <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
@@ -245,9 +245,9 @@
                                 <p class="text-xs text-slate-500">&rarr; {{ $perumahan->tahun_selesai ?: '-' }}</p>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <x-badge :tone="$perumahan->status === 'subsidi' ? 'success' : 'primary'" size="sm">
-                                    {{ $perumahan->label_status }}
-                                </x-badge>
+                                <span class="inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset {{ $perumahan->status_badge_class }}">
+                                    {{ $perumahan->status_label }}
+                                </span>
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-end gap-2">

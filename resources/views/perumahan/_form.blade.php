@@ -52,8 +52,7 @@
                            class="input file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white">
                     <p class="mt-1 text-xs text-slate-500">JPG, PNG, atau WEBP, maksimal 5 MB.</p>
                     @if ($perumahan->foto_url)
-                        <img src="{{ $perumahan->foto_url }}" alt="Foto {{ $perumahan->nama }}"
-                             class="mt-3 h-32 w-48 rounded-lg object-cover ring-1 ring-slate-200">
+                        <x-foto-perumahan :perumahan="$perumahan" class="mt-3 h-32 w-48 rounded-lg ring-1 ring-slate-200" />
                     @endif
                 </x-field>
 

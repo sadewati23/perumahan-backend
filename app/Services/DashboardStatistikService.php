@@ -57,7 +57,7 @@ class DashboardStatistikService
     /**
      * Satu query menggantikan belasan count()/sum() terpisah (agregasi kondisional).
      *
-     * @return array{total_perumahan: int, total_unit: int, total_luas_lahan: float, total_luas_rth: float, jumlah_subsidi: int, jumlah_komersil: int, jumlah_pemakaman: int, belum_koordinat: int}
+     * @return array{total_perumahan: int, total_unit: int, total_luas_lahan: float, total_luas_rth: float, jumlah_subsidi: int, jumlah_komersil: int, jumlah_campuran: int, jumlah_pemakaman: int, belum_koordinat: int}
      */
     private function statistikPerumahan(): array
     {
@@ -67,8 +67,9 @@ class DashboardStatistikService
                 COALESCE(SUM(jumlah_unit), 0) as total_unit,
                 COALESCE(SUM(luas_lahan), 0) as total_luas_lahan,
                 COALESCE(SUM(luas_rth), 0) as total_luas_rth,
-                COALESCE(SUM(CASE WHEN status = 'subsidi' THEN 1 ELSE 0 END), 0) as jumlah_subsidi,
-                COALESCE(SUM(CASE WHEN status = 'komersil' THEN 1 ELSE 0 END), 0) as jumlah_komersil,
+                 COALESCE(SUM(CASE WHEN status = 'subsidi' THEN 1 ELSE 0 END), 0) as jumlah_subsidi,
+                 COALESCE(SUM(CASE WHEN status = 'komersil' THEN 1 ELSE 0 END), 0) as jumlah_komersil,
+                 COALESCE(SUM(CASE WHEN status = 'campuran' THEN 1 ELSE 0 END), 0) as jumlah_campuran,
                 COALESCE(SUM(CASE WHEN ada_lahan_pemakaman = 1 THEN 1 ELSE 0 END), 0) as jumlah_pemakaman,
                 COALESCE(SUM(CASE WHEN latitude IS NULL OR longitude IS NULL THEN 1 ELSE 0 END), 0) as belum_koordinat
             ")
@@ -81,6 +82,7 @@ class DashboardStatistikService
             'total_luas_rth' => (float) $baris->total_luas_rth,
             'jumlah_subsidi' => (int) $baris->jumlah_subsidi,
             'jumlah_komersil' => (int) $baris->jumlah_komersil,
+            'jumlah_campuran' => (int) $baris->jumlah_campuran,
             'jumlah_pemakaman' => (int) $baris->jumlah_pemakaman,
             'belum_koordinat' => (int) $baris->belum_koordinat,
         ];

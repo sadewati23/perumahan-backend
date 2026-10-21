@@ -15,7 +15,23 @@ class Perumahan extends Model
     public const STATUS = [
         'subsidi' => 'Subsidi',
         'komersil' => 'Komersil',
+        'campuran' => 'Campuran',
     ];
+
+    public const WARNA_HEX = [
+        'subsidi' => '#f59e0b',
+        'komersil' => '#262626',
+        'campuran' => '#9f1239',
+    ];
+
+    public static function warnaPerLabel(): array
+    {
+        return [
+            'Subsidi' => self::WARNA_HEX['subsidi'],
+            'Komersil' => self::WARNA_HEX['komersil'],
+            'Campuran' => self::WARNA_HEX['campuran'],
+        ];
+    }
 
     public const JENIS_PSU = [
         'Jalan Lingkungan',
@@ -106,16 +122,39 @@ class Perumahan extends Model
         return self::STATUS[$this->status] ?? $this->status;
     }
 
+    public function getStatusLabelAttribute(): string
+    {
+        return $this->label_status;
+    }
+
     public function getFotoUrlAttribute(): ?string
     {
         return $this->foto_path ? Storage::disk('public')->url($this->foto_path) : null;
     }
 
+    public function getStatusDotClassAttribute(): string
+    {
+        return match ($this->status) {
+            'subsidi' => 'bg-amber-500',
+            'komersil' => 'bg-neutral-800',
+            'campuran' => 'bg-rose-800',
+            default => 'bg-slate-500',
+        };
+    }
+
+    public function getStatusBadgeClassAttribute(): string
+    {
+        return match ($this->status) {
+            'subsidi' => 'bg-amber-100 text-amber-800 ring-amber-600/20',
+            'komersil' => 'bg-neutral-200 text-neutral-800 ring-neutral-600/20',
+            'campuran' => 'bg-rose-100 text-rose-800 ring-rose-700/20',
+            default => 'bg-slate-100 text-slate-700 ring-slate-500/20',
+        };
+    }
+
     public function getBadgeStatusAttribute(): string
     {
-        return $this->status === 'subsidi'
-            ? 'bg-emerald-100 text-emerald-700 ring-emerald-600/20'
-            : 'bg-indigo-100 text-indigo-700 ring-indigo-600/20';
+        return $this->status_badge_class;
     }
 
     public function getLuasLahanHaAttribute(): float

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
+use App\Models\Perumahan;
 
 class StorePerumahanRequest extends FormRequest
 {
@@ -36,7 +37,7 @@ class StorePerumahanRequest extends FormRequest
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'luas_lahan' => ['required', 'numeric', 'min:0'],
             'jumlah_unit' => ['required', 'integer', 'min:0'],
-            'status' => ['required', 'in:subsidi,komersil'],
+            'status' => ['required', 'in:'.implode(',', array_keys(Perumahan::STATUS))],
             'tahun_pembuatan' => ['nullable', 'integer', 'min:1900', 'max:'.($tahunSekarang + 1)],
             'tahun_selesai' => ['nullable', 'integer', 'min:1900', 'max:'.($tahunSekarang + 10)],
             'jumlah_rth' => ['nullable', 'integer', 'min:0'],

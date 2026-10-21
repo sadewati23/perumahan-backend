@@ -97,7 +97,7 @@
                 </div>
                 <p class="mt-3 max-w-md text-sm text-slate-600">
                     Portal informasi data perumahan {{ config('peta.nama_wilayah') }} yang memuat identitas perumahan, lokasi administratif, titik koordinat,
-                    luasan lahan, jumlah unit, RTH, KDB/KDH, lahan pemakaman, prasarana-sarana-utilitas (PSU), serta status subsidi/komersil.
+                    luasan lahan, jumlah unit, RTH, KDB/KDH, lahan pemakaman, prasarana-sarana-utilitas (PSU), serta status subsidi/komersil/campuran.
                 </p>
             </div>
 

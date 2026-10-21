@@ -56,7 +56,7 @@
 <body>
     {{-- Toolbar layar — tidak ikut tercetak. --}}
     <div class="no-print">
-        <button type="button" id="tombol-cetak">🖨️ Cetak Rekap</button>
+        <button type="button" id="tombol-cetak">Cetak Rekap</button>
         <button type="button" id="tombol-tutup">Tutup Tab</button>
     </div>
 

@@ -19,10 +19,13 @@
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-4 text-sm">
             <span class="flex items-center gap-2">
-                <span class="h-3 w-3 rounded-full bg-emerald-500"></span> Subsidi
+                <span class="h-3 w-3 rounded-full bg-amber-500"></span> Subsidi
             </span>
             <span class="flex items-center gap-2">
-                <span class="h-3 w-3 rounded-full bg-indigo-500"></span> Komersil
+                <span class="h-3 w-3 rounded-full bg-neutral-800"></span> Komersil
+            </span>
+            <span class="flex items-center gap-2">
+                <span class="h-3 w-3 rounded-full bg-rose-800"></span> Campuran
             </span>
             <span class="text-slate-500">{{ $titik->count() }} dari {{ $perumahans->count() }} perumahan sudah punya titik</span>
         </div>
@@ -73,7 +76,7 @@
                             <button type="button" data-fokus="{{ $item['id'] }}"
                                     class="w-full rounded-md px-2 py-1.5 text-left transition hover:bg-slate-50">
                                 <span class="flex items-center gap-2">
-                                    <span class="h-2 w-2 shrink-0 rounded-full {{ $item['status'] === 'Subsidi' ? 'bg-emerald-500' : 'bg-indigo-500' }}"></span>
+                                         <span class="h-2 w-2 shrink-0 rounded-full {{ match ($item['status']) { 'Subsidi' => 'bg-amber-500', 'Komersil' => 'bg-neutral-800', 'Campuran' => 'bg-rose-800', default => 'bg-slate-500' } }}"></span>
                                     <span class="truncate font-medium text-slate-700">{{ $item['nama'] }}</span>
                                 </span>
                                 <span class="block truncate pl-4 text-xs text-slate-500">{{ $item['alamat'] }}</span>
@@ -122,7 +125,7 @@
                 attribution: PETA.tile_attribution,
             }).addTo(map);
 
-            const colors = { Subsidi: '#f59e0b', Komersil: '#262626' };
+             const colors = @json(\App\Models\Perumahan::warnaPerLabel());
             const markers = {};
             const formatAngka = (angka) => new Intl.NumberFormat('id-ID').format(angka);
 
