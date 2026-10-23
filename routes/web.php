@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CekLaporanController;
 use App\Http\Controllers\KecamatanController;
 use App\Http\Controllers\KelurahanController;
 use App\Http\Controllers\LaporanAdminController;
@@ -26,6 +27,8 @@ Route::get('/peta/geojson', [PublikController::class, 'geojson'])->name('publik.
 // Laporan kerusakan sarana-prasarana dari publik (tanpa login)
 Route::get('/lapor', [LaporanController::class, 'create'])->name('lapor.create');
 Route::post('/lapor', [LaporanController::class, 'store'])->middleware('throttle:lapor')->name('lapor.store');
+Route::get('/cek-laporan', [CekLaporanController::class, 'index'])->name('cek-laporan.index');
+Route::post('/cek-laporan', [CekLaporanController::class, 'cari'])->middleware('throttle:cek-laporan')->name('cek-laporan.cari');
 
 /*
 |--------------------------------------------------------------------------

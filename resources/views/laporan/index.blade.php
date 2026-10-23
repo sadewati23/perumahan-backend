@@ -153,7 +153,11 @@
                     </div>
                     <x-badge :tone="match ($laporan->status) { 'selesai' => 'success', 'ditolak' => 'danger', 'diproses' => 'info', default => 'warning' }" size="sm">
                         {{ $laporan->label_status }}
-                    </x-badge>
+                     </x-badge>
+                     @if ($laporan->status === 'selesai' && $laporan->jatuh_tempo_hapus)
+                         @php $sisa = now()->diffInDays($laporan->jatuh_tempo_hapus, false); @endphp
+                         <x-badge tone="warning" size="sm">{{ $sisa < 0 ? 'Menunggu penghapusan' : ($sisa === 0 ? 'Dihapus hari ini' : 'Dihapus '.$sisa.' hari lagi') }}</x-badge>
+                     @endif
                 </div>
 
                 <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
@@ -162,7 +166,11 @@
                         <dd class="mt-0.5">
                             <x-badge :tone="match ($laporan->jenis) { 'pengaduan' => 'info', 'bangunan_liar' => 'danger', default => 'warning' }" size="sm">
                                 {{ $laporan->label_jenis }}
-                            </x-badge>
+                                 </x-badge>
+                                 @if ($laporan->status === 'selesai' && $laporan->jatuh_tempo_hapus)
+                                     @php $sisa = now()->diffInDays($laporan->jatuh_tempo_hapus, false); @endphp
+                                     <x-badge tone="warning" size="sm">{{ $sisa < 0 ? 'Menunggu penghapusan' : ($sisa === 0 ? 'Dihapus hari ini' : 'Dihapus '.$sisa.' hari lagi') }}</x-badge>
+                                 @endif
                         </dd>
                     </div>
                     <div>

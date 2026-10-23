@@ -8,6 +8,7 @@ use App\Models\Laporan;
 use App\Models\Perumahan;
 use App\Models\PsuPerumahan;
 use App\Support\FotoBersih;
+use App\Support\TurnstileKonfigurasi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,8 @@ class LaporanController extends Controller
      */
     public function create(Request $request): View
     {
+        TurnstileKonfigurasi::catat();
+
         $perumahans = Perumahan::with(['kelurahan.kecamatan', 'psu'])
             ->orderBy('nama')
             ->get()

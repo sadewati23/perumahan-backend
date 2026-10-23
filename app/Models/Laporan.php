@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Support\FilterQuery;
 
 class Laporan extends Model
@@ -54,7 +58,7 @@ class Laporan extends Model
         'nama_pelapor', 'kontak_pelapor',
         'judul', 'deskripsi', 'tingkat',
         'tanggal_kejadian',
-        'catatan_petugas', 'deskripsi_aksi_selesai', 'selesai_pada',
+        'catatan_petugas', 'deskripsi_aksi_selesai', 'selesai_pada', 'jangan_hapus_otomatis',
         'persentase_kerusakan', 'panjang_kerusakan',
         'status', 'ditangani_oleh', 'ditangani_pada',
     ];
@@ -64,6 +68,7 @@ class Laporan extends Model
         return [
             'tanggal_kejadian' => 'date',
             'selesai_pada' => 'datetime',
+            'jangan_hapus_otomatis' => 'boolean',
             'persentase_kerusakan' => 'decimal:2',
             'panjang_kerusakan' => 'decimal:2',
             'ditangani_pada' => 'datetime',
@@ -129,6 +134,47 @@ class Laporan extends Model
             ->when($filters['perumahan_id'] ?? null, fn (Builder $q, $id) => $q->where('perumahan_id', $id));
     }
 
+    public function scopeJatuhTempoHapus(Builder $query): Builder
+    {
+        $query->where('status', 'selesai')->where('jangan_hapus_otomatis', false)
+            ->whereNotNull('selesai_pada')
+            ->where('selesai_pada', '<=', now()->subDays(config('laporan.hapus_otomatis_hari', 3)));
+        if ($sejak = config('laporan.hapus_otomatis_sejak')) {
+            $query->where('selesai_pada', '>=', Carbon::parse($sejak, config('app.timezone'))->startOfDay());
+        }
+        return $query;
+    }
+
+    public function scopeDapatDicari(Builder $query): Builder
+    {
+        if (config('laporan.hapus_otomatis', true)) {
+            $query->whereNot(function (Builder $q) {
+                $q->jatuhTempoHapus();
+            });
+        }
+        return $query;
+    }
+
+    public function getJatuhTempoHapusAttribute(): ?Carbon
+    {
+        if (! config('laporan.hapus_otomatis', true) || $this->status !== 'selesai'
+            || $this->jangan_hapus_otomatis || ! $this->selesai_pada) return null;
+        if (($sejak = config('laporan.hapus_otomatis_sejak'))
+            && $this->selesai_pada->lt(Carbon::parse($sejak, config('app.timezone'))->startOfDay())) return null;
+        return $this->selesai_pada->copy()->addDays(config('laporan.hapus_otomatis_hari', 3));
+    }
+
+    public function hapusPermanen(): void
+    {
+        $paths = $this->fotos()->pluck('path')->filter()->values()->all();
+        DB::transaction(fn () => $this->delete());
+        $gagal = [];
+        foreach ($paths as $path) {
+            try { if (! Storage::disk('public')->delete($path)) $gagal[] = $path; } catch (\Throwable) { $gagal[] = $path; }
+        }
+        if ($gagal) Log::warning('laporan.file_yatim', ['path' => $gagal]);
+    }
+
     /**
      * Nomor tiket unik per jenis, mis. LPR-20261005-7K3M / PGN-20261006-A1B2 / BLR-20261006-C3D4.
      */
@@ -139,7 +185,7 @@ class Laporan extends Model
                 '%s-%s-%s',
                 self::PREFIX_KODE[$jenis] ?? 'LPR',
                 now()->format('Ymd'),
-                strtoupper(substr(bin2hex(random_bytes(4)), 0, 4)),
+                collect(range(1, 8))->map(fn () => 'ABCDEFGHJKMNPQRSTVWXYZ23456789'[random_int(0, 29)])->implode(''),
             );
         } while (self::where('kode', $kode)->exists());
 

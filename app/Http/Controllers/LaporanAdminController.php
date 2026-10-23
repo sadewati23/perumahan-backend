@@ -9,7 +9,6 @@ use App\Support\FilterQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class LaporanAdminController extends Controller
@@ -57,14 +56,17 @@ class LaporanAdminController extends Controller
 
     public function update(Request $request, Laporan $laporan): RedirectResponse
     {
+        $statusSebelumnya = $laporan->status;
         $data = $request->validate([
             'status' => ['required', 'in:baru,diproses,selesai,ditolak'],
             'catatan_petugas' => ['nullable', 'string', 'max:2000'],
             'deskripsi_aksi_selesai' => ['nullable', 'string', 'max:2000'],
+            'jangan_hapus_otomatis' => ['nullable', 'boolean'],
         ], [
             'status.required' => 'Status penanganan wajib dipilih.',
         ]);
 
+        $data['jangan_hapus_otomatis'] = $request->boolean('jangan_hapus_otomatis');
         $laporan->update($data + [
             'ditangani_oleh' => auth()->id(),
             'ditangani_pada' => now(),
@@ -79,8 +81,11 @@ class LaporanAdminController extends Controller
         Cache::forget(Laporan::CACHE_BAIK_BARU);
         Cache::forget(DashboardStatistikService::CACHE_KEY);
 
-        return redirect()->route('laporan.show', $laporan)
-            ->with('success', 'Penanganan laporan '.$laporan->kode.' berhasil diperbarui.');
+        $pesan = 'Penanganan laporan '.$laporan->kode.' berhasil diperbarui.';
+        if ($laporan->jatuh_tempo_hapus && $statusSebelumnya !== 'selesai') {
+            $pesan .= ' Laporan akan dihapus otomatis pada '.$laporan->jatuh_tempo_hapus->translatedFormat('d F Y, H:i').' WIB ('.config('laporan.hapus_otomatis_hari').' hari setelah ditandai selesai).';
+        }
+        return redirect()->route('laporan.show', $laporan)->with('success', $pesan);
     }
 
     /**
@@ -140,15 +145,8 @@ class LaporanAdminController extends Controller
 
     public function destroy(Laporan $laporan): RedirectResponse
     {
-        // Hapus semua foto bukti dari disk storage dulu, baru baris database.
-        foreach ($laporan->fotos as $foto) {
-            if ($foto->path && Storage::disk('public')->exists($foto->path)) {
-                Storage::disk('public')->delete($foto->path);
-            }
-        }
-
         $kode = $laporan->kode;
-        $laporan->delete();
+        $laporan->hapusPermanen();
 
         // Statistik dashboard & badge sidebar tergantung data laporan → reset cache.
         Cache::forget(Laporan::CACHE_BAIK_BARU);

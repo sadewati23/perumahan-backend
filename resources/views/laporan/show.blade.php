@@ -4,6 +4,7 @@
 @section('subtitle', $laporan->kode)
 
 @section('content')
+    @if ($laporan->jatuh_tempo_hapus)<div role="status" class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Laporan ini akan dihapus otomatis pada {{ $laporan->jatuh_tempo_hapus->translatedFormat('d F Y, H:i') }} WIB. <a class="font-semibold underline" href="{{ route('laporan.cetak', $laporan) }}">Cetak laporan</a> terlebih dahulu bila masih diperlukan.</div>@elseif ($laporan->jangan_hapus_otomatis)<div role="status" class="mb-4 rounded-lg border border-slate-200 bg-slate-100 p-4 text-sm text-slate-700">Laporan ini disimpan permanen.</div>@endif
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2">
             <span class="rounded-lg bg-slate-900 px-3 py-1.5 font-mono text-sm font-bold text-white">{{ $laporan->kode }}</span>
@@ -35,7 +36,7 @@
                 <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-600">{{ $laporan->deskripsi }}</p>
 
                 <dl class="mt-5 grid gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2">
-                    <div>
+                     <div>
                         <dt class="text-xs text-slate-500">Lokasi</dt>
                         <dd class="text-sm font-medium text-slate-800">
                             @if ($laporan->perumahan)
@@ -265,6 +266,8 @@
                                 <option value="{{ $value }}" @selected(old('status', $laporan->status) === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
+                        @if (config('laporan.hapus_otomatis'))<p class="mt-1 text-xs text-slate-500">Laporan yang ditandai selesai akan dihapus otomatis {{ config('laporan.hapus_otomatis_hari') }} hari kemudian, beserta semua fotonya.</p>@endif
+                        <label class="mt-3 flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="jangan_hapus_otomatis" value="1" @checked(old('jangan_hapus_otomatis', $laporan->jangan_hapus_otomatis))> Simpan permanen (jangan hapus otomatis)</label>
                     </div>
 
                     <div>

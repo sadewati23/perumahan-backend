@@ -42,5 +42,8 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(10)->by($request->ip()),
             Limit::perDay(30)->by($request->ip()),
         ]);
+        RateLimiter::for('cek-laporan', fn (Request $request) => [
+            Limit::perMinute(10)->by($request->ip()), Limit::perDay(100)->by($request->ip()),
+        ]);
     }
 }

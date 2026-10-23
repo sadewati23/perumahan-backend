@@ -154,6 +154,12 @@
         </header>
 
         <main id="main" class="flex-1 px-4 py-6 lg:px-8">
+            @if (auth()->user()?->isAdmin() && \App\Support\TurnstileKonfigurasi::perluPerhatian())
+                <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
+                    Perlindungan CAPTCHA pada form laporan belum aktif: kunci Turnstile kosong atau masih kunci uji. Isi kunci asli di file .env server (lihat HOSTING.md).
+                </div>
+            @endif
+
             @if (session('success'))
                 <x-flash-message tone="success" auto-dismiss>
                     {{ session('success') }}

@@ -2,6 +2,8 @@
 
 Aplikasi web untuk pendataan perumahan dan sarana-prasarana (PSU), visualisasi lokasi berbasis GIS, serta pengelolaan laporan warga. Aplikasi dibangun dengan Laravel 12, Blade, Tailwind CSS 4, Leaflet, dan OpenStreetMap.
 
+Panduan lengkap deploy dan serah-terima hosting tersedia di [`HOSTING.md`](HOSTING.md).
+
 ## Daftar Isi
 
 - [Fitur](#fitur)
@@ -17,6 +19,7 @@ Aplikasi web untuk pendataan perumahan dan sarana-prasarana (PSU), visualisasi l
 - [Pengujian](#pengujian)
 - [Operasional dan Deployment](#operasional-dan-deployment)
 - [Catatan Teknis](#catatan-teknis)
+- [Panduan hosting](HOSTING.md) — deploy dan serah-terima hosting
 
 ## Fitur
 
@@ -58,7 +61,10 @@ Aplikasi web untuk pendataan perumahan dan sarana-prasarana (PSU), visualisasi l
 - Node.js dan npm.
 - MySQL/MariaDB.
 - Ekstensi GD PHP untuk pemrosesan foto laporan.
+- Ekstensi `exif`, `curl`, dan `bcmath`.
+- Nilai PHP yang disarankan: `upload_max_filesize=10M`, `post_max_size=12M`, dan `memory_limit=256M`.
 - Akses internet pada browser untuk tile OpenStreetMap dan library CDN.
+- Untuk produksi, HTTPS dan cron diperlukan.
 
 ## Instalasi
 
@@ -105,7 +111,7 @@ Aplikasi web untuk pendataan perumahan dan sarana-prasarana (PSU), visualisasi l
 
 ### Mode development
 
-Untuk menjalankan server Laravel, queue, log viewer, dan Vite secara bersamaan:
+Untuk menjalankan server Laravel, log viewer, dan Vite secara bersamaan:
 
 ```bash
 npm run dev
@@ -185,6 +191,8 @@ Seeder membuat akun berikut:
 
 Semua akun admin harus aktif (`is_active = true`). Middleware `active` menolak akun nonaktif, sedangkan middleware `role:admin` membatasi menu manajemen pengguna. Segera ganti password bawaan setelah instalasi.
 
+> **Peringatan produksi:** akun yang dibuat oleh seeder (`*@perumahan.test` dengan password `password`) hanya untuk pengembangan **lokal** dan dilarang digunakan di produksi. Pembuatan admin produksi dijelaskan pada [`HOSTING.md`](HOSTING.md), bagian **7. Akun Admin**.
+
 ## Modul Aplikasi
 
 ### Data perumahan
@@ -204,6 +212,20 @@ Form `/lapor` dapat digunakan tanpa login untuk tiga jenis laporan:
 | Bangunan liar | `BLR-YYYYMMDD-XXXX` | Dapat dilaporkan di luar area perumahan |
 
 Laporan baru berstatus `baru`, kemudian dapat diproses menjadi `diproses`, `selesai`, atau `ditolak` oleh petugas/admin. Upload laporan dibatasi maksimal tiga foto; foto diproses ulang untuk menghapus metadata EXIF sebelum disimpan. Foto hasil perbaikan disimpan terpisah dari foto bukti warga.
+
+### Penghapusan Otomatis Laporan & Cek Status
+
+Warga dapat memeriksa laporan tanpa login melalui **Cek Status Laporan** menggunakan kode tiket. Laporan berstatus selesai dihapus permanen bersama seluruh fotonya setelah tiga hari, kecuali petugas mencentang **Simpan permanen (jangan hapus otomatis)**. Pencarian publik berhenti tepat saat jatuh tempo meskipun scheduler belum berjalan.
+
+Gunakan konfigurasi berikut:
+
+```dotenv
+LAPORAN_HAPUS_OTOMATIS=true
+LAPORAN_HAPUS_OTOMATIS_HARI=3
+LAPORAN_HAPUS_OTOMATIS_SEJAK=2026-10-21
+```
+
+`LAPORAN_HAPUS_OTOMATIS_SEJAK` adalah tanggal deploy (`YYYY-MM-DD`); di server **wajib diisi** agar laporan lama tidak ikut terhapus. Periksa dahulu dengan `php artisan laporan:hapus-kedaluwarsa --dry-run`. Pada Windows, Task Scheduler setiap 1 menit harus menjalankan `C:\xampp\php\php.exe artisan schedule:run` dengan **Start in** folder project. Untuk pengembangan dapat memakai `php artisan schedule:work`. Jalankan `--dry-run` dan cadangkan database serta `storage/app/public` sebelum mengaktifkan pertama kali.
 
 ### Peta dan GeoJSON
 
@@ -303,7 +325,22 @@ Test feature mencakup portal publik, login dan throttling, role, akun nonaktif, 
 
 ## Operasional dan Deployment
 
-Panduan berikut dapat digunakan untuk VPS, shared hosting, atau cPanel.
+Panduan lengkap deploy dan serah-terima ada di [`HOSTING.md`](HOSTING.md). Bagian ini adalah ringkasan untuk VPS, shared hosting, atau cPanel.
+
+### Menjalankan dengan PHP 8.4 di Windows
+
+Jika PHP XAMPP pada PATH menggunakan versi lain, gunakan wrapper berikut agar
+Composer, Artisan, dan test memakai PHP 8.4.25. Wrapper mengaktifkan ekstensi
+hanya untuk proses tersebut; `php.ini` dan PATH global tidak diubah:
+
+```powershell
+.\scripts\php84.ps1 composer validate --check-lock --no-check-publish
+.\scripts\php84.ps1 artisan about
+.\scripts\php84.ps1 test
+```
+
+Jika PowerShell memblokir script lokal, izinkan hanya pada proses terminal saat
+ini dengan `Set-ExecutionPolicy -Scope Process Bypass`.
 
 ### 1. Siapkan server
 
@@ -368,10 +405,19 @@ DB_USERNAME=nama_user_database
 DB_PASSWORD=password_database
 
 FILESYSTEM_DISK=local
-STORAGE_URL=https://domain-anda.example/storage
+STORAGE_URL=/storage
+SESSION_SECURE_COOKIE=true
+# Kosong bila HTTPS dilayani langsung; isi IP/CIDR proxy bila ada proxy di depan.
+TRUSTED_PROXIES=
+# Produksi: gunakan SMTP agar email reset password terkirim.
+MAIL_MAILER=smtp
 ```
 
+`SESSION_SECURE_COOKIE=true` dipakai bila situs menggunakan HTTPS. Jangan memakai `TRUSTED_PROXIES=*`; isi hanya IP/CIDR proxy yang benar-benar berada di depan web server.
+
 Gunakan `APP_KEY` baru dan rahasiakan file `.env`. Jangan commit `.env` ke repository publik.
+
+Untuk mengaktifkan Cloudflare Turnstile di production, isi `TURNSTILE_SITE_KEY` dan `TURNSTILE_SECRET_KEY` dengan kunci asli dari dashboard Cloudflare. Jangan gunakan kunci uji. Jika kunci uji terdeteksi di production, widget akan disembunyikan, CAPTCHA dinonaktifkan agar form tidak rusak, peringatan critical dicatat tanpa nilai kunci, dan administrator melihat banner peringatan. Kunci kosong juga menonaktifkan CAPTCHA dan harus diperbaiki sebelum serah-terima.
 
 ### 5. Database dan storage foto
 
@@ -379,10 +425,11 @@ Buat database serta user MySQL terlebih dahulu, kemudian jalankan migration prod
 
 ```bash
 php artisan migrate --force
+php artisan db:seed --class=WilayahSeeder --force
 php artisan storage:link
 ```
 
-Perintah `migrate --seed` hanya untuk instalasi awal/development. Jangan menjalankan `migrate:fresh` di production karena akan menghapus data.
+Seeder produksi yang dibutuhkan hanya `WilayahSeeder`. **JANGAN** menjalankan `php artisan db:seed` tanpa `--class` karena akan membuat akun dan data contoh development. Perintah `migrate --seed` hanya untuk instalasi awal/development. Jangan menjalankan `migrate:fresh` di production karena akan menghapus data.
 
 Foto perumahan, foto bukti laporan, dan foto hasil perbaikan disimpan pada `storage/app/public`. Pastikan symbolic link berikut tersedia:
 
@@ -416,31 +463,45 @@ chmod -R ug+rwX storage bootstrap/cache
 
 Setelah deploy atau mengubah `.env`, ulangi `php artisan optimize:clear` lalu cache kembali.
 
-### 7. Akun admin awal
-
-Untuk membuat akun awal, gunakan seeder hanya bila database masih kosong:
+Sebelum serah-terima, jalankan pemeriksaan read-only berikut dari root project:
 
 ```bash
-php artisan db:seed --class=DatabaseSeeder --force
+php artisan produksi:periksa
 ```
 
-Segera ganti password akun bawaan setelah login. Jangan menjalankan seeder berulang kali tanpa memeriksa isi database terlebih dahulu.
+Perintah harus selesai tanpa temuan `KRITIS`. Temuan `PERINGATAN` perlu ditinjau, terutama HTTPS, mailer SMTP, batas penghapusan otomatis, dan konfigurasi Turnstile.
+
+### 7. Akun admin awal
+
+Jangan menjalankan `DatabaseSeeder` di production. Buat akun admin secara eksplisit melalui Tinker:
+
+```bash
+php artisan tinker
+```
+
+```php
+\App\Models\User::create([
+    'name' => 'Administrator',
+    'email' => 'admin@domain-anda.example',
+    'role' => 'admin',
+    'is_active' => true,
+    'password' => '<password-kuat>',
+]);
+```
+
+Cast `password` akan melakukan hash otomatis. Aplikasi baru memaksa password minimal 6 karakter; jaga password kuat (disarankan **≥12 karakter**) melalui prosedur pembuatan akun. Setelah selesai, hapus riwayat Tinker dengan `rm ~/.config/psysh/psysh_history` (atau hapus file riwayat PsySH sesuai sistem operasi). Jika akun `admin@perumahan.test` atau `petugas@perumahan.test` sudah telanjur ada, hapus atau nonaktifkan akun tersebut sebelum production.
 
 ### 8. Queue, scheduler, dan backup
 
-Jika queue database digunakan, jalankan worker melalui Supervisor, systemd, atau service manager hosting:
+Aplikasi tidak memakai antrean pekerjaan. Gunakan `QUEUE_CONNECTION=sync`; worker queue tidak diperlukan.
 
-```bash
-php artisan queue:work --tries=3
-```
-
-Tambahkan cron Laravel bila scheduler digunakan:
+Jika penghapusan otomatis laporan aktif, cron `schedule:run` **WAJIB** dijalankan setiap menit:
 
 ```cron
 * * * * * cd /home/username/apps/perumahan-backend && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Buat backup rutin database dan folder `storage/app/public`, karena data foto tidak tersimpan di database.
+Buat backup rutin database dan folder `storage/app/public`, karena data foto tidak tersimpan di database. Batasi masa simpan backup karena berisi data pribadi pelapor.
 
 ### 9. Checklist setelah deploy
 
@@ -451,6 +512,11 @@ Buat backup rutin database dan folder `storage/app/public`, karena data foto tid
 - Pastikan form `/lapor` dapat mengirim laporan.
 - Periksa `storage/logs/laravel.log` jika terjadi error.
 - Pastikan `APP_DEBUG=false` dan `.env` tidak dapat diunduh dari browser.
+- Pastikan Turnstile memakai kunci asli dari dashboard Cloudflare.
+- Pastikan `public/build` tersedia di server.
+- Pastikan akun `*@perumahan.test` tidak ada.
+- Pastikan `php artisan produksi:periksa` tidak menghasilkan temuan KRITIS ([panduan hosting](HOSTING.md)).
+- Baca hasil `php artisan laporan:hapus-kedaluwarsa --dry-run` sebelum mengaktifkan penghapusan otomatis.
 
 ## Catatan Teknis
 

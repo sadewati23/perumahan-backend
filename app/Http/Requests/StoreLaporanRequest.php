@@ -6,10 +6,10 @@ use App\Models\Laporan;
 use App\Models\Perumahan;
 use App\Models\PsuPerumahan;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Client\ConnectionException;
+use App\Rules\TurnstileTerverifikasi;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Validator;
+use App\Support\TurnstileKonfigurasi;
 
 class StoreLaporanRequest extends FormRequest
 {
@@ -60,7 +60,8 @@ class StoreLaporanRequest extends FormRequest
 
         // Proteksi Cloudflare Turnstile aktif hanya bila secret dikonfigurasi;
         // tanpa secret form tetap dapat dipakai (hanya dijaga honeypot + rate limit).
-        $aturan['cf-turnstile-response'] = $this->aturanTurnstile();
+        $aturan['cf-turnstile-response'] = ! TurnstileKonfigurasi::aktif()
+            ? [] : ['required', new TurnstileTerverifikasi];
 
         // Bangunan liar wajib minimal 1 foto; jenis lain foto opsional.
         if ($this->jenis === Laporan::JENIS_BANGUNAN_LIAR) {
@@ -168,41 +169,6 @@ class StoreLaporanRequest extends FormRequest
         return $this->input('jenis') === Laporan::JENIS_KERUSAKAN
             && filled($this->input('psu_perumahan_id'))
             && filled($this->input('perumahan_id'));
-    }
-
-    /**
-     * Aturan Cloudflare Turnstile: [] bila secret kosong (fitur nonaktif),
-     * jika tidak wajib diisi + verifikasi token ke endpoint siteverify.
-     */
-    private function aturanTurnstile(): array
-    {
-        $secret = config('services.turnstile.secret');
-
-        if (blank($secret)) {
-            return [];
-        }
-
-        return [
-            'required',
-            function (string $attribute, mixed $value, callable $fail): void {
-                try {
-                    $verifikasi = Http::asForm()->timeout(5)
-                        ->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-                            'secret' => config('services.turnstile.secret'),
-                            'response' => (string) $value,
-                            'remoteip' => $this->ip(),
-                        ])->json();
-                } catch (ConnectionException) {
-                    $fail('Verifikasi keamanan gagal. Silakan muat ulang halaman dan coba lagi.');
-
-                    return;
-                }
-
-                if (! is_array($verifikasi) || ($verifikasi['success'] ?? false) !== true) {
-                    $fail('Verifikasi keamanan gagal. Silakan muat ulang halaman dan coba lagi.');
-                }
-            },
-        ];
     }
 
     /**

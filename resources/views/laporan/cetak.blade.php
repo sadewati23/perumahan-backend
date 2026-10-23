@@ -63,6 +63,7 @@
     <div class="no-print">
         <button type="button" id="tombol-cetak">🖨️ Cetak Laporan</button>
         <button type="button" id="tombol-tutup">Tutup Tab</button>
+        @if ($laporan->jatuh_tempo_hapus)<p>Laporan ini akan dihapus otomatis pada {{ $laporan->jatuh_tempo_hapus->translatedFormat('d F Y, H:i') }} WIB. Simpan hasil cetak/PDF bila masih diperlukan.</p>@endif
     </div>
 
     <div class="kop">

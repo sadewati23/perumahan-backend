@@ -37,6 +37,7 @@
                         ['label' => 'Data Perumahan', 'route' => 'publik.perumahan.index', 'active' => 'publik.perumahan.*'],
                         ['label' => 'Peta Sebaran', 'route' => 'publik.peta', 'active' => 'publik.peta'],
                         ['label' => 'Lapor', 'route' => 'lapor.create', 'active' => 'lapor.*'],
+                        ['label' => 'Cek Status Laporan', 'route' => 'cek-laporan.index', 'active' => 'cek-laporan.*'],
                     ];
                 @endphp
 
@@ -107,6 +108,7 @@
                     <li><a href="{{ route('publik.perumahan.index') }}" class="hover:text-indigo-600">Daftar Perumahan</a></li>
                     <li><a href="{{ route('publik.peta') }}" class="hover:text-indigo-600">Peta Sebaran</a></li>
                     <li><a href="{{ route('lapor.create') }}" class="hover:text-indigo-600">Lapor Kerusakan / Pengaduan</a></li>
+                    <li><a href="{{ route('cek-laporan.index') }}" class="hover:text-indigo-600">Cek Status Laporan</a></li>
                     <li><a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener" class="hover:text-indigo-600">Data GeoJSON</a></li>
                 </ul>
             </div>

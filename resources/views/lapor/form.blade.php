@@ -50,7 +50,8 @@
                                     <p class="text-xs text-success-700" data-copy-status aria-live="polite"></p>
                                 </div>
                                 <p class="mt-2 text-sm text-success-700">
-                                    Simpan tangkapan layar atau catat nomor tiket ini. Gunakan nomor tiket bila ingin menanyakan progres penanganan.
+                                    Simpan kode ini untuk memantau status.@if (config('laporan.hapus_otomatis')) Laporan yang sudah selesai dihapus otomatis {{ config('laporan.hapus_otomatis_hari') }} hari setelah ditandai selesai.@endif
+                                    <a href="{{ route('cek-laporan.index') }}" class="font-semibold underline">Cek status laporan</a>
                                 </p>
                                 <ol class="mt-3 space-y-1 text-sm text-success-700">
                                     <li>1. Petugas akan meninjau laporan Anda.</li>
@@ -351,7 +352,7 @@
 
                         <div class="flex flex-wrap items-center justify-end gap-3">
                             <x-button variant="secondary" href="{{ route('publik.beranda') }}">Batal</x-button>
-                        @if (config('services.turnstile.site_key'))
+                        @if (\App\Support\TurnstileKonfigurasi::tampilkanWidget())
                             <div>
                                 <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
                                 @error('cf-turnstile-response')
@@ -363,6 +364,7 @@
                             <x-button type="submit">Kirim Laporan</x-button>
                         </div>
                     </form>
+                    <p class="mt-4 text-center text-sm text-slate-600">Sudah punya kode? <a href="{{ route('cek-laporan.index') }}" class="font-semibold text-indigo-600 hover:underline">Cek status laporan</a></p>
                 @endif
             </div>
 
@@ -487,7 +489,7 @@
             segarkanKeterangan();
         });
     </script>
-    @if (config('services.turnstile.site_key'))
+    @if (\App\Support\TurnstileKonfigurasi::tampilkanWidget())
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     @endif
     <script>
