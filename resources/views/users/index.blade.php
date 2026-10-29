@@ -5,9 +5,9 @@
 
 @section('content')
     <div class="grid gap-4 lg:grid-cols-3">
-        <div class="space-y-3 lg:col-span-2 md:hidden">
+        <div class="space-y-3 lg:col-span-2">
             @foreach ($users as $user)
-                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:hidden">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div class="flex items-start gap-3">
                             <span class="flex h-10 w-10 items-center justify-center rounded-pill bg-brand-100 text-sm font-semibold text-brand-700">
@@ -64,9 +64,9 @@
                                         <input id="ubah-{{ $user->id }}-jabatan" type="text" name="jabatan" value="{{ $user->jabatan }}"
                                                autocomplete="organization-title" class="input">
                                     </x-field>
-                                    <x-field name="password" for="ubah-{{ $user->id }}-password" label="Password baru" optional :show-errors="false">
+                                     <x-field name="password" for="ubah-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
                                         <input id="ubah-{{ $user->id }}-password" type="password" name="password"
-                                               autocomplete="new-password" class="input" placeholder="Minimal 6 karakter">
+                                                autocomplete="new-password" class="input" placeholder="Minimal 12 karakter">
                                     </x-field>
                                     <x-field name="password_confirmation" for="ubah-{{ $user->id }}-password-confirmation" label="Konfirmasi password" optional :show-errors="false">
                                         <input id="ubah-{{ $user->id }}-password-confirmation" type="password" name="password_confirmation"
@@ -108,7 +108,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach ($users as $user)
-                            <tr class="hover:bg-slate-50">
+                            <tr class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} hover:bg-slate-50">
                                 <td class="px-4 py-3">
                                     <p class="font-semibold text-slate-800">{{ $user->name }}</p>
                                     @if ($user->jabatan)
@@ -152,9 +152,9 @@
                                                     <input id="ubah-{{ $user->id }}-jabatan" type="text" name="jabatan" value="{{ $user->jabatan }}"
                                                            autocomplete="organization-title" class="input">
                                                 </x-field>
-                                                <x-field name="password" for="ubah-{{ $user->id }}-password" label="Password baru" optional :show-errors="false">
+                                                 <x-field name="password" for="ubah-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-password" type="password" name="password"
-                                                           autocomplete="new-password" class="input" placeholder="Minimal 6 karakter">
+                                                        autocomplete="new-password" class="input" placeholder="Minimal 12 karakter">
                                                 </x-field>
                                                 <x-field name="password_confirmation" for="ubah-{{ $user->id }}-password-confirmation" label="Konfirmasi password" optional :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-password-confirmation" type="password" name="password_confirmation"
@@ -215,9 +215,9 @@
                     <input id="jabatan" type="text" name="jabatan" value="{{ old('jabatan') }}"
                            autocomplete="organization-title" enterkeyhint="next" placeholder="Jabatan (opsional)" class="input">
                 </x-field>
-                <x-field name="password" label="Password" required>
+                 <x-field name="password" label="Password" required hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka.">
                     <input id="password" type="password" name="password" required
-                           autocomplete="new-password" enterkeyhint="next" placeholder="Minimal 6 karakter" class="input">
+                            autocomplete="new-password" enterkeyhint="next" placeholder="Minimal 12 karakter" class="input">
                 </x-field>
                 <x-field name="password_confirmation" label="Konfirmasi password" required>
                     <input id="password_confirmation" type="password" name="password_confirmation" required

@@ -52,6 +52,6 @@
         <p id="{{ $hintId }}" class="text-xs text-slate-500">{{ $hint }}</p>
     @endif
     @if ($adaError)
-        <p id="{{ $errorId }}" class="text-xs font-medium text-danger-600">{{ $pesanError }}</p>
+         <p id="{{ $errorId }}" class="getar text-xs font-medium text-danger-600">{{ $pesanError }}</p>
     @endif
 </div>

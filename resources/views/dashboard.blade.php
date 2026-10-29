@@ -6,10 +6,10 @@
 @section('content')
     @php
         $kartu = [
-            ['label' => 'Total Perumahan', 'value' => number_format($statistik['total_perumahan'], 0, ',', '.'), 'satuan' => 'lokasi', 'warna' => 'bg-indigo-50 text-indigo-700'],
-            ['label' => 'Total Unit Rumah', 'value' => number_format($statistik['total_unit'], 0, ',', '.'), 'satuan' => 'unit', 'warna' => 'bg-sky-50 text-sky-700'],
-            ['label' => 'Luas Lahan', 'value' => number_format($statistik['total_luas_lahan'] / 10000, 2, ',', '.'), 'satuan' => 'hektar', 'warna' => 'bg-amber-50 text-amber-700'],
-            ['label' => 'Luas RTH', 'value' => number_format($statistik['total_luas_rth'] / 10000, 2, ',', '.'), 'satuan' => 'hektar', 'warna' => 'bg-emerald-50 text-emerald-700'],
+            ['label' => 'Total Perumahan', 'value' => number_format($statistik['total_perumahan'], 0, ',', '.'), 'hitung' => $statistik['total_perumahan'], 'desimal' => 0, 'satuan' => 'lokasi', 'warna' => 'bg-indigo-50 text-indigo-700'],
+            ['label' => 'Total Unit Rumah', 'value' => number_format($statistik['total_unit'], 0, ',', '.'), 'hitung' => $statistik['total_unit'], 'desimal' => 0, 'satuan' => 'unit', 'warna' => 'bg-sky-50 text-sky-700'],
+            ['label' => 'Luas Lahan', 'value' => number_format($statistik['total_luas_lahan'] / 10000, 2, ',', '.'), 'hitung' => $statistik['total_luas_lahan'] / 10000, 'desimal' => 2, 'satuan' => 'hektar', 'warna' => 'bg-amber-50 text-amber-700'],
+            ['label' => 'Luas RTH', 'value' => number_format($statistik['total_luas_rth'] / 10000, 2, ',', '.'), 'hitung' => $statistik['total_luas_rth'] / 10000, 'desimal' => 2, 'satuan' => 'hektar', 'warna' => 'bg-emerald-50 text-emerald-700'],
         ];
         $maxUnit = max(1, (int) $perKecamatan->max('total_unit'));
         $maxTahun = max(1, (int) $perTahun->max('jumlah'));
@@ -46,7 +46,7 @@
         @foreach ($kartu as $item)
             <a href="{{ route('perumahan.index') }}"
                class="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-300 hover:shadow-card">
-                <p class="text-3xl font-semibold text-slate-900">{{ $item['value'] }}</p>
+                <p class="text-3xl font-semibold text-slate-900" data-hitung="{{ $item['hitung'] }}" data-desimal="{{ $item['desimal'] }}" aria-label="{{ $item['value'] }}">{{ $item['value'] }}</p>
                 <p class="mt-1 text-sm font-medium text-slate-700">{{ $item['label'] }}</p>
                 <p class="text-xs text-slate-500">{{ $item['satuan'] }}</p>
             </a>
@@ -54,12 +54,12 @@
     </div>
 
     <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="kartu-muncul rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Total Entri PSU</p>
             <p class="mt-2 text-xl font-semibold text-slate-900">{{ number_format($statistik['total_psu'], 0, ',', '.') }}</p>
             <p class="text-xs text-slate-500">prasarana, sarana &amp; utilitas terdata</p>
         </div>
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="kartu-muncul rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">PSU Rusak</p>
             <p class="mt-2 text-xl font-semibold text-rose-600">{{ number_format($statistik['psu_rusak'], 0, ',', '.') }}</p>
             <p class="text-xs text-slate-500">rusak ringan + rusak berat</p>
@@ -147,7 +147,7 @@
     </div>
 
     <div class="mt-4 grid gap-4 lg:grid-cols-2">
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="kartu-muncul rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-sm font-medium text-slate-500">Perumahan selesai dibangun per tahun</p>
 
             @if ($perTahun->isEmpty())
@@ -158,7 +158,7 @@
             @endif
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="kartu-muncul rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-sm font-medium text-slate-500">Kondisi PSU</p>
 
             @if ($totalPsuTerdata === 0)
@@ -281,14 +281,15 @@
                             </a>
                             <div class="shrink-0 flex items-center gap-2">
                                 <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_status }}">{{ $laporan->label_status }}</span>
-                                @if (auth()->user()->isAdmin())
-                                    <button type="button"
-                                            data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
-                                            data-action="{{ route('laporan.destroy', $laporan) }}"
-                                            class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                        Hapus
-                                    </button>
-                                @endif
+                                 @if (auth()->user()->isAdmin())
+                                     <form method="POST" action="{{ route('laporan.destroy', $laporan) }}" class="inline" data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan.">
+                                         @csrf
+                                         @method('DELETE')
+                                         <button type="submit" class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                                             Hapus
+                                         </button>
+                                     </form>
+                                 @endif
                             </div>
                         </div>
                     </li>
@@ -299,38 +300,6 @@
         </div>
     </div>
 
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-confirm]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    if (!window.confirm(button.dataset.confirm)) {
-                        return;
-                    }
-
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = button.dataset.action;
-
-                    const csrf = document.createElement('input');
-                    csrf.type = 'hidden';
-                    csrf.name = '_token';
-                    csrf.value = '{{ csrf_token() }}';
-                    form.appendChild(csrf);
-
-                    const method = document.createElement('input');
-                    method.type = 'hidden';
-                    method.name = '_method';
-                    method.value = 'DELETE';
-                    form.appendChild(method);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                });
-            });
-        });
-    </script>
-@endpush
 @endsection
 
 @if ($perTahun->isNotEmpty() || $totalPsuTerdata > 0 || $jenisPsu->isNotEmpty())
@@ -338,6 +307,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.js" integrity="sha384-4W8gMhOYqk0FPg9sAMkb3g/P2fXtzbUyDUUgMlA1EEig8z/U/13EYUjErc1H382b" crossorigin="anonymous"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { Chart.defaults.animation = false; }
                 const opsiDasar = { responsive: true, maintainAspectRatio: false };
 
                 @if ($perTahun->isNotEmpty())

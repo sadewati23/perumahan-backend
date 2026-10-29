@@ -7,7 +7,7 @@
 ])
 
 @php
-    $base = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-control font-semibold transition md:min-h-10';
+    $base = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-control font-semibold transition motion-safe:active:scale-[.98] motion-safe:transition-transform md:min-h-10';
 
     $variants = [
         'primary' => 'bg-brand-600 text-white shadow-card hover:bg-brand-700 active:bg-brand-800',

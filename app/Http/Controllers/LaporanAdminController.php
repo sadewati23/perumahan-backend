@@ -8,7 +8,9 @@ use App\Services\DashboardStatistikService;
 use App\Support\FilterQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class LaporanAdminController extends Controller
@@ -105,6 +107,32 @@ class LaporanAdminController extends Controller
         return view('laporan.cetak', compact('laporan'));
     }
 
+    /** Unduh satu laporan dalam format HTML yang dapat dibuka Microsoft Word. */
+    public function word(Laporan $laporan): Response
+    {
+        $laporan->load([
+            'perumahan.kelurahan.kecamatan',
+            'kelurahan.kecamatan',
+            'psu',
+            'fotosLaporan',
+            'fotosPerbaikan.pengunggah',
+            'penangan',
+        ]);
+
+        $fotosLaporan = $laporan->fotosLaporan->map(fn ($foto) => [
+            'foto' => $foto,
+            'src' => $this->gambarUntukWord($foto->path),
+        ]);
+        $fotosPerbaikan = $laporan->fotosPerbaikan->map(fn ($foto) => [
+            'foto' => $foto,
+            'src' => $this->gambarUntukWord($foto->path),
+        ]);
+
+        return response()->view('laporan.word', compact('laporan', 'fotosLaporan', 'fotosPerbaikan'))
+            ->header('Content-Type', 'application/msword; charset=UTF-8')
+            ->header('Content-Disposition', 'attachment; filename="laporan-'.$laporan->kode.'.doc"');
+    }
+
     /**
      * Halaman cetak rekap daftar laporan mengikuti filter daftar utama.
      */
@@ -141,6 +169,57 @@ class LaporanAdminController extends Controller
         $laporans = $query->orderByDesc('created_at')->limit($batasBaris)->get();
 
         return view('laporan.cetak-rekap', compact('laporans', 'filters', 'ringkasan', 'terpotong', 'batasBaris'));
+    }
+
+    /** Unduh rekap dalam format HTML yang dapat dibuka Microsoft Word. */
+    public function wordRekap(Request $request): Response
+    {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'jenis' => ['nullable', 'in:'.implode(',', array_keys(Laporan::JENIS))],
+            'status' => ['nullable', 'in:'.implode(',', array_keys(Laporan::STATUS))],
+            'tingkat' => ['nullable', 'in:'.implode(',', array_keys(Laporan::TINGKAT))],
+            'perumahan_id' => ['nullable', 'exists:perumahans,id'],
+            'dari' => ['nullable', 'date'],
+            'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
+        ], [
+            'sampai.after_or_equal' => 'Tanggal sampai tidak boleh lebih awal dari tanggal dari.',
+        ]);
+
+        $batasBaris = 500;
+        $query = Laporan::query()
+            ->with(['perumahan.kelurahan.kecamatan', 'kelurahan.kecamatan', 'psu', 'penangan'])
+            ->filter($filters)
+            ->when($filters['dari'] ?? null, fn ($q, $dari) => $q->whereDate('created_at', '>=', $dari))
+            ->when($filters['sampai'] ?? null, fn ($q, $sampai) => $q->whereDate('created_at', '<=', $sampai));
+
+        $ringkasan = [
+            'total' => (clone $query)->count(),
+            'baru' => (clone $query)->where('status', 'baru')->count(),
+            'diproses' => (clone $query)->where('status', 'diproses')->count(),
+            'selesai' => (clone $query)->where('status', 'selesai')->count(),
+            'ditolak' => (clone $query)->where('status', 'ditolak')->count(),
+        ];
+
+        $terpotong = $ringkasan['total'] > $batasBaris;
+        $laporans = $query->orderByDesc('created_at')->limit($batasBaris)->get();
+
+        return response()->view('laporan.word-rekap', compact('laporans', 'filters', 'ringkasan', 'terpotong', 'batasBaris'))
+            ->header('Content-Type', 'application/msword; charset=UTF-8')
+            ->header('Content-Disposition', 'attachment; filename="rekap-laporan.doc"');
+    }
+
+    private function gambarUntukWord(string $path): ?string
+    {
+        $disk = Storage::disk('public');
+
+        if (! $disk->exists($path)) {
+            return null;
+        }
+
+        $mime = $disk->mimeType($path) ?: 'image/jpeg';
+
+        return 'data:'.$mime.';base64,'.base64_encode($disk->get($path));
     }
 
     public function destroy(Laporan $laporan): RedirectResponse

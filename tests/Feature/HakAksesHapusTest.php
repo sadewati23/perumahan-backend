@@ -68,22 +68,22 @@ class HakAksesHapusTest extends TestCase
         $perumahan = $this->perumahan('P');
         $this->actingAs($petugas)->delete(route('perumahan.destroy', $perumahan))->assertForbidden();
         $this->assertDatabaseHas('perumahans', ['id' => $perumahan->id]);
-        $this->actingAs($admin)->delete(route('perumahan.destroy', $perumahan))->assertRedirect();
+        $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->delete(route('perumahan.destroy', $perumahan))->assertRedirect();
 
         $laporan = $this->laporan();
         $this->actingAs($petugas)->delete(route('laporan.destroy', $laporan))->assertForbidden();
         $this->assertDatabaseHas('laporans', ['id' => $laporan->id]);
-        $this->actingAs($admin)->delete(route('laporan.destroy', $laporan))->assertRedirect();
+        $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->delete(route('laporan.destroy', $laporan))->assertRedirect();
 
         [$kecamatan] = $this->wilayah('K');
         $this->actingAs($petugas)->delete(route('kecamatan.destroy', $kecamatan))->assertForbidden();
         $this->assertDatabaseHas('kecamatans', ['id' => $kecamatan->id]);
-        $this->actingAs($admin)->delete(route('kecamatan.destroy', $kecamatan))->assertRedirect();
+        $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->delete(route('kecamatan.destroy', $kecamatan))->assertRedirect();
 
         [, $kelurahan] = $this->wilayah('L');
         $this->actingAs($petugas)->delete(route('kelurahan.destroy', $kelurahan))->assertForbidden();
         $this->assertDatabaseHas('kelurahans', ['id' => $kelurahan->id]);
-        $this->actingAs($admin)->delete(route('kelurahan.destroy', $kelurahan))->assertRedirect();
+        $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->delete(route('kelurahan.destroy', $kelurahan))->assertRedirect();
     }
 
     public function test_penghapusan_foto_perbaikan_mengikuti_pengunggah_atau_admin(): void
@@ -123,7 +123,7 @@ class HakAksesHapusTest extends TestCase
         $this->laporan($milik->id)->fotos()->create(['path' => $fotoMilik]);
         $this->laporan($lain->id)->fotos()->create(['path' => $fotoLain]);
 
-        $this->actingAs($this->admin())->delete(route('perumahan.destroy', $milik))->assertRedirect();
+        $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($this->admin())->delete(route('perumahan.destroy', $milik))->assertRedirect();
         Storage::disk('public')->assertMissing($fotoMilik);
         Storage::disk('public')->assertExists($fotoLain);
     }

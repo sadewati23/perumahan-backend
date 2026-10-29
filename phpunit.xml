@@ -34,5 +34,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="LAPORAN_HAPUS_OTOMATIS_HARI" value="3" force="true"/>
+        <env name="LAPORAN_HAPUS_OTOMATIS_SEJAK" value="" force="true"/>
     </php>
 </phpunit>

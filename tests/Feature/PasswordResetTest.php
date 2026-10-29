@@ -27,12 +27,13 @@ class PasswordResetTest extends TestCase
             ->assertSee('Lupa password?');
     }
 
-    public function test_email_tidak_terdaftar_ditolak(): void
+    public function test_email_tidak_terdaftar_menampilkan_pesan_umum(): void
     {
         $this->from(route('password.request'))
             ->post(route('password.email'), ['email' => 'tidakada@perumahan.test'])
             ->assertRedirect(route('password.request'))
-            ->assertSessionHasErrors('email');
+            ->assertSessionHas('status', 'Jika email terdaftar, tautan reset password telah dikirim. Periksa kotak masuk atau folder spam.')
+            ->assertSessionHasNoErrors();
     }
 
     public function test_email_valid_mengirim_tautan_reset(): void
@@ -77,13 +78,13 @@ class PasswordResetTest extends TestCase
         $this->post(route('password.update'), [
             'token' => $token,
             'email' => $user->email,
-            'password' => 'password-baru-123',
-            'password_confirmation' => 'password-baru-123',
+            'password' => 'Rahasia-Uji-12345',
+            'password_confirmation' => 'Rahasia-Uji-12345',
         ])->assertRedirect(route('login'))
             ->assertSessionHas('success');
 
         // Password lama tidak bisa lagi, password baru bisa dipakai login.
-        $this->assertCredentials(['email' => $user->email, 'password' => 'password-baru-123']);
+        $this->assertCredentials(['email' => $user->email, 'password' => 'Rahasia-Uji-12345']);
         $this->assertInvalidCredentials(['email' => $user->email, 'password' => 'password-lama']);
     }
 
@@ -95,8 +96,8 @@ class PasswordResetTest extends TestCase
         $this->post(route('password.update'), [
             'token' => 'token-ngawur',
             'email' => $user->email,
-            'password' => 'password-baru-123',
-            'password_confirmation' => 'password-baru-123',
+            'password' => 'Rahasia-Uji-12345',
+            'password_confirmation' => 'Rahasia-Uji-12345',
         ])->assertRedirect()
             ->assertSessionHasErrors('email');
 
@@ -111,7 +112,7 @@ class PasswordResetTest extends TestCase
         $this->post(route('password.update'), [
             'token' => $token,
             'email' => $user->email,
-            'password' => 'password-baru-123',
+            'password' => 'Rahasia-Uji-12345',
             'password_confirmation' => 'beda-eh',
         ])->assertRedirect()
             ->assertSessionHasErrors('password');
@@ -136,8 +137,8 @@ class PasswordResetTest extends TestCase
         $this->post(route('password.update'), [
             'token' => $token,
             'email' => $user->email,
-            'password' => 'password-baru-123',
-            'password_confirmation' => 'password-baru-123',
+            'password' => 'Rahasia-Uji-12345',
+            'password_confirmation' => 'Rahasia-Uji-12345',
         ])->assertRedirect(route('login'));
 
         // Token sekali pakai: tabel token harus kosong setelah reset sukses.
@@ -146,7 +147,7 @@ class PasswordResetTest extends TestCase
         // Sesi baru: login langsung dengan password baru.
         $this->post(route('login.attempt'), [
             'email' => $user->email,
-            'password' => 'password-baru-123',
+            'password' => 'Rahasia-Uji-12345',
         ])->assertRedirect(route('dashboard'));
     }
 }

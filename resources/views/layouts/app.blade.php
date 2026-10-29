@@ -70,8 +70,8 @@
                                 @php $isActive = request()->routeIs($item['active']); @endphp
                                 <a href="{{ route($item['route']) }}"
                                    @if ($isActive) aria-current="page" @endif
-                                   class="flex items-center gap-3 rounded-lg px-3 py-2 transition {{ $isActive ? 'bg-brand-600 text-white shadow-card' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}">
-                                    <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                                   class="group flex items-center gap-3 rounded-lg px-3 py-2 transition {{ $isActive ? 'bg-brand-600 text-white shadow-card' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}">
+                                    <svg class="h-5 w-5 shrink-0 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
                                     </svg>
                                     <span>{{ $item['label'] }}</span>
@@ -139,7 +139,7 @@
                         </span>
                         <span class="hidden sm:inline">{{ auth()->user()?->name }}</span>
                     </summary>
-                    <div class="absolute right-0 z-40 mt-2 w-64 rounded-card border border-slate-200 bg-white p-3 shadow-pop">
+                    <div class="pop-masuk absolute right-0 z-40 mt-2 w-64 rounded-card border border-slate-200 bg-white p-3 shadow-pop">
                         <p class="text-sm font-semibold text-slate-900">{{ auth()->user()?->name }}</p>
                         <p class="mt-0.5 text-xs text-slate-500">{{ auth()->user()?->label_role }}</p>
                         <form method="POST" action="{{ route('logout') }}" class="mt-3">

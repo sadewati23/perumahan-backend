@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\SesiPengguna;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -162,9 +163,7 @@ class AuthController extends Controller
             $request->only('email')
         );
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with('status', 'Tautan reset password sudah dikirim ke email Anda. Periksa kotak masuk atau folder spam.')
-            : back()->withInput()->withErrors(['email' => 'Email tidak terdaftar. Periksa kembali alamat email Anda.']);
+        return back()->with('status', 'Jika email terdaftar, tautan reset password telah dikirim. Periksa kotak masuk atau folder spam.');
     }
 
     /**
@@ -186,13 +185,13 @@ class AuthController extends Controller
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', PasswordRule::min(6)],
+            'password' => ['required', 'confirmed', PasswordRule::defaults()],
         ], [
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'password.required' => 'Password baru wajib diisi.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'password.min' => 'Password minimal 6 karakter.',
+            'password.min' => 'Password minimal 12 karakter.',
         ]);
 
         $status = Password::reset(
@@ -202,6 +201,8 @@ class AuthController extends Controller
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
                 ])->save();
+
+                SesiPengguna::cabut($user);
 
                 event(new PasswordReset($user));
             }

@@ -22,7 +22,7 @@
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="space-y-3 lg:col-span-2">
             @forelse ($kecamatans as $kecamatan)
-                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div>
                             <p class="font-semibold text-slate-800">

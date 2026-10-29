@@ -336,7 +336,7 @@ class LaporanPerbaikanTest extends TestCase
 
         $this->assertTrue(Storage::disk('public')->exists($foto->path));
 
-        $this->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]))
+        $this->withSession(['auth.password_confirmed_at' => time()])->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]))
             ->delete(route('laporan.destroy', $laporan))
             ->assertRedirect(route('laporan.index'));
 

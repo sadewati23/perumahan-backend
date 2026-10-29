@@ -13,6 +13,7 @@ Panduan lengkap deploy dan serah-terima hosting tersedia di [`HOSTING.md`](HOSTI
 - [Konfigurasi](#konfigurasi)
 - [Akun dan Hak Akses](#akun-dan-hak-akses)
 - [Modul Aplikasi](#modul-aplikasi)
+- [Keamanan akun](#keamanan-akun)
 - [Endpoint Utama](#endpoint-utama)
 - [Struktur Data](#struktur-data)
 - [Struktur Direktori](#struktur-direktori)
@@ -38,8 +39,27 @@ Panduan lengkap deploy dan serah-terima hosting tersedia di [`HOSTING.md`](HOSTI
 - Peta admin dengan pemilih titik koordinat dan geolokasi browser.
 - Pengelolaan master kecamatan dan kelurahan.
 - Pengelolaan laporan: filter, detail, perubahan status, foto hasil perbaikan, dan cetak.
-- Manajemen pengguna (khusus administrator): tambah, ubah, nonaktifkan, dan hapus akun.
+- Cetak laporan detail dan rekap dengan pilihan cetak/simpan PDF atau unduh Word.
+- Manajemen pengguna (khusus administrator): melihat daftar admin/petugas, tambah, ubah, nonaktifkan, dan hapus akun.
 - Cache statistik dan cache data peta dibersihkan otomatis setelah perubahan data terkait.
+
+### Keamanan akun
+
+- Password baru minimal 12 karakter dan wajib memuat huruf besar, huruf kecil, serta angka.
+- Pesan validasi password tersedia dalam Bahasa Indonesia dengan fallback ke Bahasa Inggris.
+- Permintaan lupa password tidak membocorkan apakah alamat email terdaftar.
+- Sesi pengguna dicabut saat password diganti atau akun dinonaktifkan; sesi admin saat mengganti password sendiri tetap dipertahankan.
+- Header keamanan global diterapkan pada halaman normal, error, dan 404.
+- Halaman cek status publik tidak menampilkan foto bukti maupun foto hasil perbaikan.
+
+### Pemeliharaan dan Keamanan Tambahan
+
+- Aksi admin berbahaya meminta konfirmasi password dan konfirmasi berlaku terbatas.
+- Area admin dan halaman autentikasi memakai `Cache-Control: no-store` agar tidak tampil dari cache setelah logout.
+- Halaman publik memiliki batas laju untuk mengurangi penyalahgunaan pencarian dan GeoJSON.
+- Periksa file foto yatim terlebih dahulu dengan `php artisan storage:bersihkan-yatim`.
+- Jika hasil simulasi sudah sesuai, jalankan `php artisan storage:bersihkan-yatim --hapus`.
+- Berkas tak dikenal di luar folder foto hanya dilaporkan dan tidak pernah dihapus.
 
 ## Teknologi
 
@@ -215,7 +235,7 @@ Laporan baru berstatus `baru`, kemudian dapat diproses menjadi `diproses`, `sele
 
 ### Penghapusan Otomatis Laporan & Cek Status
 
-Warga dapat memeriksa laporan tanpa login melalui **Cek Status Laporan** menggunakan kode tiket. Laporan berstatus selesai dihapus permanen bersama seluruh fotonya setelah tiga hari, kecuali petugas mencentang **Simpan permanen (jangan hapus otomatis)**. Pencarian publik berhenti tepat saat jatuh tempo meskipun scheduler belum berjalan.
+Warga dapat memeriksa laporan tanpa login melalui **Cek Status Laporan** menggunakan kode tiket. Laporan berstatus selesai dihapus permanen bersama seluruh fotonya sesuai nilai `LAPORAN_HAPUS_OTOMATIS_HARI`, kecuali petugas mencentang **Simpan permanen (jangan hapus otomatis)**. Pencarian publik berhenti tepat saat jatuh tempo meskipun scheduler belum berjalan.
 
 Gunakan konfigurasi berikut:
 
@@ -227,9 +247,22 @@ LAPORAN_HAPUS_OTOMATIS_SEJAK=2026-10-21
 
 `LAPORAN_HAPUS_OTOMATIS_SEJAK` adalah tanggal deploy (`YYYY-MM-DD`); di server **wajib diisi** agar laporan lama tidak ikut terhapus. Periksa dahulu dengan `php artisan laporan:hapus-kedaluwarsa --dry-run`. Pada Windows, Task Scheduler setiap 1 menit harus menjalankan `C:\xampp\php\php.exe artisan schedule:run` dengan **Start in** folder project. Untuk pengembangan dapat memakai `php artisan schedule:work`. Jalankan `--dry-run` dan cadangkan database serta `storage/app/public` sebelum mengaktifkan pertama kali.
 
+### Cetak dan ekspor laporan
+
+Pada halaman cetak laporan, admin dapat memilih:
+
+- **Cetak / Simpan PDF** untuk membuka dialog cetak browser dan memilih printer atau *Save as PDF*.
+- **Unduh Word** untuk mengunduh file `.doc` yang dapat dibuka di Microsoft Word.
+
+File Word memakai template khusus berbasis tabel agar kompatibel dengan Word. Foto laporan disematkan langsung ke file sehingga tidak bergantung pada URL `/storage/` saat dokumen dibuka.
+
 ### Peta dan GeoJSON
 
 Hanya perumahan dengan koordinat valid yang ditampilkan sebagai titik pada peta. GeoJSON memakai format `FeatureCollection`, dengan koordinat GeoJSON `[longitude, latitude]`.
+
+### Manajemen pengguna
+
+Halaman `/admin/pengguna` hanya dapat diakses administrator. Admin dapat melihat daftar akun beserta role dan statusnya, menambah akun baru, mengubah data atau password, menonaktifkan akun, serta menghapus akun petugas. Sistem mencegah admin menghapus akun sendiri dan mencegah administrator terakhir kehilangan hak administrator.
 
 ## Endpoint Utama
 
@@ -260,6 +293,8 @@ Semua endpoint berikut menggunakan method HTTP yang tercantum. Endpoint admin me
 | GET/PUT/DELETE | `/admin/laporan/{laporan}` | Detail, update, dan hapus laporan |
 | GET | `/admin/laporan/cetak-rekap` | Cetak rekap laporan |
 | GET | `/admin/laporan/{laporan}/cetak` | Cetak satu laporan |
+| GET | `/admin/laporan/cetak-rekap/word` | Unduh rekap laporan dalam format Word |
+| GET | `/admin/laporan/{laporan}/word` | Unduh satu laporan dalam format Word |
 | POST/DELETE | `/admin/laporan/{laporan}/foto-perbaikan` | Kelola foto hasil perbaikan |
 | GET/POST/PUT/DELETE | `/admin/wilayah` | Kelola kecamatan dan kelurahan |
 | GET/POST/PUT/DELETE | `/admin/pengguna` | Kelola pengguna, khusus admin |

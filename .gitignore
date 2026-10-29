@@ -22,3 +22,11 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Folder alat bantu agen AI (jangan di-commit atau di-deploy)
+.agents/
+.freebuff/
+
+# Folder alat bantu agen AI (jangan di-commit atau di-deploy)
+.agents/
+.freebuff/

@@ -187,7 +187,7 @@ class LaporanTest extends TestCase
 
         $this->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]));
 
-        $this->delete(route('laporan.destroy', $laporan))
+        $this->withSession(['auth.password_confirmed_at' => time()])->delete(route('laporan.destroy', $laporan))
             ->assertRedirect(route('laporan.index'));
 
         // Baris laporan + foto ikut hilang dari database.

@@ -8,8 +8,8 @@
         @page { size: A4; margin: 15mm }
         * { box-sizing: border-box }
         body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            font-size: 12px;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
             color: #1e293b;
             margin: 0 auto;
             max-width: 210mm;
@@ -32,7 +32,7 @@
         .kop h1 { font-size: 15px; margin: 0; text-transform: uppercase; letter-spacing: .5px }
         .kop p { margin: 2px 0 0; font-size: 11px; color: #64748b }
 
-        .kode { font-family: "Consolas", monospace; font-weight: 700 }
+        .kode { font-family: "Times New Roman", Times, serif; font-weight: 700 }
 
         table.info, table.rekap { width: 100%; border-collapse: collapse; margin-top: 12px }
         table.info th, table.info td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top }
@@ -59,12 +59,15 @@
     </style>
 </head>
 <body>
-    {{-- Toolbar layar: tombol Cetak via addEventListener (bukan onclick inline). --}}
-    <div class="no-print">
-        <button type="button" id="tombol-cetak">🖨️ Cetak Laporan</button>
-        <button type="button" id="tombol-tutup">Tutup Tab</button>
-        @if ($laporan->jatuh_tempo_hapus)<p>Laporan ini akan dihapus otomatis pada {{ $laporan->jatuh_tempo_hapus->translatedFormat('d F Y, H:i') }} WIB. Simpan hasil cetak/PDF bila masih diperlukan.</p>@endif
-    </div>
+    @if (! ($word ?? false))
+        {{-- Toolbar layar: tombol Cetak via addEventListener (bukan onclick inline). --}}
+        <div class="no-print">
+            <button type="button" id="tombol-cetak">🖨️ Cetak / Simpan PDF</button>
+            <a href="{{ route('laporan.word', $laporan) }}">Unduh Word</a>
+            <button type="button" id="tombol-tutup">Tutup Tab</button>
+            @if ($laporan->jatuh_tempo_hapus)<p>Laporan ini akan dihapus otomatis pada {{ $laporan->jatuh_tempo_hapus->translatedFormat('d F Y, H:i') }} WIB. Simpan hasil cetak/PDF bila masih diperlukan.</p>@endif
+        </div>
+    @endif
 
     <div class="kop">
         <img src="{{ asset('images/logo.png') }}" alt="">
@@ -184,6 +187,7 @@
         Dicetak oleh {{ auth()->user()->name }} pada {{ now()->translatedFormat('d F Y, H:i') }}
     </footer>
 
+    @if (! ($word ?? false))
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tombolCetak = document.getElementById('tombol-cetak');
@@ -197,5 +201,6 @@
             }
         });
     </script>
+    @endif
 </body>
 </html>

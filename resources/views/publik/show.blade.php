@@ -18,7 +18,7 @@
                 <span class="text-slate-700">{{ $perumahan->nama }}</span>
             </nav>
 
-            <div class="mt-3 flex flex-wrap items-start justify-between gap-4">
+            <div class="mt-3 flex flex-wrap items-start justify-between gap-4 masuk-naik tunda-1">
                 <div>
                     <div class="flex flex-wrap items-center gap-2">
                         <h1 class="text-2xl font-semibold text-slate-900">{{ $perumahan->nama }}</h1>
@@ -47,26 +47,26 @@
             </div>
 
             @if ($perumahan->foto_url)
-                <x-foto-perumahan :perumahan="$perumahan" :lazy="false" class="mt-6 h-72 w-full rounded-xl ring-1 ring-slate-200 sm:h-96" />
+                <x-foto-perumahan :perumahan="$perumahan" :lazy="false" class="kartu-muncul kartu-interaktif mt-6 h-72 w-full rounded-xl ring-1 ring-slate-200 sm:h-96" />
             @endif
 
-            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="rounded-xl bg-slate-50 p-4">
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 masuk-naik tunda-2">
+                <div class="kartu-interaktif rounded-xl bg-slate-50 p-4">
                     <p class="text-xs text-slate-500">Luas Lahan</p>
                     <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format((float) $perumahan->luas_lahan, 0, ',', '.') }} m&sup2;</p>
                     <p class="text-xs text-slate-500">{{ number_format($perumahan->luas_lahan_ha, 2, ',', '.') }} hektar</p>
                 </div>
-                <div class="rounded-xl bg-slate-50 p-4">
+                <div class="kartu-interaktif rounded-xl bg-slate-50 p-4">
                     <p class="text-xs text-slate-500">Jumlah Unit</p>
                     <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format($perumahan->jumlah_unit, 0, ',', '.') }}</p>
                     <p class="text-xs text-slate-500">{{ $perumahan->tipeUnits->count() }} tipe unit</p>
                 </div>
-                <div class="rounded-xl bg-slate-50 p-4">
+                <div class="kartu-interaktif rounded-xl bg-slate-50 p-4">
                     <p class="text-xs text-slate-500">Ruang Terbuka Hijau</p>
                     <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format((float) $perumahan->luas_rth, 0, ',', '.') }} m&sup2;</p>
                     <p class="text-xs text-slate-500">{{ $perumahan->jumlah_rth }} titik RTH</p>
                 </div>
-                <div class="rounded-xl bg-slate-50 p-4">
+                <div class="kartu-interaktif rounded-xl bg-slate-50 p-4">
                     <p class="text-xs text-slate-500">KDB / KDH</p>
                     <p class="mt-1 text-lg font-semibold text-slate-900">
                         {{ $perumahan->kdb !== null ? (float) $perumahan->kdb . '%' : '-' }} /
@@ -79,8 +79,8 @@
     </section>
 
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-        <div class="grid gap-6 lg:grid-cols-3">
-            <div class="space-y-6 lg:col-span-2">
+        <div class="reveal-scroll grid gap-6 lg:grid-cols-3">
+            <div class="kartu-muncul space-y-6 lg:col-span-2">
                 <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <h2 class="text-sm font-semibold text-slate-900">Lokasi Administratif</h2>
                     <dl class="mt-4 grid gap-4 sm:grid-cols-2">
@@ -224,7 +224,7 @@
                 @endif
             </div>
 
-            <div class="space-y-6">
+            <div class="kartu-muncul space-y-6">
                 <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <h2 class="text-sm font-semibold text-slate-900">Titik Lokasi</h2>
 

@@ -78,8 +78,19 @@ export function initConfirmDialog() {
             if (form.dataset.confirming) return;
             event.preventDefault();
 
-            dialog.querySelector('[data-confirm-message]').textContent =
-                form.dataset.confirm || 'Data yang dipilih akan dihapus.';
+            const pesan = form.dataset.confirm || 'Data yang dipilih akan dihapus.';
+
+            // Browser lama yang belum mendukung native <dialog> tetap bisa
+            // mengirim form, agar preventDefault di atas tidak membuat tombol
+            // terlihat tidak bereaksi.
+            if (typeof dialog.showModal !== 'function') {
+                if (!window.confirm(pesan)) return;
+                form.dataset.confirming = 'true';
+                form.submit();
+                return;
+            }
+
+            dialog.querySelector('[data-confirm-message]').textContent = pesan;
             lastTrigger = event.submitter || document.activeElement;
             dialog.showModal();
 

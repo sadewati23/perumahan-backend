@@ -38,7 +38,7 @@
 <div {{ $attributes->merge([
     'data-flash' => $tone,
     'tabindex' => '-1',
-    'class' => 'mb-4 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm '.$t['border'].' '.$t['text'],
+    'class' => 'toast-masuk mb-4 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm '.$t['border'].' '.$t['text'],
 ]) }}
     @if ($autoDismiss) data-flash-auto @endif>
     <svg class="mt-0.5 h-5 w-5 shrink-0 {{ $t['iconText'] }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">

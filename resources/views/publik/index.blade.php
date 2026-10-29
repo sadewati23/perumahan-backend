@@ -5,7 +5,7 @@
 
 @section('content')
     <section class="border-b border-slate-200 bg-white">
-        <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8 masuk-naik tunda-1">
             <nav class="text-xs text-slate-500">
                 <a href="{{ route('publik.beranda') }}" class="hover:text-indigo-600">Beranda</a>
                 <span class="mx-1">/</span>
@@ -20,7 +20,7 @@
                 <span class="font-semibold">{{ number_format($ringkasan['luas_rth'] / 10000, 2, ',', '.') }}</span> ha RTH
             </p>
 
-            <form method="GET" class="mt-6 grid gap-3 md:grid-cols-4">
+            <form method="GET" class="mt-6 grid gap-3 md:grid-cols-4 masuk-naik tunda-2">
                 <div class="md:col-span-2">
                     <label class="mb-1 block text-xs font-medium text-slate-600">Pencarian</label>
                     <input type="text" name="q" value="{{ $filters['q'] ?? '' }}"
@@ -66,9 +66,9 @@
     </section>
 
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div class="reveal-scroll grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             @forelse ($perumahans as $perumahan)
-                @include('publik._card', ['perumahan' => $perumahan])
+                @include('publik._card', ['perumahan' => $perumahan, 'animasi' => 'masuk-naik '.($loop->iteration <= 8 && $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '')])
             @empty
                 <div class="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center md:col-span-2 lg:col-span-3">
                     <p class="text-sm font-medium text-slate-700">Tidak ada perumahan yang cocok</p>

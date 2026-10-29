@@ -5,6 +5,7 @@ import { initSubmitGuard } from './form-submit';
 import { initFormFields } from './form-fields';
 import { initFotoUpload } from './foto-upload';
 import { initCopyTicket } from './copy-ticket';
+import { initHitungNaik } from './hitung-naik';
 
 /**
  * Baris dinamis (PSU & tipe unit) + helper kecil untuk halaman perumahan.
@@ -29,6 +30,23 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => setSidebar(sidebar?.classList.contains('-translate-x-full')));
     });
     backdrop?.addEventListener('click', () => setSidebar(false));
+
+    // Munculkan section saat masuk viewport agar halaman terasa lebih hidup.
+    if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+        const revealItems = document.querySelectorAll('.reveal-scroll');
+        if ('IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                });
+            }, { threshold: 0.12 });
+            revealItems.forEach((item) => revealObserver.observe(item));
+        } else {
+            revealItems.forEach((item) => item.classList.add('is-visible'));
+        }
+    }
 
     // Tutup sidebar otomatis setelah memilih menu di layar kecil.
     if (window.matchMedia('(max-width: 1023px)').matches) {
@@ -101,4 +119,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormFields();
     initFotoUpload();
     initCopyTicket();
+    initHitungNaik();
 });

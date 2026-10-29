@@ -11,6 +11,9 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        // Uji pencabutan sesi memakai tabel sessions seperti konfigurasi produksi.
+        config(['session.driver' => 'database']);
+
         // Statistik dashboard, peta, dan badge sidebar memakai cache —
         // kosongkan antar test agar tidak ada data ter-cache dari test sebelumnya.
         Cache::flush();

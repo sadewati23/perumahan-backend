@@ -13,7 +13,7 @@
         <div class="pointer-events-none absolute right-0 top-1/2 -z-10 hidden -translate-y-1/2 xl:block" aria-hidden="true">
             <div class="absolute left-1/2 top-1/2 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-400/15 blur-3xl"></div>
             <img src="{{ asset('images/logo-latar.png') }}" alt="" width="512" height="512" decoding="async"
-                 class="relative mr-8 h-auto w-[28rem] select-none opacity-25 drop-shadow-[0_0_48px_rgba(251,191,36,0.4)] [mask-image:linear-gradient(to_left,black_45%,transparent)] [-webkit-mask-image:linear-gradient(to_left,black_45%,transparent)] 2xl:mr-24 2xl:w-[34rem]">
+             class="hero-mengambang relative mr-8 h-auto w-[28rem] select-none opacity-25 drop-shadow-[0_0_48px_rgba(251,191,36,0.4)] [mask-image:linear-gradient(to_left,black_45%,transparent)] [-webkit-mask-image:linear-gradient(to_left,black_45%,transparent)] 2xl:mr-24 2xl:w-[34rem]">
         </div>
 
         <div class="relative z-10 mx-auto max-w-7xl px-4 py-14 lg:px-8 lg:py-20">
@@ -57,10 +57,10 @@
         {{-- Statistik --}}
         @php
             $kartu = [
-                ['label' => 'Perumahan Terdata', 'value' => number_format($statistik['total_perumahan'], 0, ',', '.'), 'satuan' => 'lokasi', 'ikon' => 'rumah', 'kelas' => 'bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg shadow-amber-500/20', 'kelas_angka' => 'text-neutral-950', 'kelas_teks' => 'text-neutral-900', 'kelas_ikon' => 'bg-neutral-950/10 text-neutral-950'],
-                ['label' => 'Total Unit Rumah', 'value' => number_format($statistik['total_unit'], 0, ',', '.'), 'satuan' => 'unit', 'ikon' => 'unit', 'kelas' => 'bg-neutral-900 shadow-lg shadow-neutral-900/20', 'kelas_angka' => 'text-amber-300', 'kelas_teks' => 'text-neutral-300', 'kelas_ikon' => 'bg-amber-400/15 text-amber-300'],
-                ['label' => 'Luas Lahan', 'value' => number_format($statistik['total_luas_lahan'] / 10000, 2, ',', '.'), 'satuan' => 'hektar', 'ikon' => 'lahan', 'kelas' => 'bg-gradient-to-br from-amber-700 to-amber-800 shadow-lg shadow-amber-800/20', 'kelas_angka' => 'text-white', 'kelas_teks' => 'text-white', 'kelas_ikon' => 'bg-white/15 text-white'],
-                ['label' => 'Luas RTH', 'value' => number_format($statistik['total_luas_rth'] / 10000, 2, ',', '.'), 'satuan' => 'hektar', 'ikon' => 'daun', 'kelas' => 'bg-gradient-to-br from-neutral-700 to-neutral-900 shadow-lg shadow-neutral-900/20', 'kelas_angka' => 'text-amber-300', 'kelas_teks' => 'text-neutral-300', 'kelas_ikon' => 'bg-amber-400/15 text-amber-300'],
+                ['label' => 'Perumahan Terdata', 'value' => number_format($statistik['total_perumahan'], 0, ',', '.'), 'hitung' => $statistik['total_perumahan'], 'desimal' => 0, 'satuan' => 'lokasi', 'ikon' => 'rumah', 'kelas' => 'bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg shadow-amber-500/20', 'kelas_angka' => 'text-neutral-950', 'kelas_teks' => 'text-neutral-900', 'kelas_ikon' => 'bg-neutral-950/10 text-neutral-950'],
+                ['label' => 'Total Unit Rumah', 'value' => number_format($statistik['total_unit'], 0, ',', '.'), 'hitung' => $statistik['total_unit'], 'desimal' => 0, 'satuan' => 'unit', 'ikon' => 'unit', 'kelas' => 'bg-neutral-900 shadow-lg shadow-neutral-900/20', 'kelas_angka' => 'text-amber-300', 'kelas_teks' => 'text-neutral-300', 'kelas_ikon' => 'bg-amber-400/15 text-amber-300'],
+                ['label' => 'Luas Lahan', 'value' => number_format($statistik['total_luas_lahan'] / 10000, 2, ',', '.'), 'hitung' => $statistik['total_luas_lahan'] / 10000, 'desimal' => 2, 'satuan' => 'hektar', 'ikon' => 'lahan', 'kelas' => 'bg-gradient-to-br from-amber-700 to-amber-800 shadow-lg shadow-amber-800/20', 'kelas_angka' => 'text-white', 'kelas_teks' => 'text-white', 'kelas_ikon' => 'bg-white/15 text-white'],
+                ['label' => 'Luas RTH', 'value' => number_format($statistik['total_luas_rth'] / 10000, 2, ',', '.'), 'hitung' => $statistik['total_luas_rth'] / 10000, 'desimal' => 2, 'satuan' => 'hektar', 'ikon' => 'daun', 'kelas' => 'bg-gradient-to-br from-neutral-700 to-neutral-900 shadow-lg shadow-neutral-900/20', 'kelas_angka' => 'text-amber-300', 'kelas_teks' => 'text-neutral-300', 'kelas_ikon' => 'bg-amber-400/15 text-amber-300'],
             ];
         @endphp
 
@@ -91,7 +91,7 @@
                         @endif
                     </div>
                     <p class="mt-4 text-sm font-medium {{ $item['kelas_teks'] }}">{{ $item['label'] }}</p>
-                    <p class="mt-1 text-3xl font-bold tracking-tight {{ $item['kelas_angka'] }} tabular-nums">{{ $item['value'] }}</p>
+                    <p class="mt-1 text-3xl font-bold tracking-tight {{ $item['kelas_angka'] }} tabular-nums" data-hitung="{{ $item['hitung'] }}" data-desimal="{{ $item['desimal'] }}" aria-label="{{ $item['value'] }}">{{ $item['value'] }}</p>
                     <p class="text-sm {{ $item['kelas_teks'] }}">{{ $item['satuan'] }}</p>
                 </div>
             @endforeach
@@ -174,7 +174,7 @@
         </div>
 
         {{-- Peta ringkas --}}
-        <section class="mt-10">
+        <section class="reveal-scroll mt-10">
             <div class="flex flex-wrap items-end justify-between gap-3">
                 <div>
                     <h2 class="border-l-4 border-amber-400 pl-3 text-lg font-semibold text-neutral-900">Peta Sebaran Perumahan</h2>
@@ -186,12 +186,12 @@
                 </a>
             </div>
 
-            <div id="peta-beranda" class="mt-4 h-80 w-full overflow-hidden rounded-2xl border-2 border-amber-300 bg-neutral-100 shadow-lg"></div>
+            <div id="peta-beranda" class="reveal-scroll mt-4 h-80 w-full overflow-hidden rounded-2xl border-2 border-amber-300 bg-neutral-100 shadow-lg"></div>
 
             <div class="mt-2 flex flex-wrap items-center gap-2" aria-label="Legenda status peta">
-                <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-amber-500" aria-hidden="true">●</span>Subsidi</span>
-                <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-neutral-800" aria-hidden="true">●</span>Komersil</span>
-                <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-rose-200"><span class="text-rose-800" aria-hidden="true">●</span>Campuran</span>
+                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-amber-500" aria-hidden="true">●</span>Subsidi</span>
+                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-neutral-800" aria-hidden="true">●</span>Komersil</span>
+                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-rose-200"><span class="text-rose-800" aria-hidden="true">●</span>Campuran</span>
             </div>
 
             @if ($titik->isEmpty())

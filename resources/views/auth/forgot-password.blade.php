@@ -19,7 +19,7 @@
             </p>
         </div>
 
-        <div class="rounded-2xl bg-white p-6 shadow-xl sm:p-8">
+        <div class="masuk-naik rounded-2xl bg-white p-6 shadow-xl sm:p-8">
             @if ($errors->any())
                 <div class="mb-5 rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700">
                     {{ $errors->first() }}

@@ -109,7 +109,7 @@
     {{-- Tampilan kartu untuk layar kecil (HP) --}}
     <div class="space-y-3 md:hidden">
         @forelse ($perumahans as $perumahan)
-            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <a href="{{ route('perumahan.show', $perumahan) }}" class="block truncate font-semibold text-slate-800 hover:text-indigo-600">
@@ -210,7 +210,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($perumahans as $perumahan)
-                        <tr class="hover:bg-slate-50/70">
+                        <tr class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} hover:bg-slate-50/70">
                             <td class="px-4 py-3">
                                 <a href="{{ route('perumahan.show', $perumahan) }}" class="font-medium text-slate-800 hover:text-indigo-600">
                                     {{ $perumahan->nama }}

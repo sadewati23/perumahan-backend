@@ -1,4 +1,4 @@
-<article class="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+<article class="{{ $animasi ?? 'kartu-muncul' }} kartu-interaktif flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
     <x-foto-perumahan :perumahan="$perumahan" class="aspect-[16/9] w-full" />
     <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
         <div>

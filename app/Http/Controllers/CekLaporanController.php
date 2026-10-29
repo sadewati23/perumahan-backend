@@ -24,11 +24,11 @@ class CekLaporanController extends Controller
     {
         if ($request->filled('jawaban_cadangan')) return back()->withInput()->withErrors(['kode' => self::PESAN]);
         $laporan = Laporan::dapatDicari()
-            ->with(['perumahan', 'kelurahan.kecamatan', 'fotosPerbaikan'])
+            ->with(['perumahan', 'kelurahan.kecamatan'])
             ->where('kode', $request->validated('kode'))
             ->first();
         if (! $laporan) return back()->withInput()->withErrors(['kode' => self::PESAN]);
-        return response()->view('lapor.status', compact('laporan'))
+        return response()->view('lapor.status', ['laporan' => $laporan, 'tanpaFoto' => true])
             ->header('Cache-Control', 'no-store, private')->header('X-Robots-Tag', 'noindex, nofollow')
             ->header('Referrer-Policy', 'no-referrer');
     }

@@ -69,7 +69,7 @@ export function initFotoUpload() {
 
             berkasSaatIni.forEach((berkas, index) => {
                 const item = document.createElement('li');
-                item.className = 'flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-2';
+                item.className = 'pop-masuk flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-2';
 
                 const gambar = document.createElement('img');
                 gambar.src = URL.createObjectURL(berkas);

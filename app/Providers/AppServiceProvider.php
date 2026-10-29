@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Password::defaults(fn () => Password::min(12)->mixedCase()->numbers());
+
         // Jumlah laporan berstatus "baru" (semua jenis) untuk badge sidebar area admin.
         // Di-cache singkat agar tidak menambah satu query count() di setiap halaman admin;
         // cache di-reset di LaporanAdminController setiap status laporan berubah.
@@ -45,5 +48,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('cek-laporan', fn (Request $request) => [
             Limit::perMinute(10)->by($request->ip()), Limit::perDay(100)->by($request->ip()),
         ]);
+        RateLimiter::for('publik', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        RateLimiter::for('geojson', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
     }
 }

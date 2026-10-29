@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
         // Daftar proxy terpercaya TIDAK dibaca dari env() di sini, karena
         // callback ini dieksekusi saat kernel di-resolve — masih sebelum .env
         // di-bootstrap (env() selalu null). TrustProxies sendiri yang
@@ -36,6 +38,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role'   => \App\Http\Middleware\EnsureUserHasRole::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+            'tanpa-cache' => \App\Http\Middleware\TanpaCache::class,
+            'simpan-tujuan-konfirmasi' => \App\Http\Middleware\SimpanTujuanKonfirmasiPassword::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));

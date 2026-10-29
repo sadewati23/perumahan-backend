@@ -72,7 +72,7 @@ class AkunNonaktifTest extends TestCase
             'last_activity' => now()->timestamp,
         ]);
 
-        $this->actingAs($admin)->put(route('users.update', $petugas), [
+        $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->put(route('users.update', $petugas), [
             'name' => $petugas->name,
             'email' => $petugas->email,
             'role' => 'petugas',

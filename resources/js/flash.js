@@ -8,7 +8,22 @@ const AUTO_DISMISS_MS = 5000;
 
 export function initFlashMessages() {
     document.querySelectorAll('[data-flash]').forEach((el) => {
-        const dismiss = () => el.remove();
+        const dismiss = () => {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                el.remove();
+                return;
+            }
+
+            el.classList.add('toast-keluar');
+            let selesai = false;
+            const remove = () => {
+                if (selesai) return;
+                selesai = true;
+                el.remove();
+            };
+            el.addEventListener('animationend', remove, { once: true });
+            window.setTimeout(remove, 300);
+        };
 
         el.querySelector('[data-flash-dismiss]')?.addEventListener('click', dismiss);
 

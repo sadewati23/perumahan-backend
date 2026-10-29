@@ -116,7 +116,7 @@ class HapusOtomatisLaporanTest extends TestCase
 
     public function test_14_destroy_manual_menghapus_semua_file(): void
     {
-        Storage::fake('public'); $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]); $l = $this->laporan(); $this->foto($l, 'manual.jpg', 'laporan'); $this->actingAs($admin)->delete(route('laporan.destroy', $l))->assertRedirect(route('laporan.index')); $this->assertDatabaseMissing('laporans', ['id' => $l->id]); Storage::disk('public')->assertMissing('manual.jpg');
+        Storage::fake('public'); $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]); $l = $this->laporan(); $this->foto($l, 'manual.jpg', 'laporan'); $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->delete(route('laporan.destroy', $l))->assertRedirect(route('laporan.index')); $this->assertDatabaseMissing('laporans', ['id' => $l->id]); Storage::disk('public')->assertMissing('manual.jpg');
     }
 
     public function test_peringatan_sejak_kosong_muncul_di_dry_run_dan_normal(): void

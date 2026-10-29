@@ -3,7 +3,7 @@
 @push('head')<meta name="robots" content="noindex">@endpush
 @section('content')
 <section class="mx-auto max-w-xl px-4 py-10 lg:px-8">
-    <x-card>
+    <x-card class="masuk-naik">
         <h1 class="text-2xl font-semibold text-slate-900">Cek Status Laporan</h1>
         @if (config('laporan.hapus_otomatis'))<p class="mt-2 text-sm text-slate-600">Laporan yang sudah selesai dihapus otomatis {{ config('laporan.hapus_otomatis_hari') }} hari setelah ditandai selesai.</p>@endif
         @if ($errors->any()) <div class="mt-4 rounded-lg border border-danger-200 bg-danger-50 p-3 text-sm text-danger-800">{{ $errors->first() }}</div> @endif

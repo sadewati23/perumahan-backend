@@ -144,7 +144,7 @@
     {{-- Daftar kartu untuk layar kecil --}}
     <div class="mt-4 space-y-3 md:hidden">
         @forelse ($laporans as $laporan)
-            <x-card>
+            <x-card class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }}">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <a href="{{ route('laporan.show', $laporan) }}" class="font-mono text-xs font-semibold text-slate-700 hover:text-brand-700">{{ $laporan->kode }}</a>
@@ -198,13 +198,14 @@
                 @endif
 
                 @if (auth()->user()->isAdmin())
-                    <div class="mt-3 border-t border-slate-100 pt-3 text-right">
-                        <button type="button"
-                                data-confirm="Hapus laporan {{ $laporan->kode }} ini?&#10;Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
-                                data-action="{{ route('laporan.destroy', $laporan) }}"
-                                class="text-xs font-medium text-danger-600 hover:text-danger-700">
-                            Hapus
-                        </button>
+                     <div class="mt-3 border-t border-slate-100 pt-3 text-right">
+                         <form method="POST" action="{{ route('laporan.destroy', $laporan) }}" class="inline" data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan.">
+                             @csrf
+                             @method('DELETE')
+                             <button type="submit" class="text-xs font-medium text-danger-600 hover:text-danger-700">
+                                 Hapus
+                             </button>
+                         </form>
                     </div>
                 @endif
             </x-card>
@@ -236,7 +237,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($laporans as $laporan)
-                        <tr class="transition hover:bg-slate-50">
+                        <tr class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} transition hover:bg-slate-50">
                             <td class="whitespace-nowrap px-4 py-3 font-mono text-xs font-semibold text-slate-700">{{ $laporan->kode }}</td>
                             <td class="px-4 py-3">
                                 <p class="font-medium text-slate-800">{{ $laporan->judul }}</p>
@@ -281,15 +282,16 @@
                             <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-500">
                                 {{ $laporan->created_at->translatedFormat('d M Y, H:i') }}
                             </td>
-                            <td class="whitespace-nowrap px-4 py-3 text-right">
-                                @if (auth()->user()->isAdmin())
-                                    <button type="button"
-                                            data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan."
-                                            data-action="{{ route('laporan.destroy', $laporan) }}"
-                                            class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                        Hapus
-                                    </button>
-                                @endif
+                             <td class="whitespace-nowrap px-4 py-3 text-right">
+                                 @if (auth()->user()->isAdmin())
+                                     <form method="POST" action="{{ route('laporan.destroy', $laporan) }}" class="inline" data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan.">
+                                         @csrf
+                                         @method('DELETE')
+                                         <button type="submit" class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                                             Hapus
+                                         </button>
+                                     </form>
+                                 @endif
                             </td>
                         </tr>
                     @empty

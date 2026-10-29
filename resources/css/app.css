@@ -13,6 +13,61 @@
     .tunda-4 { animation-delay: .55s; }
 }
 
+/* Animasi ringan untuk navigasi dan konten publik. Tidak mengubah warna UI. */
+@keyframes halaman-masuk {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes garis-masuk {
+    from { opacity: 0; transform: scaleX(.94); }
+    to { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes melayang {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes muncul-scroll {
+    from { opacity: 0; transform: translateY(22px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .halaman-masuk { animation: halaman-masuk .55s cubic-bezier(.22, 1, .36, 1) both; }
+    .header-masuk { animation: garis-masuk .5s cubic-bezier(.22, 1, .36, 1) both; transform-origin: top center; }
+    .kartu-interaktif {
+        transition: transform .25s cubic-bezier(.22, 1, .36, 1), box-shadow .25s ease;
+    }
+    .kartu-interaktif:hover { transform: translateY(-4px); }
+    .kartu-interaktif img.relative {
+        transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+    }
+    .kartu-interaktif:hover img.relative { transform: scale(1.045); }
+    .nav-animasi { position: relative; }
+    .nav-animasi::after {
+        content: '';
+        position: absolute;
+        right: .75rem;
+        bottom: .3rem;
+        left: .75rem;
+        height: 2px;
+        transform: scaleX(0);
+        transform-origin: center;
+        background: currentColor;
+        transition: transform .25s ease;
+    }
+    .nav-animasi:hover::after,
+    .nav-animasi[aria-current='page']::after { transform: scaleX(1); }
+    .tombol-animasi { transition: transform .2s ease, box-shadow .2s ease; }
+    .tombol-animasi:hover { transform: translateY(-2px); }
+    .tombol-animasi:active { transform: translateY(0) scale(.98); }
+    .hero-mengambang { animation: melayang 6s ease-in-out infinite; }
+    .reveal-scroll { opacity: 0; transform: translateY(22px) scale(.985); }
+    .reveal-scroll.is-visible { animation: muncul-scroll .65s cubic-bezier(.22, 1, .36, 1) both; }
+}
+
 /* Kilau emas yang bergerak pelan pada teks sorotan */
 @keyframes kilau-teks { to { background-position: 200% center; } }
 .teks-kilau {
@@ -179,6 +234,61 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
+    }
+
+    .animate-spin {
+        animation-duration: 1s !important;
+        animation-iteration-count: infinite !important;
+    }
+}
+
+@keyframes pop-masuk {
+    from { opacity: 0; transform: scale(.96); }
+}
+
+@keyframes toast-masuk {
+    from { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes toast-keluar {
+    to { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes getar {
+    0%, 100% { transform: none; }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+@keyframes garis-isi {
+    from { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .pop-masuk { animation: pop-masuk .25s cubic-bezier(.22, 1, .36, 1) both; }
+    .toast-masuk { animation: toast-masuk .2s ease-out both; }
+    .toast-keluar { animation: toast-keluar .2s ease-out forwards; }
+    .getar { animation: getar .3s ease-out both; }
+    .garis-isi { transform-origin: left center; animation: garis-isi .35s cubic-bezier(.22, 1, .36, 1) both; }
+
+    dialog[open] { animation: pop-masuk .2s cubic-bezier(.22, 1, .36, 1) both; }
+    dialog::backdrop { opacity: 1; transition: opacity .2s ease-out; }
+    @starting-style {
+        dialog[open]::backdrop { opacity: 0; }
+    }
+    details[open] > :not(summary) { animation: pop-masuk .18s ease-out both; }
+
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root),
+    ::view-transition-new(root) { animation-duration: .18s; }
+}
+
+@media print {
+    *,
+    ::before,
+    ::after {
+        animation: none !important;
+        transition: none !important;
     }
 }
 

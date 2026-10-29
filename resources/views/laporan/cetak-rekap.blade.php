@@ -8,8 +8,8 @@
         @page { size: A4; margin: 15mm }
         * { box-sizing: border-box }
         body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            font-size: 11px;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
             color: #1e293b;
             margin: 0 auto;
             max-width: 210mm;
@@ -42,7 +42,7 @@
         tbody tr { page-break-inside: avoid }
 
         .kolom-teks { max-width: 140px }
-        .kode { font-family: "Consolas", monospace; font-weight: 600 }
+        .kode { font-family: "Times New Roman", Times, serif; font-weight: 600 }
 
         .catatan { margin-top: 10px; padding: 6px 8px; border: 1px solid #f59e0b; background: #fef3c7; font-size: 10px; page-break-inside: avoid }
 
@@ -54,11 +54,14 @@
     </style>
 </head>
 <body>
-    {{-- Toolbar layar — tidak ikut tercetak. --}}
-    <div class="no-print">
-        <button type="button" id="tombol-cetak">Cetak Rekap</button>
-        <button type="button" id="tombol-tutup">Tutup Tab</button>
-    </div>
+    @if (! ($word ?? false))
+        {{-- Toolbar layar — tidak ikut tercetak. --}}
+        <div class="no-print">
+            <button type="button" id="tombol-cetak">Cetak / Simpan PDF</button>
+            <a href="{{ route('laporan.cetak-rekap.word', $filters) }}">Unduh Word</a>
+            <button type="button" id="tombol-tutup">Tutup Tab</button>
+        </div>
+    @endif
 
     <div class="kop">
         <img src="{{ asset('images/logo.png') }}" alt="">
@@ -139,6 +142,7 @@
         Dicetak oleh {{ auth()->user()->name }} pada {{ now()->translatedFormat('d F Y, H:i') }}
     </footer>
 
+    @if (! ($word ?? false))
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tombolCetak = document.getElementById('tombol-cetak');
@@ -152,5 +156,6 @@
             }
         });
     </script>
+    @endif
 </body>
 </html>

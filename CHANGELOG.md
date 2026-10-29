@@ -22,6 +22,7 @@ Dokumentasi riwayat pekerjaan pada proyek ini, mencatat setiap perubahan fitur y
 | 2026-10-06 | Perbaikan 4 temuan review | Throttle login anti brute-force, sinkronisasi PSU/tipe unit tanpa delete-all, guard hapus kecamatan berkelurahan, dan pembersihan route API |
 | 2026-10-06 | Perbaikan Stored XSS popup peta | Nilai perumahan (nama/alamat/status) yang diinterpolasi ke HTML popup Leaflet kini di-escape di 3 halaman peta (penemuan user) |
 | 2026-10-12 | SRI pada CDN Leaflet & Chart.js | Tag CDN di 8 view kini pakai `integrity` + `crossorigin` agar browser memverifikasi checksum file eksternal (penemuan user) |
+| 2026-10-27 | Animasi situs & perbaikan hapus laporan | Animasi transform/opacity publik-admin, count-up statistik, reduced-motion, print guard, serta perbaikan tombol hapus di dashboard dan admin/laporan |
 
 ---
 
@@ -415,6 +416,57 @@ chart.umd.js sha384-4W8gMhOYqk0FPg9sAMkb3g/P2fXtzbUyDUUgMlA1EEig8z/U/13EYUjErc1H
 - **Kontrol negatif**: hash sengaja dipalsukan → browser memblokir Leaflet (`L is not defined`) — atribut SRI aktif, bukan hiasan ✅
 - E2E login admin sungguhan (Chrome + server `php artisan serve`): dashboard memuat Chart.js 200 & 3 chart instance terpasang (`grafik-tahun`, `grafik-kondisi`, `grafik-jenis-psu`); `/admin/perumahan/peta` memuat Leaflet 1.9.4 & peta aktif; 0 console error, 0 request gagal ✅
 - 67 test lulus (383 assertions) ✅ — termasuk test regresi baru (46 assertion)
+
+---
+
+## 15. Animasi Situs Publik & Admin (2026-10-27)
+
+**Status: selesai.**
+
+Permintaan: menambahkan animasi yang halus dan bermakna tanpa mengubah warna, teks, route, atau logika bisnis.
+
+### Perubahan
+
+| Area | Rincian |
+|---|---|
+| CSS | Menambahkan animasi pop-in, toast masuk/keluar, getar error field, garis tahap status, dialog/backdrop, animasi `<details>`, view transition progresif, print guard, dan pengecualian spinner saat reduced motion aktif |
+| JavaScript | Modul `hitung-naik.js` untuk count-up statistik; flash toast keluar bertahap; thumbnail upload mendapat pop-in; fallback `window.confirm()` untuk browser tanpa dukungan native `<dialog>` |
+| Statistik | Beranda dan KPI dashboard memakai `data-hitung`, `data-desimal`, serta `aria-label`; teks akhir selalu dikembalikan ke teks server |
+| Publik | Animasi kartu perumahan, panel foto/info, peta, legenda, form laporan, hasil cek/status, kartu autentikasi, dan kotak sukses |
+| Admin | Animasi panel grafik, baris/kartu daftar, dropdown pengguna, ikon sidebar, tombol, dan flash message |
+| Test | `tests/Feature/AnimasiTest.php` ditambahkan; mencakup guard CSS, properti keyframe, statistik, integrasi JavaScript, dan form hapus laporan |
+
+### Verifikasi
+
+- `npm run build` ✅
+- `php artisan view:clear` ✅
+- Test terkait animasi, publik, admin, dan penghapusan laporan lulus ✅
+- Audit multiset token warna pada file implementasi tidak menemukan token warna baru ✅
+
+---
+
+## 16. Perbaikan Tombol Hapus Laporan (2026-10-27)
+
+**Status: selesai.**
+
+### Masalah
+
+Tombol **Hapus** pada dashboard dan halaman `admin/laporan` sebelumnya berupa button dengan `data-confirm`/`data-action`, sedangkan dialog konfirmasi global hanya menangani `form[data-confirm]`. Handler inline yang diharapkan tidak berjalan konsisten sehingga klik tidak memberi reaksi.
+
+### Perbaikan
+
+- Tombol hapus dashboard diubah menjadi form `POST` dengan `@method('DELETE')`.
+- Tombol hapus versi mobile dan desktop di `resources/views/laporan/index.blade.php` disamakan dengan pola tersebut.
+- Handler duplikat di dashboard dihapus.
+- Dialog konfirmasi memiliki fallback `window.confirm()` bila browser tidak mendukung `HTMLDialogElement.showModal()`.
+- Test regresi memastikan form konfirmasi tersedia di dashboard dan admin/laporan.
+
+### Verifikasi
+
+- `AnimasiTest`: 7 test lulus ✅
+- `LaporanTest`: 23 test lulus ✅
+- `HakAksesHapusTest`: 4 test lulus ✅
+- `git diff --check` bersih ✅
 
 ---
 

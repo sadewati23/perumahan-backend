@@ -20,10 +20,14 @@
         Lewati ke konten utama
     </a>
 
-    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header class="header-masuk sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 lg:px-8">
             <a href="{{ route('publik.beranda') }}" class="flex min-w-0 items-center gap-3">
-                <x-logo />
+                 @if ($tanpaFoto ?? false)
+                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">DP</span>
+                 @else
+                     <x-logo />
+                 @endif
                 <span class="min-w-0 leading-tight">
                     <span class="block truncate text-sm font-semibold text-slate-900">Data Perumahan</span>
                     <span class="block truncate text-xs text-slate-500">{{ config('peta.nama_wilayah') }}</span>
@@ -45,14 +49,14 @@
                     @php $aktif = request()->routeIs($item['active']); @endphp
                     <a href="{{ route($item['route']) }}"
                        @if ($aktif) aria-current="page" @endif
-                       class="rounded-lg px-3 py-2 text-sm font-medium transition {{ $aktif ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                       class="nav-animasi rounded-lg px-3 py-2 text-sm font-medium transition {{ $aktif ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
                         {{ $item['label'] }}
                     </a>
                 @endforeach
             </nav>
 
             <a href="{{ route('login') }}"
-               class="shrink-0 whitespace-nowrap rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:px-4">
+                class="tombol-animasi shrink-0 whitespace-nowrap rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:px-4">
                 <span class="hidden sm:inline">Masuk </span>Admin
             </a>
         </div>
@@ -62,14 +66,14 @@
                 @php $aktif = request()->routeIs($item['active']); @endphp
                 <a href="{{ route($item['route']) }}"
                    @if ($aktif) aria-current="page" @endif
-                   class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition {{ $aktif ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600' }}">
+                       class="nav-animasi whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition {{ $aktif ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600' }}">
                     {{ $item['label'] }}
                 </a>
             @endforeach
         </nav>
     </header>
 
-    <main id="main" class="flex-1">
+    <main id="main" class="halaman-masuk flex-1">
         @if (session('success'))
             <div class="mx-auto max-w-7xl px-4 pt-4 lg:px-8">
                 <x-flash-message tone="success" auto-dismiss>
@@ -89,11 +93,15 @@
         @yield('content')
     </main>
 
-    <footer class="mt-12 border-t border-slate-200 bg-white">
+    <footer class="footer-gradasi mt-12 border-t border-slate-200 bg-gradient-to-b from-white via-slate-50 to-slate-100">
         <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
             <div class="lg:col-span-2">
                 <div class="flex items-center gap-3">
-                    <x-logo ukuran="h-9 w-9" />
+                     @if ($tanpaFoto ?? false)
+                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white">DP</span>
+                     @else
+                         <x-logo ukuran="h-9 w-9" />
+                     @endif
                     <span class="font-semibold text-slate-900">{{ config('app.name') }}</span>
                 </div>
                 <p class="mt-3 max-w-md text-sm text-slate-600">

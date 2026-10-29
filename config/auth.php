@@ -112,6 +112,10 @@ return [
     |
     */
 
-    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+    'password_timeout' => (function () {
+        $timeout = filter_var(env('AUTH_PASSWORD_TIMEOUT', 900), FILTER_VALIDATE_INT);
+
+        return $timeout !== false && $timeout >= 60 ? $timeout : 900;
+    })(),
 
 ];

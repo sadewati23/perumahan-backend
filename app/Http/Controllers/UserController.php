@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
+use App\Support\SesiPengguna;
 
 class UserController extends Controller
 {
@@ -26,7 +26,9 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:150', 'unique:users,email'],
             'role' => ['required', 'in:admin,petugas'],
             'jabatan' => ['nullable', 'string', 'max:100'],
-            'password' => ['required', 'confirmed', Password::min(6)],
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ], [
+            'password.min' => 'Password minimal 12 karakter.',
         ]);
 
         User::create($data + ['is_active' => true]);
@@ -42,7 +44,9 @@ class UserController extends Controller
             'role' => ['required', 'in:admin,petugas'],
             'jabatan' => ['nullable', 'string', 'max:100'],
             'is_active' => ['nullable', 'boolean'],
-            'password' => ['nullable', 'confirmed', Password::min(6)],
+            'password' => ['nullable', 'confirmed', Password::defaults()],
+        ], [
+            'password.min' => 'Password minimal 12 karakter.',
         ]);
 
         $data['is_active'] = $request->boolean('is_active');
@@ -62,11 +66,11 @@ class UserController extends Controller
 
         $user->update($data);
 
-        // Ketika akun dinonaktifkan, cabut semua sesi aktifnya (driver: database).
-        if (! $data['is_active'] && $user->wasChanged('is_active')) {
-            DB::table(config('session.table', 'sessions'))
-                ->where('user_id', $user->id)
-                ->delete();
+        if ((! $data['is_active'] && $user->wasChanged('is_active')) || $user->wasChanged('password')) {
+            SesiPengguna::cabut(
+                $user,
+                $user->id === auth()->id() ? $request->session()->getId() : null,
+            );
         }
 
         return back()->with('success', 'Data pengguna berhasil diperbarui.');

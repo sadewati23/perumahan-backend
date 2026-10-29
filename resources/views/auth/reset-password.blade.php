@@ -19,7 +19,7 @@
             </p>
         </div>
 
-        <div class="rounded-2xl bg-white p-6 shadow-xl sm:p-8">
+        <div class="masuk-naik rounded-2xl bg-white p-6 shadow-xl sm:p-8">
             @if ($errors->any())
                 <div class="mb-5 rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700">
                     <p class="font-semibold">Periksa kembali isian berikut:</p>
@@ -42,11 +42,11 @@
                            placeholder="nama@instansi.go.id">
                 </x-field>
 
-                <x-field name="password" for="password" label="Password Baru" required>
+                 <x-field name="password" for="password" label="Password Baru" required hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka.">
                     <div class="relative">
                         <input id="password" name="password" type="password" required autofocus
                                autocomplete="new-password" enterkeyhint="next" class="input pr-24"
-                               placeholder="Minimal 6 karakter">
+                                placeholder="Minimal 12 karakter">
                         <button type="button" data-password-toggle aria-controls="password" aria-label="Tampilkan password"
                                 class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md px-2 py-2 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
                             <span data-password-text>Tampilkan</span>

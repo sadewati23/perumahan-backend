@@ -28,7 +28,7 @@
         <div class="grid gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 @if (session('laporan_kode'))
-                    <div class="mb-6 rounded-xl border border-success-200 bg-success-50 p-6">
+                    <div class="pop-masuk mb-6 rounded-xl border border-success-200 bg-success-50 p-6">
                         <div class="flex items-start gap-3">
                             <svg class="mt-0.5 h-6 w-6 shrink-0 text-success-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -100,7 +100,7 @@
 
                             <div class="mt-4 grid gap-3 sm:grid-cols-3">
                                 @foreach (\App\Models\Laporan::JENIS as $value => $label)
-                                    <label class="jenis-kartu flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition has-[:checked]:border-brand-500 has-[:checked]:ring-2 has-[:checked]:ring-brand-500/30
+                                        <label class="jenis-kartu flex cursor-pointer items-start gap-3 rounded-lg border p-3 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[.98] has-[:checked]:border-brand-500 has-[:checked]:ring-2 has-[:checked]:ring-brand-500/30
                                                   {{ old('jenis', $jenisTerpilih ?? 'kerusakan') === $value ? 'border-brand-500 ring-2 ring-brand-500/30' : 'border-slate-300' }}">
                                         <input type="radio" name="jenis" value="{{ $value }}" required
                                                @checked(old('jenis', $jenisTerpilih ?? 'kerusakan') === $value)

@@ -163,7 +163,7 @@ class HalamanTest extends TestCase
         $kecamatan = Kecamatan::create(['nama' => 'Mandalasari']);
         Kelurahan::create(['kecamatan_id' => $kecamatan->id, 'nama' => 'Cibangkong']);
 
-        $this->actingAs($admin)
+        $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)
             ->delete(route('kecamatan.destroy', $kecamatan))
             ->assertRedirect()
             ->assertSessionHas('error');
