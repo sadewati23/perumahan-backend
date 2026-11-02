@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Support\OriginAplikasi;
 use App\Models\Laporan;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -27,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Password::defaults(fn () => Password::min(12)->mixedCase()->numbers());
+
+        if (($origin = OriginAplikasi::url()) !== null) {
+            URL::forceRootUrl($origin);
+        }
 
         // Jumlah laporan berstatus "baru" (semua jenis) untuk badge sidebar area admin.
         // Di-cache singkat agar tidak menambah satu query count() di setiap halaman admin;

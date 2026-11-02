@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\OriginAplikasi;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -42,9 +43,13 @@ class ResetPasswordNotification extends Notification
      */
     protected function resetUrl(object $notifiable): string
     {
-        return url(route('password.reset', [
+        $path = route('password.reset', [
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
-        ], false));
+        ], false);
+
+        $origin = OriginAplikasi::url();
+
+        return $origin !== null ? $origin.$path : url($path);
     }
 }

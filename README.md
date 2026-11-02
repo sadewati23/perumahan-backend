@@ -204,14 +204,24 @@ Mail default menggunakan driver `log`. Untuk mengaktifkan reset password melalui
 
 Seeder membuat akun berikut:
 
-| Email | Password awal | Role | Hak akses |
-| --- | --- | --- | --- |
-| `admin@perumahan.test` | `password` | `admin` | Semua modul, termasuk seluruh penghapusan dan pengguna |
-| `petugas@perumahan.test` | `password` | `petugas` | Melihat, menambah, mengubah data, dan mengunggah foto perbaikan; tidak dapat menghapus, kecuali foto perbaikan yang diunggah sendiri |
+| Username (lokal) | Email reset password | Password awal | Role | Hak akses |
+| --- | --- | --- | --- | --- |
+| `admin` | `admin@perumahan.test` | `password` | `admin` | Semua modul, termasuk seluruh penghapusan dan pengguna |
+| `petugas` | `petugas@perumahan.test` | `password` | `petugas` | Melihat, menambah, mengubah data, dan mengunggah foto perbaikan; tidak dapat menghapus, kecuali foto perbaikan yang diunggah sendiri |
 
 Semua akun admin harus aktif (`is_active = true`). Middleware `active` menolak akun nonaktif, sedangkan middleware `role:admin` membatasi menu manajemen pengguna. Segera ganti password bawaan setelah instalasi.
 
 > **Peringatan produksi:** akun yang dibuat oleh seeder (`*@perumahan.test` dengan password `password`) hanya untuk pengembangan **lokal** dan dilarang digunakan di produksi. Pembuatan admin produksi dijelaskan pada [`HOSTING.md`](HOSTING.md), bagian **7. Akun Admin**.
+
+### Catatan keamanan deployment
+
+- Buat admin produksi dengan `php artisan admin:buat <username> <email>`; password diminta secara tersembunyi. Username dipakai untuk login, sedangkan email dipakai untuk reset password.
+- Pada produksi, `APP_URL` wajib menggunakan origin HTTPS asli.
+- `TRUSTED_HOSTS` berisi host tambahan yang diizinkan, dipisahkan dengan koma.
+- Host pada `APP_URL` selalu diizinkan; `TRUSTED_HOSTS` kosong berarti hanya host tersebut.
+- `X-Forwarded-Host` dan `X-Forwarded-Prefix` tidak dipercaya aplikasi.
+- Nilai `*` pada `TRUSTED_PROXIES` diabaikan pada produksi.
+- Seeder akun dan data contoh hanya berjalan pada lingkungan non-produksi.
 
 ## Modul Aplikasi
 

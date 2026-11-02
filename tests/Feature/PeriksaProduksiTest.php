@@ -141,7 +141,7 @@ class PeriksaProduksiTest extends TestCase
             'app.env' => 'production',
             'app.debug' => false,
             'app.key' => 'testing-application-key',
-            'app.url' => 'https://contoh.test',
+            'app.url' => 'https://contoh.go.id',
             'app.timezone' => 'Asia/Jakarta',
             'session.secure' => true,
             'trustedproxy.proxies' => null,

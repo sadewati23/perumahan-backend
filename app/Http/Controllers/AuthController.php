@@ -8,7 +8,9 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -29,15 +31,20 @@ class AuthController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
+        $rawUsername = $request->input('username');
+        if (is_string($rawUsername)) {
+            $request->merge(['username' => Str::lower(trim($rawUsername))]);
+        }
+
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'username' => ['required', 'string', 'max:50'],
             'password' => ['required', 'string'],
         ]);
 
         $this->batasiPercobaanLogin($request);
 
         try {
-            $this->batasiPercobaanPerEmail($request);
+            $this->batasiPercobaanPerUsername($request);
         } catch (ValidationException $e) {
             $this->batasiPercobaanLogin($request);
 
@@ -48,15 +55,31 @@ class AuthController extends Controller
         // kredensial salah, sehingga tidak membocorkan bahwa password-nya benar.
         if (! Auth::attempt($credentials + ['is_active' => true], $request->boolean('remember'))) {
             RateLimiter::hit($this->kunciPercobaanLogin($request));
-            RateLimiter::hit($this->kunciPercobaanPerEmail($request));
+            RateLimiter::hit($this->kunciPercobaanPerUsername($request));
 
             throw ValidationException::withMessages([
-                'email' => 'Email atau password yang Anda masukkan salah, atau akun dinonaktifkan.',
+                'username' => 'Username atau password yang Anda masukkan salah, atau akun dinonaktifkan.',
+            ]);
+        }
+
+        $user = Auth::user();
+        if (app()->isProduction() && $user && str_ends_with(Str::lower($user->email), '@perumahan.test')) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            RateLimiter::hit($this->kunciPercobaanLogin($request));
+            RateLimiter::hit($this->kunciPercobaanPerUsername($request));
+            if (Cache::add('login.akun_bawaan_diblokir', true, now()->addHour())) {
+                Log::critical('login.akun_bawaan_diblokir');
+            }
+
+            throw ValidationException::withMessages([
+                'username' => 'Username atau password yang Anda masukkan salah, atau akun dinonaktifkan.',
             ]);
         }
 
         RateLimiter::clear($this->kunciPercobaanLogin($request));
-        RateLimiter::clear($this->kunciPercobaanPerEmail($request));
+        RateLimiter::clear($this->kunciPercobaanPerUsername($request));
 
         $request->session()->regenerate();
 
@@ -76,11 +99,11 @@ class AuthController extends Controller
 
     /**
      * Anti brute-force login: maksimal 5 percobaan gagal per menit,
-     * ber-key email + IP. Login yang berhasil menghapus penghitung.
+     * ber-key username + IP. Login yang berhasil menghapus penghitung.
      *
      * Kunci INI yang di-blind oleh spoofing X-Forwarded-For (karena $request->ip()
      * hanya dipengaruhi proxy terpercaya — lihat bootstrap/app.php) — namun
-     * pengaman kedua (percobaan per email) tetap berjalan walau IP-nya falsu.
+     * pengaman kedua (percobaan per username) tetap berjalan walau IP-nya falsu.
      */
     private function batasiPercobaanLogin(Request $request): void
     {
@@ -93,44 +116,44 @@ class AuthController extends Controller
         $detik = RateLimiter::availableIn($kunci);
 
         throw ValidationException::withMessages([
-            'email' => 'Terlalu banyak percobaan login. Silakan coba lagi dalam '.$detik.' detik.',
+            'username' => 'Terlalu banyak percobaan login. Silakan coba lagi dalam '.$detik.' detik.',
         ]);
     }
 
     /**
-     * Pengaman kedua: maksimal 5 percobaan gagal per menit **per email saja**
+     * Pengaman kedua: maksimal 5 percobaan gagal per menit **per username saja**
      * (tanpa IP). Ini yang menjaga satu akun tidak di-brute-force dari banyak
      * IP sekaligus / dengan IP palsu.
      * Dipanggil setelah batasiPercobaanLogin agar pesan yang tampil tetap
      * prioritaskan pembatasan per IP; pengecekan dua-duanya tetap di-hit.
      */
-    private function batasiPercobaanPerEmail(Request $request): void
+    private function batasiPercobaanPerUsername(Request $request): void
     {
-        $kunci = $this->kunciPercobaanPerEmail($request);
+        $kunci = $this->kunciPercobaanPerUsername($request);
 
         if (! RateLimiter::tooManyAttempts($kunci, 5)) {
             return;
         }
 
         throw ValidationException::withMessages([
-            'email' => 'Terlalu banyak percobaan login untuk akun ini. Silakan coba lagi '.RateLimiter::availableIn($kunci).' detik lagi.',
+            'username' => 'Terlalu banyak percobaan login untuk akun ini. Silakan coba lagi '.RateLimiter::availableIn($kunci).' detik lagi.',
         ]);
     }
 
     /**
-     * Key throttle percobaan login: email (dinormalisasi) + IP pengirim.
+     * Key throttle percobaan login: username (dinormalisasi) + IP pengirim.
      */
     private function kunciPercobaanLogin(Request $request): string
     {
-        return Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
+        return Str::transliterate(Str::lower((string) $request->input('username')).'|'.$request->ip());
     }
 
     /**
-     * Key throttle percobaan login per email saja (tanpa IP) — lapis kedua.
+     * Key throttle percobaan login per username saja (tanpa IP) — lapis kedua.
      */
-    private function kunciPercobaanPerEmail(Request $request): string
+    private function kunciPercobaanPerUsername(Request $request): string
     {
-        return 'login-email:'.Str::transliterate(Str::lower($request->input('email')));
+        return 'login-username:'.Str::transliterate(Str::lower((string) $request->input('username')));
     }
 
     /*

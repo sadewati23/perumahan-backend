@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\PostTooLargeException;
+use Illuminate\Http\Request;
 
 /*
 |----------------------------------------------------------------------
@@ -28,6 +29,24 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // Laravel melewati TrustHosts pada unit test. Kondisi eksplisit ini
+        // juga mencegah state trusted-host vendor terbawa antar test ketika
+        // test mengubah environment aplikasi menjadi production.
+        if (! app()->runningUnitTests()) {
+            $middleware->trustHosts(
+                at: fn () => \App\Support\HostTepercaya::daftar(),
+                subdomains: false,
+            );
+        }
+        // Host dan prefix forwarded tidak dipercaya agar klien tidak dapat
+        // memalsukan origin URL atau base path aplikasi.
+        $middleware->trustProxies(
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO,
+        );
+        $middleware->authenticateSessions();
 
         // Daftar proxy terpercaya TIDAK dibaca dari env() di sini, karena
         // callback ini dieksekusi saat kernel di-resolve — masih sebelum .env

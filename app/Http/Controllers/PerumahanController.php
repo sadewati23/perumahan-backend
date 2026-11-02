@@ -240,8 +240,9 @@ class PerumahanController extends Controller
      */
     private function syncDetail(Perumahan $perumahan, Request $request): void
     {
-        $this->syncPsu($perumahan, (array) $request->input('psu', []));
-        $this->syncTipeUnits($perumahan, (array) $request->input('tipe_units', []));
+        $data = $request->validated();
+        $this->syncPsu($perumahan, $data['psu'] ?? []);
+        $this->syncTipeUnits($perumahan, $data['tipe_units'] ?? []);
     }
 
     private function pastikanFotoValid(StorePerumahanRequest $request): void

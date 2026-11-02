@@ -29,12 +29,18 @@ class User extends Authenticatable implements CanResetPasswordContract
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'role',
         'is_active',
         'jabatan',
         'password',
     ];
+
+    public function setUsernameAttribute($value): void
+    {
+        $this->attributes['username'] = Str::lower(trim((string) $value));
+    }
 
     /**
      * The attributes that should be hidden for serialization.

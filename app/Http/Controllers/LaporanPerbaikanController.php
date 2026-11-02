@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Laporan;
 use App\Models\LaporanFoto;
 use App\Support\FotoBersih;
+use App\Support\KuotaFotoTerlewati;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -66,16 +67,13 @@ class LaporanPerbaikanController extends Controller
                 }
             }
 
-            DB::transaction(function () use ($laporan, $data, $paths): void {
-                foreach ($paths as $path) {
-                    $laporan->fotosPerbaikan()->create([
-                        'path' => $path,
-                        'tipe' => LaporanFoto::TIPE_PERBAIKAN,
-                        'keterangan' => $data['keterangan'] ?? null,
-                        'diunggah_oleh' => auth()->id(),
-                    ]);
-                }
-            });
+            $this->simpanDenganKuota($laporan, $data['keterangan'] ?? null, $paths);
+        } catch (KuotaFotoTerlewati $e) {
+            if ($paths !== []) {
+                Storage::disk('public')->delete($paths);
+            }
+
+            return back()->with('error', $e->getMessage());
         } catch (Throwable $e) {
             if ($paths !== []) {
                 Storage::disk('public')->delete($paths);
@@ -85,6 +83,30 @@ class LaporanPerbaikanController extends Controller
         }
 
         return back()->with('success', count($paths).' foto hasil perbaikan berhasil ditambahkan ke laporan '.$laporan->kode.'.');
+    }
+
+    /** @param list<string> $paths */
+    public function simpanDenganKuota(Laporan $laporan, ?string $keterangan, array $paths): void
+    {
+        DB::transaction(function () use ($laporan, $keterangan, $paths): void {
+            $terkunci = Laporan::query()->whereKey($laporan->id)->lockForUpdate()->firstOrFail();
+            $jumlahSekarang = $terkunci->fotosPerbaikan()->count();
+
+            if ($jumlahSekarang + count($paths) > self::MAKS_FOTO) {
+                throw new KuotaFotoTerlewati(
+                    'Foto hasil perbaikan untuk laporan ini maksimal '.self::MAKS_FOTO.' — saat ini sudah '.$jumlahSekarang.' foto.'
+                );
+            }
+
+            foreach ($paths as $path) {
+                $terkunci->fotosPerbaikan()->create([
+                    'path' => $path,
+                    'tipe' => LaporanFoto::TIPE_PERBAIKAN,
+                    'keterangan' => $keterangan,
+                    'diunggah_oleh' => auth()->id(),
+                ]);
+            }
+        });
     }
 
     public function destroy(Laporan $laporan, LaporanFoto $foto): RedirectResponse

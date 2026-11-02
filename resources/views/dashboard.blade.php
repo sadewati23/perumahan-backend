@@ -77,32 +77,32 @@
             <div class="mt-4 space-y-3">
                 <div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="font-medium text-amber-800">Subsidi</span>
+                        <span class="font-medium text-emerald-700">Subsidi</span>
                         <span class="text-slate-600">{{ $statistik['jumlah_subsidi'] }} perumahan</span>
                     </div>
                     @php $persenSubsidi = $statistik['total_perumahan'] ? round($statistik['jumlah_subsidi'] / $statistik['total_perumahan'] * 100) : 0; @endphp
                     <div class="mt-1 h-2 w-full rounded-full bg-slate-100">
-                        <div class="h-2 rounded-full bg-amber-500" style="width: {{ $persenSubsidi }}%"></div>
+                        <div class="h-2 rounded-full bg-emerald-500" style="width: {{ $persenSubsidi }}%"></div>
                     </div>
                 </div>
                 <div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="font-medium text-neutral-800">Komersil</span>
+                        <span class="font-medium text-sky-700">Komersil</span>
                         <span class="text-slate-600">{{ $statistik['jumlah_komersil'] }} perumahan</span>
                     </div>
                     @php $persenKomersil = $statistik['total_perumahan'] ? round($statistik['jumlah_komersil'] / $statistik['total_perumahan'] * 100) : 0; @endphp
                     <div class="mt-1 h-2 w-full rounded-full bg-slate-100">
-                        <div class="h-2 rounded-full bg-neutral-800" style="width: {{ $persenKomersil }}%"></div>
+                        <div class="h-2 rounded-full bg-sky-500" style="width: {{ $persenKomersil }}%"></div>
                     </div>
                 </div>
                 <div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="font-medium text-rose-800">Campuran</span>
+                        <span class="font-medium text-violet-700">Campuran</span>
                         <span class="text-slate-600">{{ $statistik['jumlah_campuran'] }} perumahan</span>
                     </div>
                     @php $persenCampuran = $statistik['total_perumahan'] ? round($statistik['jumlah_campuran'] / $statistik['total_perumahan'] * 100) : 0; @endphp
                     <div class="mt-1 h-2 w-full rounded-full bg-slate-100">
-                        <div class="h-2 rounded-full bg-rose-800" style="width: {{ $persenCampuran }}%"></div>
+                        <div class="h-2 rounded-full bg-violet-500" style="width: {{ $persenCampuran }}%"></div>
                     </div>
                 </div>
             </div>

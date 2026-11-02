@@ -20,6 +20,7 @@
                                         <span class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">Anda</span>
                                     @endif
                                 </p>
+                                <p class="text-sm text-slate-600">{{ $user->username }}</p>
                                 <p class="text-xs text-slate-500">{{ $user->email }}</p>
                                 <p class="mt-1 flex flex-wrap items-center gap-2 text-xs">
                                     <span class="rounded-pill px-2 py-0.5 font-medium ring-1 ring-inset {{ $user->isAdmin() ? 'bg-brand-50 text-brand-700 ring-brand-200' : 'bg-slate-100 text-slate-600 ring-slate-200' }}">
@@ -49,9 +50,14 @@
                                         <input id="ubah-{{ $user->id }}-name" type="text" name="name" value="{{ $user->name }}"
                                                required autocomplete="name" class="input">
                                     </x-field>
+                                    <x-field name="username" for="ubah-{{ $user->id }}-username" label="Username" hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung." :show-errors="false">
+                                        <input id="ubah-{{ $user->id }}-username" type="text" name="username" value="{{ $user->username }}"
+                                               required autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" class="input">
+                                    </x-field>
                                     <x-field name="email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
                                         <input id="ubah-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
                                                required autocomplete="email" enterkeyhint="done" class="input">
+                                        <p class="text-xs text-slate-500">Dipakai untuk reset password.</p>
                                     </x-field>
                                     <x-field name="role" for="ubah-{{ $user->id }}-role" label="Role" :show-errors="false">
                                         <select id="ubah-{{ $user->id }}-role" name="role" class="input">
@@ -100,7 +106,7 @@
                     <thead class="sticky top-0 z-10 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                         <tr>
                             <th class="px-4 py-3">Pengguna</th>
-                            <th class="px-4 py-3">Email</th>
+                            <th class="px-4 py-3">Username / Email</th>
                             <th class="px-4 py-3">Role</th>
                             <th class="px-4 py-3">Status</th>
                             <th class="px-4 py-3 text-right">Aksi</th>
@@ -111,11 +117,14 @@
                             <tr class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} hover:bg-slate-50">
                                 <td class="px-4 py-3">
                                     <p class="font-semibold text-slate-800">{{ $user->name }}</p>
+                                    <p class="text-sm text-slate-600">{{ $user->username }}</p>
                                     @if ($user->jabatan)
                                         <p class="text-xs text-slate-500">{{ $user->jabatan }}</p>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 text-slate-600">{{ $user->email }}</td>
+                                <td class="px-4 py-3 text-slate-600">
+                                    <span class="block text-xs text-slate-500">Email</span>{{ $user->email }}
+                                </td>
                                 <td class="px-4 py-3">
                                     <x-badge :tone="$user->isAdmin() ? 'primary' : 'neutral'" size="sm">{{ $user->label_role }}</x-badge>
                                 </td>
@@ -133,13 +142,18 @@
                                                 @csrf
                                                 @method('PUT')
                                                 @php $popover = true; @endphp
-                                                <x-field name="name" for="ubah-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
+                                                    <x-field name="name" for="ubah-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-name" type="text" name="name" value="{{ $user->name }}"
                                                            required autocomplete="name" class="input">
-                                                </x-field>
-                                                <x-field name="email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
-                                                    <input id="ubah-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
-                                                           required autocomplete="email" enterkeyhint="done" class="input">
+                                                    </x-field>
+                                                    <x-field name="username" for="ubah-{{ $user->id }}-username" label="Username" hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung." :show-errors="false">
+                                                        <input id="ubah-{{ $user->id }}-username" type="text" name="username" value="{{ $user->username }}"
+                                                               required autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" class="input">
+                                                    </x-field>
+                                                    <x-field name="email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
+                                                        <input id="ubah-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
+                                                               required autocomplete="email" enterkeyhint="done" class="input">
+                                                        <p class="text-xs text-slate-500">Dipakai untuk reset password.</p>
                                                 </x-field>
                                                 <x-field name="role" for="ubah-{{ $user->id }}-role" label="Role" :show-errors="false">
                                                     <select id="ubah-{{ $user->id }}-role" name="role" class="input">
@@ -200,9 +214,14 @@
                     <input id="name" type="text" name="name" value="{{ old('name') }}" required
                            autocomplete="name" enterkeyhint="next" placeholder="Nama lengkap" class="input">
                 </x-field>
+                <x-field name="username" label="Username" required hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung.">
+                    <input id="username" type="text" name="username" value="{{ old('username') }}" required
+                           autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" class="input">
+                </x-field>
                 <x-field name="email" label="Email" required>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" required
                            autocomplete="email" enterkeyhint="next" placeholder="nama@instansi.go.id" class="input">
+                    <p class="text-xs text-slate-500">Dipakai untuk reset password.</p>
                 </x-field>
                 <x-field name="role" label="Role" required hint="Administrator kelola seluruh data termasuk pengguna; petugas kelola data perumahan & wilayah.">
                     <select id="role" name="role" required class="input">

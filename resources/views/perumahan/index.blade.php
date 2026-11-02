@@ -4,15 +4,29 @@
 @section('subtitle', 'Daftar lengkap perumahan beserta luasan, unit, dan status')
 
 @section('content')
+    <div class="rounded-2xl bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 shadow-sm ring-1 ring-slate-200/70 lg:p-6">
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-slate-600">
-            Menampilkan <span class="font-semibold">{{ $ringkasan['jumlah'] }}</span> perumahan &middot;
-            <span class="font-semibold">{{ number_format($ringkasan['unit'], 0, ',', '.') }}</span> unit &middot;
-            <span class="font-semibold">{{ number_format($ringkasan['luas_lahan'] / 10000, 2, ',', '.') }}</span> ha lahan
-        </p>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2 text-sm">
+            <span class="inline-flex items-baseline gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-indigo-800">
+                <strong class="text-lg font-bold tabular-nums">{{ $ringkasan['jumlah'] }}</strong>
+                <span class="text-xs font-medium">perumahan</span>
+            </span>
+            <span class="inline-flex items-baseline gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2 text-sky-800">
+                <strong class="text-lg font-bold tabular-nums">{{ number_format($ringkasan['unit'], 0, ',', '.') }}</strong>
+                <span class="text-xs font-medium">unit</span>
+            </span>
+            <span class="inline-flex items-baseline gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-amber-800">
+                <strong class="text-lg font-bold tabular-nums">{{ number_format($ringkasan['luas_lahan'] / 10000, 2, ',', '.') }}</strong>
+                <span class="text-xs font-medium">ha lahan</span>
+            </span>
+            <span class="inline-flex items-baseline gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-emerald-800">
+                <strong class="text-lg font-bold tabular-nums">{{ number_format($ringkasan['luas_rth'] / 10000, 2, ',', '.') }}</strong>
+                <span class="text-xs font-medium">ha RTH</span>
+            </span>
+        </div>
+        <div class="flex flex-wrap gap-2">
             <a href="{{ route('perumahan.peta') }}"
-               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+               class="rounded-lg border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-800 transition hover:bg-sky-100">
                 Lihat Peta
             </a>
             <a href="{{ route('perumahan.create') }}"
@@ -22,10 +36,17 @@
         </div>
     </div>
 
-    <details class="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm" open>
-        <summary class="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-700 md:cursor-default">
-            Filter perumahan
-            <span class="text-xs font-normal text-slate-500 md:hidden">ketuk untuk buka/tutup</span>
+    <details class="mb-4 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-white to-white p-4 shadow-sm" open>
+        <summary class="flex cursor-pointer items-center justify-between text-sm font-semibold text-indigo-900 md:cursor-default">
+            <span class="flex items-center gap-2">
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700" aria-hidden="true">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M7 12h10M10 18h4"/>
+                    </svg>
+                </span>
+                Filter perumahan
+            </span>
+            <span class="text-xs font-normal text-indigo-600 md:hidden">ketuk untuk buka/tutup</span>
         </summary>
         <form method="GET" class="mt-3">
         <div class="grid gap-3 md:grid-cols-3">
@@ -63,10 +84,10 @@
             </div>
         </div>
         <div class="mt-3 flex gap-2">
-            <button type="submit" class="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-900">
+            <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">
                 Terapkan
             </button>
-            <a href="{{ route('perumahan.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+            <a href="{{ route('perumahan.index') }}" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
                 Reset
             </a>
         </div>
@@ -109,7 +130,8 @@
     {{-- Tampilan kartu untuk layar kecil (HP) --}}
     <div class="space-y-3 md:hidden">
         @forelse ($perumahans as $perumahan)
-            <div class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            @php $tema = $perumahan->status_theme; @endphp
+            <div class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} rounded-xl border border-slate-200 border-l-4 {{ $tema['rail_left'] }} bg-white p-4 shadow-sm">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <a href="{{ route('perumahan.show', $perumahan) }}" class="block truncate font-semibold text-slate-800 hover:text-indigo-600">
@@ -191,11 +213,19 @@
         @endforelse
     </div>
 
+    {{-- Legenda warna status --}}
+    <div class="mb-3 hidden flex-wrap items-center gap-3 text-xs text-slate-500 md:flex">
+        <span class="font-medium text-slate-600">Keterangan status:</span>
+        <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span>Subsidi</span>
+        <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-sky-500" aria-hidden="true"></span>Komersil</span>
+        <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-violet-500" aria-hidden="true"></span>Campuran</span>
+    </div>
+
     {{-- Tampilan tabel untuk layar sedang ke atas --}}
-    <div class="hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:block">
+    <div class="hidden overflow-hidden rounded-xl border border-indigo-100 bg-white shadow-sm md:block">
         <div class="no-scrollbar overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="sticky top-0 z-10 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <thead class="sticky top-0 z-10 bg-indigo-50/80 text-left text-xs font-semibold uppercase tracking-wide text-indigo-800">
                     <tr>
                         <th class="px-4 py-3">Perumahan</th>
                         <th class="px-4 py-3">Lokasi (Kel./Kec. &middot; RT/RW)</th>
@@ -210,12 +240,17 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($perumahans as $perumahan)
-                        <tr class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} hover:bg-slate-50/70">
+                        <tr class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} hover:bg-indigo-50/40">
                             <td class="px-4 py-3">
-                                <a href="{{ route('perumahan.show', $perumahan) }}" class="font-medium text-slate-800 hover:text-indigo-600">
-                                    {{ $perumahan->nama }}
-                                </a>
-                                <p class="text-xs text-slate-500">{{ $perumahan->pengembang ?: 'Pengembang belum diisi' }}</p>
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full {{ $perumahan->status_theme['dot'] }}" aria-hidden="true"></span>
+                                    <div class="min-w-0">
+                                        <a href="{{ route('perumahan.show', $perumahan) }}" class="font-medium text-slate-800 hover:text-indigo-600">
+                                            {{ $perumahan->nama }}
+                                        </a>
+                                        <p class="text-xs text-slate-500">{{ $perumahan->pengembang ?: 'Pengembang belum diisi' }}</p>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-4 py-3 text-slate-600">
                                 <p>Kel. {{ $perumahan->kelurahan->nama ?? '-' }}</p>
@@ -294,5 +329,6 @@
 
     <div class="mt-4">
         {{ $perumahans->links() }}
+    </div>
     </div>
 @endsection

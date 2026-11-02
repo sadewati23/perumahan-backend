@@ -39,6 +39,7 @@ di komputer lokal, kemudian upload folder `public/build`.
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://dprkp.cirebonkota.go.id
+TRUSTED_HOSTS=
 APP_TIMEZONE=Asia/Jakarta
 APP_LOCALE=id
 APP_FALLBACK_LOCALE=en
@@ -59,6 +60,25 @@ Jangan menggunakan URL `localhost` atau URL XAMPP subfolder pada production.
 
 Jangan mengunggah `.env` ke repository publik dan jangan mengaktifkan
 `APP_DEBUG` pada server production.
+
+Untuk reverse proxy, isi `TRUSTED_PROXIES` hanya dengan IP/CIDR proxy yang
+benar-benar digunakan. Jangan memakai `*` pada production karena akan
+diabaikan aplikasi. Header `X-Forwarded-Host` dan `X-Forwarded-Prefix` tidak
+dipercaya; pastikan proxy meneruskan host publik yang benar.
+
+Jangan menjalankan `DatabaseSeeder` pada production. Buat akun administrator
+melalui prompt interaktif berikut (password tidak menjadi argumen command):
+
+```bash
+php artisan admin:buat admin@dprkp.cirebonkota.go.id
+```
+
+Setelah deployment, jalankan pemeriksaan konfigurasi. Perintah gagal bila
+masih terdapat akun bawaan atau konfigurasi kritis:
+
+```bash
+php artisan produksi:periksa
+```
 
 ## 4. Database dan storage foto
 

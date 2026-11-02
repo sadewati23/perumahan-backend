@@ -79,7 +79,7 @@ class KonfirmasiPasswordTest extends TestCase
             ->delete(route('kelurahan.destroy', $kelurahan))->assertRedirect();
 
         $payload = [
-            'name' => 'Pengguna Baru', 'email' => 'baru-'.uniqid().'@uji.test', 'role' => 'petugas',
+            'name' => 'Pengguna Baru', 'username' => 'baru'.uniqid(), 'email' => 'baru-'.uniqid().'@uji.test', 'role' => 'petugas',
             'jabatan' => 'Petugas', 'password' => 'Rahasia-Uji-12345', 'password_confirmation' => 'Rahasia-Uji-12345',
         ];
         $this->withSession(['auth.password_confirmed_at' => time() - 901])->actingAs($admin)->post(route('users.store'), $payload)->assertRedirect(route('password.confirm'));
@@ -147,6 +147,7 @@ class KonfirmasiPasswordTest extends TestCase
         $this->post(route('password.confirm.store'), ['password' => 'salah'])->assertStatus(429);
 
         RateLimiter::clear('6|127.0.0.1');
+        $this->flushSession();
         $petugas = User::factory()->create(['role' => 'petugas', 'is_active' => true]);
         $kecamatan = Kecamatan::create(['nama' => 'Kecamatan Petugas']);
         $this->actingAs($petugas)->delete(route('kecamatan.destroy', $kecamatan))->assertForbidden();

@@ -15,7 +15,7 @@
             <x-logo tile ukuran="mx-auto mb-3 h-14 w-14" />
             <h1 class="text-xl font-semibold text-white">Lupa Password</h1>
             <p class="mt-1 text-sm text-slate-400">
-                Masukkan email akun Anda — tautan reset password akan dikirim ke email tersebut.
+                Masukkan email yang terdaftar pada akun Anda (bukan username). Tautan reset password akan dikirim ke email tersebut.
             </p>
         </div>
 

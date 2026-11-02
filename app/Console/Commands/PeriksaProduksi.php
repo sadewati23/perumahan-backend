@@ -28,14 +28,30 @@ class PeriksaProduksi extends Command
             filled(config('app.key')) ? 'terisi' : 'kosong');
 
         $https = str_starts_with((string) config('app.url'), 'https://');
-        $this->tambah($rows, 'APP_URL', $https ? 'OK' : 'PERINGATAN', $https ? 'https' : 'bukan https');
+        $appHost = parse_url((string) config('app.url'), PHP_URL_HOST);
+        $hostLokal = is_string($appHost) && (in_array(strtolower($appHost), ['localhost', '127.0.0.1', '::1'], true)
+            || str_ends_with(strtolower($appHost), '.test')
+            || str_ends_with(strtolower($appHost), '.local')
+            || str_ends_with(strtolower($appHost), '.localhost'));
+        $appUrlStatus = config('app.env') === 'production' && $hostLokal ? 'KRITIS' : ($https ? 'OK' : 'PERINGATAN');
+        $this->tambah($rows, 'APP_URL', $appUrlStatus, $hostLokal ? 'host lokal tidak boleh di produksi' : ($https ? 'https' : 'bukan https'));
+        $this->tambah($rows, 'TRUSTED_HOSTS', config('app.trusted_hosts', []) === [] ? 'INFO' : 'OK',
+            config('app.trusted_hosts', []) === [] ? 'hanya host dari APP_URL yang diizinkan' : 'host tambahan terdaftar');
         $this->tambah($rows, 'session.secure', ! $https || config('session.secure') === true ? 'OK' : 'PERINGATAN',
             ! $https ? 'tidak relevan sebelum APP_URL https' : (config('session.secure') === true ? 'true' : 'false'));
 
         $proxies = config('trustedproxy.proxies');
-        $hasWildcardProxy = is_array($proxies) && in_array('*', $proxies, true);
+        $rawProxies = array_map('trim', explode(',', (string) env('TRUSTED_PROXIES', '')));
+        $hasWildcardProxy = (is_array($proxies) && in_array('*', $proxies, true))
+            || in_array('*', $rawProxies, true);
         $this->tambah($rows, 'TRUSTED_PROXIES', $hasWildcardProxy ? 'KRITIS' : ($proxies ? 'OK' : 'INFO'),
             $hasWildcardProxy ? 'jangan mempercayai semua proxy' : ($proxies ? 'terbatas' : 'kosong = tanpa proxy'));
+
+        $maxInputVars = (int) (ini_get('max_input_vars') ?: 0);
+        $this->tambah($rows, 'max_input_vars', $maxInputVars > 0 && $maxInputVars < 3000 ? 'PERINGATAN' : 'OK',
+            $maxInputVars > 0 && $maxInputVars < 3000
+                ? 'form perumahan dengan banyak baris bisa terpotong diam-diam; naikkan ke 3000'
+                : (string) $maxInputVars);
 
         $mailer = (string) config('mail.default');
         $this->tambah($rows, 'MAIL_MAILER', in_array($mailer, ['log', 'array'], true) ? 'PERINGATAN' : 'OK',

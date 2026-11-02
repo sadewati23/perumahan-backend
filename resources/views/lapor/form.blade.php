@@ -24,7 +24,8 @@
         </div>
     </section>
 
-    <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
+    <div class="bg-indigo-50/40">
+    <div class="mx-auto max-w-7xl px-4 py-8 pb-24 sm:pb-8 lg:px-8">
         <div class="grid gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 @if (session('laporan_kode'))
@@ -86,6 +87,29 @@
                         mendata wilayah terlebih dahulu.
                     </div>
                 @else
+                    {{-- Indikator langkah: navigasi cepat + penanda langkah aktif saat scroll. --}}
+                    <nav aria-label="Langkah pengisian laporan"
+                         class="no-scrollbar mb-4 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm">
+                        <ol class="flex min-w-max items-center gap-1 text-xs">
+                            @foreach ([
+                                ['langkah-1', 'Jenis', 'Jenis laporan'],
+                                ['langkah-2', 'Lokasi', 'Lokasi'],
+                                ['langkah-3', 'Pelapor', 'Data pelapor'],
+                                ['langkah-4', 'Detail', 'Detail laporan'],
+                            ] as $i => [$idLangkah, $labelPendek, $labelPanjang])
+                                <li>
+                                    <a href="#{{ $idLangkah }}" data-langkah-nav="{{ $idLangkah }}"
+                                       class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-medium text-slate-500 transition hover:bg-slate-50">
+                                        <span data-langkah-nomor
+                                              class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[11px] font-bold text-slate-600">{{ $i + 1 }}</span>
+                                        <span class="hidden sm:inline">{{ $labelPanjang }}</span>
+                                        <span class="sm:hidden">{{ $labelPendek }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </nav>
+
                     <form id="form-lapor" action="{{ route('lapor.store') }}" method="POST" enctype="multipart/form-data"
                           class="space-y-6">
                         @csrf
@@ -95,8 +119,11 @@
                                style="position:absolute;left:-9999px"
                                aria-hidden="true" tabindex="-1" autocomplete="off">
                         {{-- 1. Jenis laporan --}}
-                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                            <h2 class="text-sm font-semibold text-slate-900">1. Pilih Jenis Laporan</h2>
+                        <div id="langkah-1" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
+                            <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700" aria-hidden="true">1</span>
+                                Pilih Jenis Laporan
+                            </h2>
 
                             <div class="mt-4 grid gap-3 sm:grid-cols-3">
                                 @foreach (\App\Models\Laporan::JENIS as $value => $label)
@@ -123,8 +150,11 @@
                         </div>
 
                         {{-- 2. Lokasi — tampilan dinamis per jenis --}}
-                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                            <h2 class="text-sm font-semibold text-slate-900">2. Lokasi</h2>
+                        <div id="langkah-2" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
+                            <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700" aria-hidden="true">2</span>
+                                Lokasi
+                            </h2>
 
                             {{-- Bagian khusus kerusakan: perumahan + PSU --}}
                             <div class="panel-jenis mt-4 grid gap-4 sm:grid-cols-2" data-panel="kerusakan">
@@ -234,8 +264,11 @@
                         </div>
 
                         {{-- 3. Data pelapor --}}
-                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                            <h2 class="text-sm font-semibold text-slate-900">3. Data Pelapor</h2>
+                        <div id="langkah-3" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
+                            <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700" aria-hidden="true">3</span>
+                                Data Pelapor
+                            </h2>
 
                             <div class="mt-4 grid gap-4">
                                 <x-field name="nama_pelapor" for="nama_pelapor" label="Nama Lengkap"
@@ -250,8 +283,11 @@
                         </div>
 
                         {{-- 4. Detail per jenis --}}
-                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                            <h2 class="text-sm font-semibold text-slate-900">4. Detail Laporan</h2>
+                        <div id="langkah-4" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
+                            <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700" aria-hidden="true">4</span>
+                                Detail Laporan
+                            </h2>
 
                             <div class="mt-4 grid gap-4">
                                 <x-field name="judul" for="judul" label="Judul Laporan" required>
@@ -344,16 +380,63 @@
 
                                         <p id="foto-pesan" data-foto-pesan class="mt-1 text-xs font-medium" aria-live="polite"></p>
                                     </div>
-
-                                    <p id="foto-petunjuk" class="mt-1 text-xs text-slate-500">Format JPG / PNG / WEBP, masing-masing maksimal 2 MB.</p>
                                 </x-field>
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center justify-end gap-3">
-                            <x-button variant="secondary" href="{{ route('publik.beranda') }}">Batal</x-button>
+                        {{-- Ringkasan isian: bantuan pemeriksaan sebelum mengirim --}}
+                        <details class="group rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-slate-900 sm:px-6">
+                                <span class="flex items-center gap-2.5">
+                                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600" aria-hidden="true">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </span>
+                                    Ringkasan laporan
+                                </span>
+                                <span class="flex items-center gap-1.5 text-xs font-normal text-slate-500">
+                                    Periksa sebelum mengirim
+                                    <svg class="h-4 w-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
+                                    </svg>
+                                </span>
+                            </summary>
+                            <dl class="grid gap-x-6 gap-y-3 border-t border-slate-100 px-5 py-4 text-sm sm:grid-cols-2 sm:px-6">
+                                <div>
+                                    <dt class="text-xs text-slate-500">Jenis laporan</dt>
+                                    <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="jenis">—</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-slate-500">Lokasi</dt>
+                                    <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="lokasi">—</dd>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <dt class="text-xs text-slate-500">Judul</dt>
+                                    <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="judul">—</dd>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <dt class="text-xs text-slate-500">Uraian</dt>
+                                    <dd class="mt-0.5 text-slate-700" data-ringkas="uraian">—</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-slate-500">Foto bukti</dt>
+                                    <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="foto">—</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-slate-500">Titik koordinat</dt>
+                                    <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="koordinat">—</dd>
+                                </div>
+                            </dl>
+                            <p class="border-t border-slate-100 px-5 py-3 text-xs text-slate-500 sm:px-6">
+                                Ringkasan ini hanya bantuan pemeriksaan — data yang dikirim tetap mengikuti isian form.
+                            </p>
+                        </details>
+
+                        <div id="aksi-laporan" class="flex flex-wrap items-center justify-end gap-3">
+                            <x-button variant="secondary" href="{{ route('publik.beranda') }}" class="w-full sm:w-auto">Batal</x-button>
                         @if (\App\Support\TurnstileKonfigurasi::tampilkanWidget())
-                            <div>
+                            <div class="w-full sm:w-auto">
                                 <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
                                 @error('cf-turnstile-response')
                                     <p class="mt-1 text-xs text-danger-600">{{ $message }}</p>
@@ -361,15 +444,26 @@
                             </div>
                         @endif
 
-                            <x-button type="submit">Kirim Laporan</x-button>
+                            <x-button type="submit" class="w-full sm:w-auto">Kirim Laporan</x-button>
                         </div>
                     </form>
+
+                    {{-- Bar aksi tetap di bawah layar kecil; disembunyikan saat area tombol asli terlihat. --}}
+                    <div id="bar-aksi-mobile"
+                         data-turnstile-aktif="{{ \App\Support\TurnstileKonfigurasi::tampilkanWidget() ? '1' : '0' }}"
+                         class="fixed inset-x-0 bottom-0 z-30 hidden border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] backdrop-blur sm:hidden">
+                        <div class="flex items-center gap-2">
+                            <x-button variant="secondary" href="{{ route('publik.beranda') }}" class="flex-1">Batal</x-button>
+                            <x-button type="submit" form="form-lapor" data-kirim-mobile class="flex-[1.6]">Kirim Laporan</x-button>
+                        </div>
+                        <p data-kirim-pesan class="mt-1 text-center text-[11px] font-medium text-amber-700" aria-live="polite"></p>
+                    </div>
                     <p class="mt-4 text-center text-sm text-slate-600">Sudah punya kode? <a href="{{ route('cek-laporan.index') }}" class="font-semibold text-indigo-600 hover:underline">Cek status laporan</a></p>
                 @endif
             </div>
 
             <aside class="space-y-6">
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
                     <h2 class="text-sm font-semibold text-slate-900">Cara Melapor</h2>
                     <ol class="mt-4 space-y-4">
                         @foreach ([
@@ -387,28 +481,32 @@
                     </ol>
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
                     <h2 class="text-sm font-semibold text-slate-900">Setelah Dilaporkan</h2>
                     <ul class="mt-4 space-y-3 text-sm">
                         @foreach ([
-                            'Baru' => ['bg-warning-100 text-warning-700 ring-warning-200', 'Laporan diterima dan menunggu peninjauan petugas.'],
-                            'Diproses' => ['bg-info-100 text-info-700 ring-info-200', 'Petugas sedang menangani laporan.'],
-                            'Selesai' => ['bg-success-100 text-success-700 ring-success-200', 'Laporan telah ditangani.'],
-                        ] as $status => [$warna, $penjelasan])
-                            <li>
-                                <span class="inline-flex rounded-pill px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ $warna }}">{{ $status }}</span>
-                                <span class="mt-1 block text-slate-600">{{ $penjelasan }}</span>
+                            'Baru' => ['bg-warning-50 text-warning-700 ring-warning-200', 'bg-warning-500', 'Laporan diterima dan menunggu peninjauan petugas.'],
+                            'Diproses' => ['bg-info-50 text-info-700 ring-info-200', 'bg-info-500', 'Petugas sedang menangani laporan.'],
+                            'Selesai' => ['bg-success-50 text-success-700 ring-success-200', 'bg-success-500', 'Laporan telah ditangani.'],
+                        ] as $status => [$warna, $titik, $penjelasan])
+                            <li class="flex items-start gap-2.5">
+                                <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full {{ $titik }}" aria-hidden="true"></span>
+                                <span>
+                                    <span class="inline-flex rounded-pill px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ $warna }}">{{ $status }}</span>
+                                    <span class="mt-1 block text-slate-600">{{ $penjelasan }}</span>
+                                </span>
                             </li>
                         @endforeach
                     </ul>
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-white p-6 text-xs text-slate-500 shadow-sm">
+                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 text-xs text-slate-500 shadow-sm sm:p-6">
                     Laporan dikirim tanpa perlu membuat akun. Nama pelapor hanya digunakan untuk
                     tindak lanjut laporan dan tidak ditampilkan pada halaman publik.
                 </div>
             </aside>
         </div>
+    </div>
     </div>
 @endsection
 
@@ -590,6 +688,163 @@
             renderJenis();
             selPerumahan.required = jenisAktif() === 'kerusakan';
             renderSarana();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('form-lapor');
+            if (!form) return;
+
+            // --- 1. Indikator langkah (navigasi cepat + penanda posisi scroll) ---
+            const navLangkah = [...document.querySelectorAll('[data-langkah-nav]')];
+            const bagianLangkah = [...document.querySelectorAll('[data-langkah]')];
+
+            const gayaNav = {
+                idle: 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-medium text-slate-500 transition hover:bg-slate-50',
+                aktif: 'flex items-center gap-2 rounded-lg bg-indigo-600 px-2.5 py-1.5 font-medium text-white shadow-sm transition',
+                selesai: 'flex items-center gap-2 rounded-lg bg-indigo-50 px-2.5 py-1.5 font-medium text-indigo-700 transition hover:bg-indigo-100',
+            };
+            const gayaNomor = {
+                idle: 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[11px] font-bold text-slate-600',
+                aktif: 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/20 text-[11px] font-bold text-white',
+                selesai: 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-indigo-600 text-[11px] font-bold text-white',
+            };
+
+            const tandaiLangkah = (idAktif) => {
+                const indeksAktif = bagianLangkah.findIndex((bagian) => bagian.id === idAktif);
+                if (indeksAktif < 0) return;
+
+                navLangkah.forEach((tautan, indeks) => {
+                    const status = indeks < indeksAktif ? 'selesai' : (indeks === indeksAktif ? 'aktif' : 'idle');
+                    tautan.className = gayaNav[status];
+
+                    const nomor = tautan.querySelector('[data-langkah-nomor]');
+                    if (nomor) nomor.className = gayaNomor[status];
+
+                    if (status === 'aktif') tautan.setAttribute('aria-current', 'step');
+                    else tautan.removeAttribute('aria-current');
+                });
+            };
+
+            navLangkah.forEach((tautan) => {
+                tautan.addEventListener('click', () => tandaiLangkah(tautan.dataset.langkahNav));
+            });
+
+            if ('IntersectionObserver' in window) {
+                const pengamatLangkah = new IntersectionObserver((entri) => {
+                    entri.forEach((item) => {
+                        if (item.isIntersecting) tandaiLangkah(item.target.id);
+                    });
+                }, { rootMargin: '-30% 0px -60% 0px' });
+
+                bagianLangkah.forEach((bagian) => pengamatLangkah.observe(bagian));
+            }
+            tandaiLangkah(bagianLangkah[0]?.id);
+
+            // --- 2. Ringkasan isian sebelum kirim ---
+            const ringkas = {};
+            form.querySelectorAll('[data-ringkas]').forEach((el) => {
+                ringkas[el.dataset.ringkas] = el;
+            });
+
+            const isiRingkas = (kunci, teks) => {
+                const el = ringkas[kunci];
+                if (el) el.textContent = teks && String(teks).trim() ? teks : '—';
+            };
+
+            const potongTeks = (teks, maks = 160) => {
+                const bersih = (teks || '').trim();
+                return bersih.length > maks ? bersih.slice(0, maks).trimEnd() + '…' : bersih;
+            };
+
+            const teksOpsi = (select) => (select && select.value ? (select.selectedOptions[0]?.textContent.trim() ?? '') : '');
+
+            const segarkanRingkasan = () => {
+                const jenisEl = form.querySelector('input[name="jenis"]:checked');
+                const jenis = jenisEl?.value ?? 'kerusakan';
+
+                isiRingkas('jenis', jenisEl?.closest('label')?.querySelector('span > span')?.textContent.trim());
+
+                let lokasi = '';
+                if (jenis === 'kerusakan') {
+                    lokasi = teksOpsi(document.getElementById('pilih-perumahan'));
+                } else if (jenis === 'bangunan_liar') {
+                    lokasi = [
+                        teksOpsi(document.getElementById('pilih-kelurahan')),
+                        document.getElementById('lokasi_teks')?.value,
+                    ].filter(Boolean).join(' · ');
+                } else {
+                    lokasi = 'Tidak disebutkan';
+                }
+                isiRingkas('lokasi', lokasi);
+
+                isiRingkas('judul', document.getElementById('judul')?.value);
+                isiRingkas('uraian', potongTeks(document.getElementById('deskripsi')?.value));
+
+                const daftarFoto = document.getElementById('foto-daftar');
+                const jumlahFoto = daftarFoto ? daftarFoto.querySelectorAll('li').length : 0;
+                isiRingkas('foto', jumlahFoto > 0 ? `${jumlahFoto} foto` : 'Tidak ada foto');
+
+                const lat = document.getElementById('peta-latitude')?.value.trim();
+                const lng = document.getElementById('peta-longitude')?.value.trim();
+                isiRingkas('koordinat', lat && lng ? `${lat}, ${lng}` : 'Belum ditandai');
+            };
+
+            ['input', 'change'].forEach((peristiwa) => form.addEventListener(peristiwa, segarkanRingkasan));
+
+            const daftarFoto = document.getElementById('foto-daftar');
+            if (daftarFoto && 'MutationObserver' in window) {
+                new MutationObserver(segarkanRingkasan).observe(daftarFoto, { childList: true });
+            }
+
+            // Titik peta diisi lewat JS (tidak memicu input/change), jadi segarkan setelah klik.
+            const segarkanTertunda = () => window.setTimeout(segarkanRingkasan, 50);
+            ['peta-pemilih', 'peta-posisi-saya', 'peta-hapus'].forEach((id) => {
+                document.getElementById(id)?.addEventListener('click', segarkanTertunda, { capture: true });
+            });
+
+            segarkanRingkasan();
+
+            // --- 3. Bar aksi tetap di bawah layar kecil ---
+            const bar = document.getElementById('bar-aksi-mobile');
+            const areaAksi = document.getElementById('aksi-laporan');
+            const pesanBar = bar?.querySelector('[data-kirim-pesan]');
+
+            if (bar) {
+                const perbaruiBar = () => {
+                    const formRect = form.getBoundingClientRect();
+                    const aksiRect = areaAksi?.getBoundingClientRect();
+                    const sudahMasukForm = formRect.top < window.innerHeight * 0.6;
+                    const aksiTerlihat = aksiRect && aksiRect.top < window.innerHeight - 8 && aksiRect.bottom > 0;
+                    bar.classList.toggle('hidden', !sudahMasukForm || aksiTerlihat);
+                };
+
+                window.addEventListener('scroll', perbaruiBar, { passive: true });
+                window.addEventListener('resize', perbaruiBar);
+                perbaruiBar();
+
+                bar.querySelector('[data-kirim-mobile]')?.addEventListener('click', (event) => {
+                    if (bar.dataset.turnstileAktif !== '1') return;
+
+                    const widget = document.querySelector('[data-sitekey]');
+                    if (!widget) return;
+
+                    const token = form.querySelector('input[name$="turnstile-response"]');
+                    if (token && token.value) return;
+
+                    // Verifikasi keamanan belum selesai: arahkan ke widgetnya,
+                    // jangan kirim form agar tidak memunculkan error yang membingungkan.
+                    event.preventDefault();
+                    widget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (pesanBar) pesanBar.textContent = 'Selesaikan verifikasi keamanan dulu, lalu tekan Kirim.';
+                });
+
+                window.setInterval(() => {
+                    if (!pesanBar?.textContent) return;
+                    const token = form.querySelector('input[name$="turnstile-response"]');
+                    if (token?.value) pesanBar.textContent = '';
+                }, 1500);
+            }
         });
     </script>
 @endpush

@@ -35,10 +35,10 @@
             <form method="POST" action="{{ route('login.attempt') }}" class="space-y-4">
                 @csrf
 
-                <x-field name="email" for="email" label="Email" required>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus
-                           autocomplete="email" enterkeyhint="next" class="input"
-                           placeholder="nama@instansi.go.id">
+                <x-field name="username" for="username" label="Username" required>
+                    <input id="username" name="username" type="text" value="{{ old('username') }}" required autofocus
+                           autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
+                           enterkeyhint="next" class="input">
                 </x-field>
 
                 <x-field name="password" for="password" label="Password" required>
@@ -73,7 +73,7 @@
         </div>
 
         <p class="mt-6 text-center text-xs text-slate-500">
-            Akun awal: <span class="font-medium text-slate-300">admin@perumahan.test / password</span>
+            Akun awal lokal: <span class="font-medium text-slate-300">admin / password</span>
         </p>
     </div>
 </body>

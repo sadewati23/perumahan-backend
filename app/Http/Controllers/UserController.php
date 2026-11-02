@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\Username;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -21,14 +23,17 @@ class UserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $request->merge(['username' => is_string($request->input('username')) ? strtolower(trim($request->input('username'))) : $request->input('username')]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
+            'username' => ['required', 'string', new Username, Rule::unique('users', 'username')],
             'email' => ['required', 'email', 'max:150', 'unique:users,email'],
             'role' => ['required', 'in:admin,petugas'],
             'jabatan' => ['nullable', 'string', 'max:100'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ], [
             'password.min' => 'Password minimal 12 karakter.',
+            'username.unique' => 'Username sudah dipakai.',
         ]);
 
         User::create($data + ['is_active' => true]);
@@ -38,8 +43,10 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
+        $request->merge(['username' => is_string($request->input('username')) ? strtolower(trim($request->input('username'))) : $request->input('username')]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
+            'username' => ['required', 'string', new Username, Rule::unique('users', 'username')->ignore($user->id)],
             'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
             'role' => ['required', 'in:admin,petugas'],
             'jabatan' => ['nullable', 'string', 'max:100'],
@@ -47,6 +54,7 @@ class UserController extends Controller
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ], [
             'password.min' => 'Password minimal 12 karakter.',
+            'username.unique' => 'Username sudah dipakai.',
         ]);
 
         $data['is_active'] = $request->boolean('is_active');
@@ -71,6 +79,11 @@ class UserController extends Controller
                 $user,
                 $user->id === auth()->id() ? $request->session()->getId() : null,
             );
+
+            if ($user->id === auth()->id() && $user->wasChanged('password')) {
+                Auth::logoutOtherDevices($data['password']);
+                $request->session()->put('password_hash_web', $user->getAuthPassword());
+            }
         }
 
         return back()->with('success', 'Data pengguna berhasil diperbarui.');

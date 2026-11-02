@@ -48,14 +48,14 @@ class StorePerumahanRequest extends FormRequest
             'luas_lahan_pemakaman' => ['nullable', 'numeric', 'min:0'],
             'lokasi_lahan_pemakaman' => ['nullable', 'string', 'max:255'],
             'keterangan' => ['nullable', 'string', 'max:2000'],
-            'psu' => ['nullable', 'array'],
+            'psu' => ['nullable', 'array', 'max:100'],
             'psu.*.id' => ['nullable', 'integer'],
             'psu.*.jenis' => ['nullable', 'string', 'max:100'],
             'psu.*.jumlah' => ['nullable', 'numeric', 'min:0'],
             'psu.*.satuan' => ['nullable', 'string', 'max:30'],
             'psu.*.kondisi' => ['nullable', 'in:baik,rusak_ringan,rusak_berat'],
             'psu.*.keterangan' => ['nullable', 'string', 'max:255'],
-            'tipe_units' => ['nullable', 'array'],
+            'tipe_units' => ['nullable', 'array', 'max:100'],
             'tipe_units.*.id' => ['nullable', 'integer'],
             'tipe_units.*.tipe' => ['nullable', 'string', 'max:50'],
             'tipe_units.*.jumlah_unit' => ['nullable', 'integer', 'min:0'],
@@ -78,6 +78,8 @@ class StorePerumahanRequest extends FormRequest
             'foto.mimes' => 'Foto harus berformat JPG, PNG, atau WEBP.',
             'foto.max' => 'Ukuran foto maksimal 5 MB.',
             'foto.dimensions' => 'Ukuran foto maksimal 6000 × 6000 piksel.',
+            'psu.max' => 'Maksimal 100 baris PSU.',
+            'tipe_units.max' => 'Maksimal 100 baris tipe unit.',
         ];
     }
 

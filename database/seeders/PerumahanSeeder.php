@@ -14,6 +14,12 @@ class PerumahanSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command?->error('Seeder ini hanya untuk pengembangan lokal dan dilarang di produksi.');
+
+            return;
+        }
+
         $contoh = [
             [
                 'nama' => 'Perumahan Griya Kalijaga Asri',

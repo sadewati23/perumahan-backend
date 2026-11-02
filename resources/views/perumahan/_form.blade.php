@@ -31,8 +31,11 @@
 <div class="grid gap-4 xl:grid-cols-3">
     {{-- Kolom kiri --}}
     <div class="space-y-4 xl:col-span-2">
-        <x-card>
-            <h2 class="mb-4 text-sm font-semibold text-slate-800">1. Identitas &amp; Lokasi Administratif</h2>
+        <x-card class="border-t-4 border-t-sky-300">
+            <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-sky-100 text-xs font-bold text-sky-700">1</span>
+                Identitas &amp; Lokasi Administratif
+            </h2>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <x-field name="nama" label="Nama Perumahan" for="nama" required class="sm:col-span-2">
@@ -109,9 +112,12 @@
             </div>
         </x-card>
 
-        <x-card>
+        <x-card class="border-t-4 border-t-indigo-300">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <h2 class="text-sm font-semibold text-slate-800">2. Titik Lokasi (GIS)</h2>
+                <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700">2</span>
+                    Titik Lokasi (GIS)
+                </h2>
                 <button type="button" id="btn-lokasi-saya"
                         class="min-h-11 rounded-control border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 md:min-h-10">
                     Gunakan lokasi saya
@@ -139,8 +145,11 @@
             <div id="map-picker" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100 sm:h-80"></div>
         </x-card>
 
-        <x-card>
-            <h2 class="mb-4 text-sm font-semibold text-slate-800">3. Luasan, Unit, RTH &amp; Koefisien</h2>
+        <x-card class="border-t-4 border-t-emerald-300">
+            <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-xs font-bold text-emerald-700">3</span>
+                Luasan, Unit, RTH &amp; Koefisien
+            </h2>
 
             <div class="grid gap-4 sm:grid-cols-3">
                 <x-field name="luas_lahan" label="Luas Lahan (m²)" for="luas_lahan" required>
@@ -188,15 +197,18 @@
             </div>
         </x-card>
 
-        <x-card padded="false" data-dynamic-rows data-template="template-tipe">
-            <div class="mb-4 border-b border-slate-100 p-4 sm:p-5 lg:p-6">
+        <x-card padded="false" data-dynamic-rows data-template="template-tipe" class="border-t-4 border-t-amber-300">
+            <div class="mb-4 border-b border-amber-100 bg-amber-50/30 p-4 sm:p-5 lg:p-6">
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                        <h2 class="text-sm font-semibold text-slate-800">4. Unit &amp; Tipe Rumah</h2>
+                        <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-100 text-xs font-bold text-amber-700">4</span>
+                            Unit &amp; Tipe Rumah
+                        </h2>
                         <p class="mt-0.5 text-xs text-slate-500">Rincikan tipe unit yang dibangun beserta jumlahnya.</p>
                     </div>
                     <button type="button" data-add-row
-                            class="shrink-0 whitespace-nowrap rounded-control bg-slate-800 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-900">
+                            class="shrink-0 whitespace-nowrap rounded-control bg-amber-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-amber-600">
                         + Tambah Tipe
                     </button>
                 </div>
@@ -259,15 +271,18 @@
             </div>
         </x-card>
 
-        <x-card padded="false" data-dynamic-rows data-template="template-psu">
-            <div class="mb-4 border-b border-slate-100 p-4 sm:p-5 lg:p-6">
+        <x-card padded="false" data-dynamic-rows data-template="template-psu" class="border-t-4 border-t-violet-300">
+            <div class="mb-4 border-b border-violet-100 bg-violet-50/30 p-4 sm:p-5 lg:p-6">
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                        <h2 class="text-sm font-semibold text-slate-800">5. Data PSU</h2>
+                        <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-100 text-xs font-bold text-violet-700">5</span>
+                            Data PSU
+                        </h2>
                         <p class="mt-0.5 text-xs text-slate-500">Prasarana, sarana, dan utilitas yang tersedia di perumahan.</p>
                     </div>
                     <button type="button" data-add-row
-                            class="shrink-0 whitespace-nowrap rounded-control bg-slate-800 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-900">
+                            class="shrink-0 whitespace-nowrap rounded-control bg-violet-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-violet-700">
                         + Tambah PSU
                     </button>
                 </div>
@@ -347,8 +362,11 @@
 
     {{-- Kolom kanan --}}
     <div class="space-y-4">
-        <x-card>
-            <h2 class="mb-4 text-sm font-semibold text-slate-800">6. Lahan Pemakaman</h2>
+        <x-card class="border-t-4 border-t-rose-300">
+            <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 text-xs font-bold text-rose-700">6</span>
+                Lahan Pemakaman
+            </h2>
 
             <label class="flex min-h-11 items-start gap-2 text-sm text-slate-700">
                 <input type="checkbox" name="ada_lahan_pemakaman" id="ada-lahan-pemakaman" value="1"
@@ -371,8 +389,11 @@
             </div>
         </x-card>
 
-        <x-card>
-            <h2 class="mb-3 text-sm font-semibold text-slate-800">7. Keterangan Tambahan</h2>
+        <x-card class="border-t-4 border-t-slate-300">
+            <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-700">7</span>
+                Keterangan Tambahan
+            </h2>
             <x-field name="keterangan" optional hint="Maksimal 2000 karakter.">
                 <textarea id="keterangan" name="keterangan" rows="6" maxlength="2000" class="input"
                           placeholder="Catatan kondisi perumahan, akses jalan, fasilitas lain, dsb.">{{ $val('keterangan') }}</textarea>

@@ -34,6 +34,7 @@ class PatchKeamananTest extends TestCase
     {
         return [
             'name' => 'Pengguna Uji',
+            'username' => 'penggunauji'.uniqid(),
             'email' => 'pengguna-'.uniqid().'@perumahan.test',
             'role' => 'petugas',
             'jabatan' => 'Petugas Uji',
@@ -288,6 +289,7 @@ class PatchKeamananTest extends TestCase
         $this->get('/')->assertHeaderMissing('Strict-Transport-Security');
 
         $this->app['env'] = 'production';
+        config(['app.url' => 'https://perumahan.test']);
         $this->get('https://perumahan.test/')->assertHeader('Strict-Transport-Security', 'max-age=31536000');
         $this->get('http://perumahan.test/')->assertHeaderMissing('Strict-Transport-Security');
     }

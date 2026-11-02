@@ -14,10 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            UserSeeder::class,
-            WilayahSeeder::class,
-            PerumahanSeeder::class,
-        ]);
+        $this->call(app()->isProduction()
+            ? [WilayahSeeder::class]
+            : [UserSeeder::class, WilayahSeeder::class, PerumahanSeeder::class]);
     }
 }

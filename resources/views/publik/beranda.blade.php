@@ -111,29 +111,29 @@
                 <div class="mt-4 space-y-4">
                     <div>
                         <div class="flex items-center justify-between text-sm">
-                            <span class="flex items-center gap-2 font-medium text-amber-800"><span class="h-2.5 w-2.5 rounded-full bg-amber-500" aria-hidden="true"></span>Subsidi</span>
+                            <span class="flex items-center gap-2 font-medium text-emerald-700"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500" aria-hidden="true"></span>Subsidi</span>
                             <span class="text-neutral-700">{{ $statistik['jumlah_subsidi'] }} <span class="font-semibold text-neutral-900">({{ $persenSubsidi }}%)</span></span>
                         </div>
                         <div class="mt-1 h-2.5 rounded-full bg-stone-200">
-                            <div class="batang h-2.5 rounded-full bg-amber-500" style="width: {{ $persenSubsidi }}%"></div>
+                            <div class="batang h-2.5 rounded-full bg-emerald-500" style="width: {{ $persenSubsidi }}%"></div>
                         </div>
                     </div>
                     <div>
                         <div class="flex items-center justify-between text-sm">
-                            <span class="flex items-center gap-2 font-medium text-neutral-800"><span class="h-2.5 w-2.5 rounded-full bg-neutral-800" aria-hidden="true"></span>Komersil</span>
+                            <span class="flex items-center gap-2 font-medium text-sky-700"><span class="h-2.5 w-2.5 rounded-full bg-sky-500" aria-hidden="true"></span>Komersil</span>
                             <span class="text-neutral-700">{{ $statistik['jumlah_komersil'] }} <span class="font-semibold text-neutral-900">({{ $persenKomersil }}%)</span></span>
                         </div>
                         <div class="mt-1 h-2.5 rounded-full bg-stone-200">
-                            <div class="batang h-2.5 rounded-full bg-neutral-800" style="width: {{ $persenKomersil }}%"></div>
+                            <div class="batang h-2.5 rounded-full bg-sky-500" style="width: {{ $persenKomersil }}%"></div>
                         </div>
                     </div>
                     <div>
                         <div class="flex items-center justify-between text-sm">
-                        <span class="flex items-center gap-2 font-medium text-rose-800"><span class="h-2.5 w-2.5 rounded-full bg-rose-800" aria-hidden="true"></span>Campuran</span>
+                        <span class="flex items-center gap-2 font-medium text-violet-700"><span class="h-2.5 w-2.5 rounded-full bg-violet-500" aria-hidden="true"></span>Campuran</span>
                             <span class="text-neutral-700">{{ $statistik['jumlah_campuran'] }} <span class="font-semibold text-neutral-900">({{ $persenCampuran }}%)</span></span>
                         </div>
                         <div class="mt-1 h-2.5 rounded-full bg-stone-200">
-                            <div class="batang h-2.5 rounded-full bg-rose-800" style="width: {{ $persenCampuran }}%"></div>
+                            <div class="batang h-2.5 rounded-full bg-violet-500" style="width: {{ $persenCampuran }}%"></div>
                         </div>
                     </div>
                 </div>
@@ -189,9 +189,9 @@
             <div id="peta-beranda" class="reveal-scroll mt-4 h-80 w-full overflow-hidden rounded-2xl border-2 border-amber-300 bg-neutral-100 shadow-lg"></div>
 
             <div class="mt-2 flex flex-wrap items-center gap-2" aria-label="Legenda status peta">
-                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-amber-500" aria-hidden="true">●</span>Subsidi</span>
-                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-amber-200"><span class="text-neutral-800" aria-hidden="true">●</span>Komersil</span>
-                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-rose-200"><span class="text-rose-800" aria-hidden="true">●</span>Campuran</span>
+                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-emerald-200"><span class="text-emerald-500" aria-hidden="true">●</span>Subsidi</span>
+                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-sky-200"><span class="text-sky-500" aria-hidden="true">●</span>Komersil</span>
+                <span class="kartu-muncul inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-neutral-800 ring-1 ring-violet-200"><span class="text-violet-500" aria-hidden="true">●</span>Campuran</span>
             </div>
 
             @if ($titik->isEmpty())

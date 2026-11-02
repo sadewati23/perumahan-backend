@@ -35,9 +35,9 @@ class AkunNonaktifTest extends TestCase
         ]);
 
         $this->post('/login', [
-            'email' => $user->email,
+            'username' => $user->username,
             'password' => 'rahasia-123',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('username');
 
         $this->assertGuest();
     }
@@ -51,7 +51,7 @@ class AkunNonaktifTest extends TestCase
         ]);
 
         $this->post('/login', [
-            'email' => $user->email,
+            'username' => $user->username,
             'password' => 'rahasia-123',
         ])->assertRedirect(route('dashboard'));
 
@@ -74,6 +74,7 @@ class AkunNonaktifTest extends TestCase
 
         $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->put(route('users.update', $petugas), [
             'name' => $petugas->name,
+            'username' => $petugas->username,
             'email' => $petugas->email,
             'role' => 'petugas',
             // is_active tidak dikirim => false

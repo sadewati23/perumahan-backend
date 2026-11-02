@@ -146,7 +146,7 @@ class PasswordResetTest extends TestCase
 
         // Sesi baru: login langsung dengan password baru.
         $this->post(route('login.attempt'), [
-            'email' => $user->email,
+            'username' => $user->username,
             'password' => 'Rahasia-Uji-12345',
         ])->assertRedirect(route('dashboard'));
     }

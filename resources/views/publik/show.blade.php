@@ -8,7 +8,10 @@
 @endpush
 
 @section('content')
+    @php $tema = $perumahan->status_theme; @endphp
+
     <section class="border-b border-slate-200 bg-white">
+        <div class="h-1.5 w-full {{ $tema['dot'] }}" aria-hidden="true"></div>
         <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
             <nav class="text-xs text-slate-500">
                 <a href="{{ route('publik.beranda') }}" class="hover:text-indigo-600">Beranda</a>
@@ -19,10 +22,11 @@
             </nav>
 
             <div class="mt-3 flex flex-wrap items-start justify-between gap-4 masuk-naik tunda-1">
-                <div>
+                <div class="border-l-4 {{ $tema['rail_left'] }} pl-3 sm:pl-4">
                     <div class="flex flex-wrap items-center gap-2">
                         <h1 class="text-2xl font-semibold text-slate-900">{{ $perumahan->nama }}</h1>
-                        <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->status_badge_class }}">
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $perumahan->status_badge_class }}">
+                            <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true"></span>
                             {{ $perumahan->status_label }}
                         </span>
                     </div>
@@ -51,28 +55,28 @@
             @endif
 
             <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 masuk-naik tunda-2">
-                <div class="kartu-interaktif rounded-xl bg-slate-50 p-4">
-                    <p class="text-xs text-slate-500">Luas Lahan</p>
-                    <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format((float) $perumahan->luas_lahan, 0, ',', '.') }} m&sup2;</p>
-                    <p class="text-xs text-slate-500">{{ number_format($perumahan->luas_lahan_ha, 2, ',', '.') }} hektar</p>
+                <div class="kartu-interaktif rounded-xl bg-sky-50 p-4 ring-1 ring-inset ring-sky-100">
+                    <p class="text-xs font-medium text-sky-700">Luas Lahan</p>
+                    <p class="mt-1 text-lg font-semibold text-sky-900">{{ number_format((float) $perumahan->luas_lahan, 0, ',', '.') }} m&sup2;</p>
+                    <p class="text-xs text-sky-600">{{ number_format($perumahan->luas_lahan_ha, 2, ',', '.') }} hektar</p>
                 </div>
-                <div class="kartu-interaktif rounded-xl bg-slate-50 p-4">
-                    <p class="text-xs text-slate-500">Jumlah Unit</p>
-                    <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format($perumahan->jumlah_unit, 0, ',', '.') }}</p>
-                    <p class="text-xs text-slate-500">{{ $perumahan->tipeUnits->count() }} tipe unit</p>
+                <div class="kartu-interaktif rounded-xl bg-indigo-50 p-4 ring-1 ring-inset ring-indigo-100">
+                    <p class="text-xs font-medium text-indigo-700">Jumlah Unit</p>
+                    <p class="mt-1 text-lg font-semibold text-indigo-900">{{ number_format($perumahan->jumlah_unit, 0, ',', '.') }}</p>
+                    <p class="text-xs text-indigo-600">{{ $perumahan->tipeUnits->count() }} tipe unit</p>
                 </div>
-                <div class="kartu-interaktif rounded-xl bg-slate-50 p-4">
-                    <p class="text-xs text-slate-500">Ruang Terbuka Hijau</p>
-                    <p class="mt-1 text-lg font-semibold text-slate-900">{{ number_format((float) $perumahan->luas_rth, 0, ',', '.') }} m&sup2;</p>
-                    <p class="text-xs text-slate-500">{{ $perumahan->jumlah_rth }} titik RTH</p>
+                <div class="kartu-interaktif rounded-xl bg-emerald-50 p-4 ring-1 ring-inset ring-emerald-100">
+                    <p class="text-xs font-medium text-emerald-700">Ruang Terbuka Hijau</p>
+                    <p class="mt-1 text-lg font-semibold text-emerald-900">{{ number_format((float) $perumahan->luas_rth, 0, ',', '.') }} m&sup2;</p>
+                    <p class="text-xs text-emerald-600">{{ $perumahan->jumlah_rth }} titik RTH</p>
                 </div>
-                <div class="kartu-interaktif rounded-xl bg-slate-50 p-4">
-                    <p class="text-xs text-slate-500">KDB / KDH</p>
-                    <p class="mt-1 text-lg font-semibold text-slate-900">
+                <div class="kartu-interaktif rounded-xl bg-amber-50 p-4 ring-1 ring-inset ring-amber-100">
+                    <p class="text-xs font-medium text-amber-700">KDB / KDH</p>
+                    <p class="mt-1 text-lg font-semibold text-amber-900">
                         {{ $perumahan->kdb !== null ? (float) $perumahan->kdb . '%' : '-' }} /
                         {{ $perumahan->kdh !== null ? (float) $perumahan->kdh . '%' : '-' }}
                     </p>
-                    <p class="text-xs text-slate-500">Koefisien dasar bangunan / hijau</p>
+                    <p class="text-xs text-amber-600">Koefisien dasar bangunan / hijau</p>
                 </div>
             </div>
         </div>
@@ -81,8 +85,8 @@
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         <div class="reveal-scroll grid gap-6 lg:grid-cols-3">
             <div class="kartu-muncul space-y-6 lg:col-span-2">
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-sm font-semibold text-slate-900">Lokasi Administratif</h2>
+                <div class="rounded-xl border border-slate-200 border-l-4 border-l-sky-400 bg-white p-6 shadow-sm">
+                    <h2 class="text-sm font-semibold text-sky-800">Lokasi Administratif</h2>
                     <dl class="mt-4 grid gap-4 sm:grid-cols-2">
                         <div>
                             <dt class="text-xs text-slate-500">Kelurahan</dt>
@@ -107,8 +111,8 @@
                     </dl>
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-sm font-semibold text-slate-900">Waktu &amp; Lahan Pemakaman</h2>
+                <div class="rounded-xl border border-slate-200 border-l-4 border-l-amber-400 bg-white p-6 shadow-sm">
+                    <h2 class="text-sm font-semibold text-amber-800">Waktu &amp; Lahan Pemakaman</h2>
                     <dl class="mt-4 grid gap-4 sm:grid-cols-2">
                         <div>
                             <dt class="text-xs text-slate-500">Tahun pembuatan</dt>
@@ -139,9 +143,9 @@
                     </dl>
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="rounded-xl border border-slate-200 border-l-4 border-l-indigo-400 bg-white p-6 shadow-sm">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-sm font-semibold text-slate-900">Unit &amp; Tipe Rumah</h2>
+                        <h2 class="text-sm font-semibold text-indigo-800">Unit &amp; Tipe Rumah</h2>
                         @if ($perumahan->tipeUnits->isNotEmpty())
                             <span class="text-xs text-slate-500">
                                 Total {{ number_format($perumahan->total_unit_tipe, 0, ',', '.') }} unit terinci
@@ -154,7 +158,7 @@
                     @else
                         <div class="mt-4 overflow-x-auto">
                             <table class="min-w-full divide-y divide-slate-200 text-sm">
-                                <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <thead class="text-left text-xs font-semibold uppercase tracking-wide text-indigo-700">
                                     <tr>
                                         <th class="whitespace-nowrap py-2 pr-4">Tipe</th>
                                         <th class="whitespace-nowrap py-2 pr-4 text-right">Jumlah</th>
@@ -177,9 +181,9 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="rounded-xl border border-slate-200 border-l-4 border-l-violet-400 bg-white p-6 shadow-sm">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-sm font-semibold text-slate-900">Prasarana, Sarana &amp; Utilitas (PSU)</h2>
+                        <h2 class="text-sm font-semibold text-violet-800">Prasarana, Sarana &amp; Utilitas (PSU)</h2>
                         <a href="{{ route('lapor.create', ['perumahan' => $perumahan->id]) }}"
                            class="text-xs font-medium text-amber-600 hover:underline">
                             Ada yang rusak? Laporkan &rarr;
@@ -191,7 +195,7 @@
                     @else
                         <div class="mt-4 overflow-x-auto">
                             <table class="min-w-full divide-y divide-slate-200 text-sm">
-                                <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <thead class="text-left text-xs font-semibold uppercase tracking-wide text-violet-700">
                                     <tr>
                                         <th class="whitespace-nowrap py-2 pr-4">Jenis PSU</th>
                                         <th class="whitespace-nowrap py-2 pr-4 text-right">Jumlah</th>
@@ -217,16 +221,16 @@
                 </div>
 
                 @if ($perumahan->keterangan)
-                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <h2 class="text-sm font-semibold text-slate-900">Keterangan</h2>
+                    <div class="rounded-xl border border-slate-200 border-l-4 border-l-slate-300 bg-white p-6 shadow-sm">
+                        <h2 class="text-sm font-semibold text-slate-700">Keterangan</h2>
                         <p class="mt-3 whitespace-pre-line text-sm text-slate-600">{{ $perumahan->keterangan }}</p>
                     </div>
                 @endif
             </div>
 
             <div class="kartu-muncul space-y-6">
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-sm font-semibold text-slate-900">Titik Lokasi</h2>
+                <div class="rounded-xl border border-slate-200 border-l-4 border-l-emerald-400 bg-white p-6 shadow-sm">
+                    <h2 class="text-sm font-semibold text-emerald-800">Titik Lokasi</h2>
 
                     @if ($perumahan->punya_koordinat)
                         <div id="peta-detail-publik" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100"></div>
@@ -250,8 +254,8 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-sm font-semibold text-slate-900">Perumahan Lain di Kecamatan Ini</h2>
+                <div class="rounded-xl border border-slate-200 border-l-4 border-l-indigo-400 bg-white p-6 shadow-sm">
+                    <h2 class="text-sm font-semibold text-indigo-800">Perumahan Lain di Kecamatan Ini</h2>
                     <ul class="mt-3 divide-y divide-slate-100">
                         @forelse ($lainnya as $item)
                             <li class="py-3">
@@ -269,7 +273,7 @@
                     </ul>
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm text-xs text-slate-500">
+                <div class="rounded-xl border border-slate-200 border-l-4 border-l-slate-200 bg-white p-6 shadow-sm text-xs text-slate-500">
                     <p>Terakhir diperbarui: {{ $perumahan->updated_at?->translatedFormat('d F Y, H:i') ?? '-' }}</p>
                     <p class="mt-2">
                         Data bersumber dari pendataan petugas. Menemukan data yang perlu diperbarui?

@@ -5,8 +5,8 @@
 | Proxy terpercaya (ngrok, load balancer, Cloudflare, dst.)
 |--------------------------------------------------------------------------
 | Nilai TRUSTED_PROXIES di .env berisi daftar IP/CIDR yang dipisah koma;
-| gunakan `*` untuk mempercayai semua proxy (cukup untuk tunnel dev
-| seperti ngrok/cloudflared). Bila kosong: tidak ada proxy dipercaya.
+| gunakan `*` hanya untuk tunnel pengembangan. Nilai `*` diabaikan pada
+| produksi. Bila kosong: tidak ada proxy dipercaya.
 |
 | Catatan: nilai ini harus dibaca lewat config (file ini), bukan langsung
 | env() di bootstrap/app.php — callback withMiddleware() dieksekusi
@@ -17,6 +17,10 @@
 */
 
 $trustedProxies = env('TRUSTED_PROXIES', '');
+
+if (env('APP_ENV') === 'production' && in_array('*', array_map('trim', explode(',', $trustedProxies)), true)) {
+    $trustedProxies = '';
+}
 
 return [
     'proxies' => $trustedProxies === ''

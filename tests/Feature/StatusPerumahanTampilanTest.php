@@ -48,8 +48,11 @@ class StatusPerumahanTampilanTest extends TestCase
         });
 
         $this->assertCount(3, $status->unique(fn (array $kelas) => implode('|', $kelas)));
-        $this->assertStringNotContainsString('emerald', $status->flatten()->implode(' '));
-        $this->assertStringNotContainsString('indigo', $status->flatten()->implode(' '));
+
+        $kelas = $status->flatten()->implode(' ');
+        $this->assertStringContainsString('bg-emerald-100', $kelas);
+        $this->assertStringContainsString('bg-sky-100', $kelas);
+        $this->assertStringContainsString('bg-violet-100', $kelas);
     }
 
     public function test_tiga_peta_memuat_warna_dan_legenda_campuran(): void
@@ -59,24 +62,24 @@ class StatusPerumahanTampilanTest extends TestCase
         foreach ([route('publik.peta'), route('publik.beranda'), route('perumahan.peta')] as $url) {
             $response = $this->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]))->get($url);
 
-            $response->assertOk()->assertSee('#9f1239')->assertSee('Campuran');
+            $response->assertOk()->assertSee('#7c3aed')->assertSee('Campuran');
         }
     }
 
-    public function test_daftar_admin_memakai_lencana_rose_dan_dashboard_memakai_batang_rose(): void
+    public function test_daftar_admin_memakai_lencana_violet_dan_dashboard_memakai_batang_violet(): void
     {
         $this->buatData();
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
 
         $this->actingAs($admin)->get(route('perumahan.index'))
             ->assertOk()
-            ->assertSee('bg-rose-100 text-rose-800 ring-rose-700/20', false);
+            ->assertSee('bg-violet-100 text-violet-800 ring-violet-600/20', false);
 
         Cache::forget(DashboardStatistikService::CACHE_KEY);
         $this->actingAs($admin)->get(route('dashboard'))
             ->assertOk()
             ->assertSee('Campuran')
-            ->assertSee('bg-rose-800', false);
+            ->assertSee('bg-violet-500', false);
     }
 
     public function test_beranda_tidak_memakai_warna_oranye_status(): void

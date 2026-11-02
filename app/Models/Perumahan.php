@@ -19,9 +19,9 @@ class Perumahan extends Model
     ];
 
     public const WARNA_HEX = [
-        'subsidi' => '#f59e0b',
-        'komersil' => '#262626',
-        'campuran' => '#9f1239',
+        'subsidi' => '#10b981',
+        'komersil' => '#0284c7',
+        'campuran' => '#7c3aed',
     ];
 
     public static function warnaPerLabel(): array
@@ -132,24 +132,64 @@ class Perumahan extends Model
         return $this->foto_path ? Storage::disk('public')->url($this->foto_path) : null;
     }
 
-    public function getStatusDotClassAttribute(): string
+    /**
+     * Palet warna per status: hijau (subsidi), biru (komersil), ungu (campuran).
+     * Dipakai bersama oleh badge, titik penanda, dan aksen kartu agar konsisten.
+     */
+    public function getStatusThemeAttribute(): array
     {
         return match ($this->status) {
-            'subsidi' => 'bg-amber-500',
-            'komersil' => 'bg-neutral-800',
-            'campuran' => 'bg-rose-800',
-            default => 'bg-slate-500',
+            'subsidi' => [
+                'badge' => 'bg-emerald-100 text-emerald-800 ring-emerald-600/20',
+                'dot' => 'bg-emerald-500',
+                'soft' => 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+                'text' => 'text-emerald-700',
+                'rail' => 'border-emerald-500',
+                'rail_left' => 'border-l-emerald-500',
+                'rail_top' => 'border-t-emerald-500',
+                'gradient' => 'from-emerald-50 via-white to-white',
+            ],
+            'komersil' => [
+                'badge' => 'bg-sky-100 text-sky-800 ring-sky-600/20',
+                'dot' => 'bg-sky-500',
+                'soft' => 'bg-sky-50 text-sky-800 ring-sky-200',
+                'text' => 'text-sky-700',
+                'rail' => 'border-sky-500',
+                'rail_left' => 'border-l-sky-500',
+                'rail_top' => 'border-t-sky-500',
+                'gradient' => 'from-sky-50 via-white to-white',
+            ],
+            'campuran' => [
+                'badge' => 'bg-violet-100 text-violet-800 ring-violet-600/20',
+                'dot' => 'bg-violet-500',
+                'soft' => 'bg-violet-50 text-violet-800 ring-violet-200',
+                'text' => 'text-violet-700',
+                'rail' => 'border-violet-500',
+                'rail_left' => 'border-l-violet-500',
+                'rail_top' => 'border-t-violet-500',
+                'gradient' => 'from-violet-50 via-white to-white',
+            ],
+            default => [
+                'badge' => 'bg-slate-100 text-slate-700 ring-slate-500/20',
+                'dot' => 'bg-slate-500',
+                'soft' => 'bg-slate-50 text-slate-700 ring-slate-200',
+                'text' => 'text-slate-600',
+                'rail' => 'border-slate-400',
+                'rail_left' => 'border-l-slate-400',
+                'rail_top' => 'border-t-slate-400',
+                'gradient' => 'from-slate-50 via-white to-white',
+            ],
         };
+    }
+
+    public function getStatusDotClassAttribute(): string
+    {
+        return $this->status_theme['dot'];
     }
 
     public function getStatusBadgeClassAttribute(): string
     {
-        return match ($this->status) {
-            'subsidi' => 'bg-amber-100 text-amber-800 ring-amber-600/20',
-            'komersil' => 'bg-neutral-200 text-neutral-800 ring-neutral-600/20',
-            'campuran' => 'bg-rose-100 text-rose-800 ring-rose-700/20',
-            default => 'bg-slate-100 text-slate-700 ring-slate-500/20',
-        };
+        return $this->status_theme['badge'];
     }
 
     public function getBadgeStatusAttribute(): string

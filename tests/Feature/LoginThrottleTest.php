@@ -16,21 +16,21 @@ class LoginThrottleTest extends TestCase
 
         for ($i = 0; $i < 5; $i++) {
             $this->post(route('login.attempt'), [
-                'email' => $user->email,
+                'username' => $user->username,
                 'password' => 'password-salah',
-            ])->assertSessionHasErrors('email');
+            ])->assertSessionHasErrors('username');
         }
 
         // Percobaan ke-6 diblokir throttle (walau kredensialnya benar),
         // dengan pesan throttle berbahasa Indonesia — bukan pesan kredensial salah.
         $this->post(route('login.attempt'), [
-            'email' => $user->email,
+            'username' => $user->username,
             'password' => 'password',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('username');
 
         $this->assertStringContainsString(
             'Terlalu banyak percobaan login',
-            (string) session('errors')->first('email'),
+            (string) session('errors')->first('username'),
         );
 
         $this->assertGuest();
@@ -41,12 +41,12 @@ class LoginThrottleTest extends TestCase
         $user = User::factory()->create(['is_active' => true]);
 
         $this->post(route('login.attempt'), [
-            'email' => $user->email,
+            'username' => $user->username,
             'password' => 'password-salah',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('username');
 
         $this->post(route('login.attempt'), [
-            'email' => $user->email,
+            'username' => $user->username,
             'password' => 'password',
         ])->assertRedirect(route('dashboard'));
 
@@ -58,13 +58,13 @@ class LoginThrottleTest extends TestCase
         // Setelah login sukses hitungan bersih: satu percobaan gagal
         // berikutnya tetap dapat pesan kredensial salah, bukan throttle.
         $this->post(route('login.attempt'), [
-            'email' => $user->email,
+            'username' => $user->username,
             'password' => 'password-salah',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('username');
 
         $this->assertStringContainsString(
-            'Email atau password',
-            (string) session('errors')->first('email'),
+            'Username atau password',
+            (string) session('errors')->first('username'),
         );
     }
 
@@ -76,54 +76,54 @@ class LoginThrottleTest extends TestCase
         // tanpa proxy terpercaya, header ini HARUS diabaikan ($request->ip() tetap sama).
         for ($i = 0; $i < 5; $i++) {
             $this->post(route('login.attempt'), [
-                'email' => $user->email,
+                'username' => $user->username,
                 'password' => 'password-salah',
             ], [
                 'X-Forwarded-For' => '11.22.33.'.$i,
-            ])->assertSessionHasErrors('email');
+            ])->assertSessionHasErrors('username');
         }
 
         // Percobaan ke-6 dengan header palsu LAIN tetap terkena throttle
         // — kalau throttle bisa dilewati header, pesan akan 'kredensial salah'.
         $this->post(route('login.attempt'), [
-            'email' => $user->email,
+            'username' => $user->username,
             'password' => 'password',
         ], [
             'X-Forwarded-For' => '99.88.77.66',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('username');
 
         $this->assertStringContainsString(
             'Terlalu banyak percobaan login',
-            (string) session('errors')->first('email'),
+            (string) session('errors')->first('username'),
         );
 
         $this->assertGuest();
     }
 
-    public function test_throttle_per_email_menahan_brute_force_dari_ip_yang_berganti(): void
+    public function test_throttle_per_username_menahan_brute_force_dari_ip_yang_berganti(): void
     {
         $user = User::factory()->create();
 
         // Luluskan 5 percobaan gagal semuanya dengan IP yang beda-beda
-        // (meniru penyerang memutar IP) — key per email tanpa IP menangkapnya.
+        // (meniru penyerang memutar IP) — key per username tanpa IP menangkapnya.
         for ($i = 0; $i < 5; $i++) {
             $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.'.$i])
                 ->post(route('login.attempt'), [
-                    'email' => $user->email,
+                    'username' => $user->username,
                     'password' => 'password-salah',
-                ])->assertSessionHasErrors('email');
+                ])->assertSessionHasErrors('username');
         }
 
         // Percobaan ke-6 dari IP baru juga diblokir karena sudah 5 gagal untuk email ini.
         $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.99'])
             ->post(route('login.attempt'), [
-                'email' => $user->email,
+                'username' => $user->username,
                 'password' => 'password',
-            ])->assertSessionHasErrors('email');
+            ])->assertSessionHasErrors('username');
 
         $this->assertStringContainsString(
             'Terlalu banyak percobaan login',
-            (string) session('errors')->first('email'),
+            (string) session('errors')->first('username'),
         );
     }
 
