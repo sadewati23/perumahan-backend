@@ -55,10 +55,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // sehingga cukup diisi lewat config/trustedproxy.php.
 
         $middleware->alias([
-            'role'   => \App\Http\Middleware\EnsureUserHasRole::class,
-            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
-            'tanpa-cache' => \App\Http\Middleware\TanpaCache::class,
-            'simpan-tujuan-konfirmasi' => \App\Http\Middleware\SimpanTujuanKonfirmasiPassword::class,
+            'role'   => \App\Http\Middleware\Admin\EnsureUserHasRole::class,
+            'active' => \App\Http\Middleware\Admin\EnsureUserIsActive::class,
+            'tanpa-cache' => \App\Http\Middleware\Admin\TanpaCache::class,
+            'simpan-tujuan-konfirmasi' => \App\Http\Middleware\Admin\SimpanTujuanKonfirmasiPassword::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));

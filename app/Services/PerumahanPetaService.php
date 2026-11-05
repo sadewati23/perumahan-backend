@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Sumber data tunggal untuk titik peta, GeoJSON, dan ringkasan perumahan.
- * Dipakai bersama oleh PublikController dan PerumahanController agar logika
+ * Dipakai bersama oleh Publik\PublikController dan Admin\PerumahanController agar logika
  * tidak terduplikasi dan cache antar halaman konsisten.
  */
 class PerumahanPetaService

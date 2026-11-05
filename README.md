@@ -336,21 +336,33 @@ php artisan migrate:fresh --seed
 
 ```text
 app/
-├── Http/Controllers/       # Controller publik, admin, auth, dan laporan
-├── Http/Middleware/        # Middleware akun aktif dan role
-├── Http/Requests/          # Validasi form
-├── Models/                 # Model Eloquent dan relasi
-├── Services/               # Statistik dashboard dan layanan peta
-└── Support/                # Utility pemrosesan file/foto
+├── Http/Controllers/          # Controller Publik/ (portal publik) dan Admin/ (area admin + auth)
+├── Http/Middleware/           # SecurityHeaders (global) dan middleware Admin/
+├── Http/Requests/             # Validasi form publik (Publik/) dan admin (Admin/)
+├── Models/                    # Model Eloquent dan relasi (dipakai bersama)
+├── Services/                  # Statistik dashboard dan layanan peta (dipakai bersama)
+└── Support/                   # Utility pemrosesan file/foto (dipakai bersama)
 database/
-├── migrations/             # Skema dan perubahan database
-└── seeders/                # Data awal/contoh
-resources/views/            # Template Blade publik dan admin
-routes/web.php              # Definisi seluruh route web
-config/peta.php             # Konfigurasi wilayah dan peta
-public/                     # Entry point, asset hasil build, dan storage link
-tests/Feature/              # Pengujian alur aplikasi
+├── migrations/                # Skema dan perubahan database
+└── seeders/                   # Data awal/contoh
+resources/views/               # layouts/publik + publik/* (portal) dan layouts/admin + admin/* (area admin)
+resources/js/                  # publik.js + admin.js (dua entri), umum/ modul bersama
+routes/                        # web.php (pemuat) + publik.php, auth.php, admin.php
+config/peta.php                # Konfigurasi wilayah dan peta
+public/                        # Entry point, asset hasil build, dan storage link
+tests/                         # Feature/{Publik,Admin,Konsol,Konfigurasi} + Unit
 ```
+
+## Struktur Proyek: Publik vs Admin
+
+Kode aplikasi dipisah secara arsitektural menjadi dua area tanpa mengubah perilaku:
+
+- **Rute**: `routes/web.php` adalah pemuat tipis yang me-require `publik.php` (portal tanpa login), `auth.php` (login admin), dan `admin.php` (area admin) secara berurutan; urutan registrasi rute tetap identik.
+- **Controller & Request**: portal publik di `App\Http\Controllers\Publik` (`PublikController`, `LaporanController`, `CekLaporanController`) dengan request di `App\Http\Requests\Publik`; seluruh area admin (termasuk `Admin\Auth\*` untuk login/konfirmasi password) di `App\Http\Controllers\Admin` dengan request di `App\Http\Requests\Admin`.
+- **Middleware**: `SecurityHeaders` global; middleware area admin (`role`, `active`, `tanpa-cache`, `simpan-tujuan-konfirmasi`) berada di `App\Http\Middleware\Admin` dan di-alias dengan nama yang sama di `bootstrap/app.php`.
+- **View**: halaman publik memakai `layouts.publik` + `views/publik/**`; area admin memakai `layouts.admin` + `views/admin/**` (termasuk `admin/auth/*` yang berdiri sendiri); `components/`, `partials/`, dan `vendor/pagination/` dipakai kedua area.
+- **JavaScript**: `npm run build` menghasilkan **dua entri** — `resources/js/publik.js` untuk seluruh halaman publik dan `resources/js/admin.js` untuk `layouts.admin` beserta `admin/auth/*`. Modul yang dipakai kedua area ada di `resources/js/umum/`; modul khusus area masing-masing di `resources/js/publik/` dan `resources/js/admin/`, sehingga halaman publik tidak memuat JavaScript khusus admin (dipantau oleh `tests/Feature/CakupanJsTest.php`).
+- **Tests**: `tests/Feature/{Publik,Admin,Konsol,Konfigurasi}/` dengan namespace `Tests\Feature\*` masing-masing.
 
 ## Pengujian
 

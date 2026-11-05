@@ -36,8 +36,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Jumlah laporan berstatus "baru" (semua jenis) untuk badge sidebar area admin.
         // Di-cache singkat agar tidak menambah satu query count() di setiap halaman admin;
-        // cache di-reset di LaporanAdminController setiap status laporan berubah.
-        View::composer('layouts.app', function ($view): void {
+        // cache di-reset di Admin\LaporanController setiap status laporan berubah.
+        View::composer('layouts.admin', function ($view): void {
             $view->with('jumlahLaporanBaru', Cache::remember(
                 Laporan::CACHE_BAIK_BARU,
                 now()->addMinutes(5),
