@@ -16,7 +16,7 @@
             @if (\App\Support\TurnstileKonfigurasi::tampilkanWidget()) <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div> @endif
             <x-button type="submit">Cek Status</x-button>
         </form>
-        <p class="mt-5 text-sm text-slate-600">Belum punya kode? <a class="font-semibold text-indigo-600 hover:underline" href="{{ route('lapor.create') }}">Buat laporan</a></p>
+        <p class="mt-5 text-sm text-slate-600">Belum punya kode? <a class="font-semibold text-brand-600 hover:underline" href="{{ route('lapor.create') }}">Buat laporan</a></p>
     </x-card>
 </section>
 @endsection

@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+/* Gulir halus untuk tautan jangkar (navigasi bagian halaman detail).
+   Dimatikan oleh blok prefers-reduced-motion di bagian bawah file. */
+@media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+}
+
 /* Teks muncul bertahap dari bawah */
 @keyframes naik-masuk {
     from { opacity: 0; transform: translateY(16px); }
@@ -113,18 +119,20 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* --- Warna brand (dasar indigo) --- */
-    --color-brand-50: #eef2ff;
-    --color-brand-100: #e0e7ff;
-    --color-brand-200: #c7d2fe;
-    --color-brand-300: #a5b4fc;
-    --color-brand-400: #818cf8;
-    --color-brand-500: #6366f1;
-    --color-brand-600: #4f46e5;
-    --color-brand-700: #4338ca;
-    --color-brand-800: #3730a3;
-    --color-brand-900: #312e81;
-    --color-brand-950: #1e1b4b;
+    /* --- Warna brand (dasar biru/denim) ---
+       Satu warna aksen untuk portal publik: menu aktif, tombol, fokus, tautan.
+       Warna status (emerald/sky/violet) tetap memakai palet status masing-masing. */
+    --color-brand-50: #eff6ff;
+    --color-brand-100: #dbeafe;
+    --color-brand-200: #bfdbfe;
+    --color-brand-300: #93c5fd;
+    --color-brand-400: #60a5fa;
+    --color-brand-500: #3b82f6;
+    --color-brand-600: #2563eb;
+    --color-brand-700: #1d4ed8;
+    --color-brand-800: #1e40af;
+    --color-brand-900: #1e3a8a;
+    --color-brand-950: #172554;
 
     /* --- Warna status: sukses --- */
     --color-success-50: #ecfdf5;
@@ -223,6 +231,70 @@
     /* Area unggah foto (drag & drop) saat berkas diseret ke atasnya. */
     .dropzone-aktif {
         @apply border-brand-500 bg-brand-50 ring-2 ring-brand-500/30;
+    }
+
+    /* Tombol aksi standar portal publik: satu warna aksen (brand) + varian netral.
+       Tinggi minimum 44px di HP agar nyaman disentuh. */
+    .tombol-utama {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition
+            hover:bg-brand-700 active:bg-brand-800 disabled:cursor-not-allowed disabled:bg-brand-300;
+        min-height: 44px;
+    }
+
+    .tombol-sekunder {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition
+            hover:border-slate-400 hover:bg-slate-50 active:bg-slate-100;
+        min-height: 44px;
+    }
+
+    @media (min-width: 768px) {
+        .tombol-utama,
+        .tombol-sekunder {
+            min-height: 0;
+        }
+    }
+
+    /* Panel filter yang bisa dilipat di HP (elemen <details>).
+       Di layar >= md panel selalu dibuka oleh filter-lipat.js. */
+    .filter-lipat > summary {
+        list-style: none;
+    }
+
+    .filter-lipat > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    /* Tabel tipe unit & PSU: tetap tabel di desktop, menjadi kartu mini di HP.
+       Label tiap nilai diambil dari atribut data-label pada <td>. */
+    @media (max-width: 639px) {
+        .tabel-mini { display: block; min-width: 0; }
+        .tabel-mini thead { display: none; }
+        .tabel-mini tbody { display: grid; gap: .625rem; }
+        .tabel-mini tr {
+            display: block;
+            padding: .625rem .875rem;
+            border: 1px solid var(--color-slate-200);
+            border-radius: .75rem;
+            background: #fff;
+        }
+        .tabel-mini td {
+            display: grid;
+            grid-template-columns: 7rem minmax(0, 1fr);
+            align-items: baseline;
+            gap: .75rem;
+            padding: .1875rem 0;
+            border: 0;
+            text-align: right;
+        }
+        .tabel-mini td::before {
+            content: attr(data-label);
+            font-size: .75rem;
+            font-weight: 500;
+            color: var(--color-slate-500);
+            text-align: left;
+        }
+        .tabel-mini td > * { justify-self: end; }
+        .tabel-mini td:empty { display: none; }
     }
 }
 

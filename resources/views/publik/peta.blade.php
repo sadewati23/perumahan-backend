@@ -11,7 +11,7 @@
     <section class="border-b border-slate-200 bg-white">
         <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
             <nav class="text-xs text-slate-500">
-                <a href="{{ route('publik.beranda') }}" class="hover:text-indigo-600">Beranda</a>
+                <a href="{{ route('publik.beranda') }}" class="hover:text-brand-600">Beranda</a>
                 <span class="mx-1">/</span>
                 <span class="text-slate-700">Peta Sebaran</span>
             </nav>
@@ -39,11 +39,11 @@
                 <div class="md:col-span-2">
                     <label class="mb-1 block text-xs font-medium text-slate-600">Pencarian</label>
                     <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nama perumahan / kelurahan / kecamatan..."
-                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600">Kecamatan</label>
-                    <select name="kecamatan_id" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500">
+                    <select name="kecamatan_id" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
                         <option value="">Semua kecamatan</option>
                         @foreach ($kecamatans as $kecamatan)
                             <option value="{{ $kecamatan->id }}" @selected(($filters['kecamatan_id'] ?? '') == $kecamatan->id)>{{ $kecamatan->nama }}</option>
@@ -52,7 +52,7 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-slate-600">Status</label>
-                    <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500">
+                    <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
                         <option value="">Semua status</option>
                         @foreach (\App\Models\Perumahan::STATUS as $value => $label)
                             <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
@@ -61,7 +61,7 @@
                 </div>
 
                 <div class="flex gap-2 md:col-span-4">
-                    <button type="submit" class="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                    <button type="submit" class="rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-700">
                         Terapkan Filter
                     </button>
                     <a href="{{ route('publik.peta') }}"
@@ -83,11 +83,11 @@
                 <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                     <label class="mb-1 block text-xs font-medium text-slate-600">Saring daftar lokasi</label>
                     <input type="text" id="cari-lokasi" placeholder="Ketik nama perumahan..."
-                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">                        <ul id="daftar-lokasi" class="no-scrollbar mt-3 max-h-80 divide-y divide-slate-100 overflow-y-auto text-sm">
+                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">                        <ul id="daftar-lokasi" class="no-scrollbar mt-3 max-h-80 divide-y divide-slate-100 overflow-y-auto text-sm">
                         @foreach ($titik as $item)
                             <li data-cari="{{ strtolower($item['nama'].' '.$item['alamat']) }}">
                                 <button type="button" data-fokus="{{ $item['id'] }}"
-                                        class="w-full py-2 text-left transition hover:text-indigo-600">
+                                        class="w-full py-2 text-left transition hover:text-brand-600">
                                     <span class="flex items-center gap-2">
                                          <span class="h-2 w-2 shrink-0 rounded-full {{ match ($item['status']) { 'Subsidi' => 'bg-emerald-500', 'Komersil' => 'bg-sky-500', 'Campuran' => 'bg-violet-500', default => 'bg-slate-500' } }}"></span>
                                         <span class="truncate font-medium text-slate-700">{{ $item['nama'] }}</span>

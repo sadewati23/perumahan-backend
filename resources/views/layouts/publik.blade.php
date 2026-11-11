@@ -49,7 +49,7 @@
                     @php $aktif = request()->routeIs($item['active']); @endphp
                     <a href="{{ route($item['route']) }}"
                        @if ($aktif) aria-current="page" @endif
-                       class="nav-animasi rounded-lg px-3 py-2 text-sm font-medium transition {{ $aktif ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                       class="nav-animasi rounded-lg px-3 py-2 text-sm font-medium transition {{ $aktif ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
                         {{ $item['label'] }}
                     </a>
                 @endforeach
@@ -66,7 +66,7 @@
                 @php $aktif = request()->routeIs($item['active']); @endphp
                 <a href="{{ route($item['route']) }}"
                    @if ($aktif) aria-current="page" @endif
-                       class="nav-animasi whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition {{ $aktif ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600' }}">
+                       class="nav-animasi whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition {{ $aktif ? 'bg-brand-50 text-brand-700' : 'text-slate-600' }}">
                     {{ $item['label'] }}
                 </a>
             @endforeach
@@ -113,18 +113,18 @@
             <div>
                 <p class="text-sm font-semibold text-slate-900">Jelajahi</p>
                 <ul class="mt-3 space-y-2 text-sm text-slate-600">
-                    <li><a href="{{ route('publik.perumahan.index') }}" class="hover:text-indigo-600">Daftar Perumahan</a></li>
-                    <li><a href="{{ route('publik.peta') }}" class="hover:text-indigo-600">Peta Sebaran</a></li>
-                    <li><a href="{{ route('lapor.create') }}" class="hover:text-indigo-600">Lapor Kerusakan / Pengaduan</a></li>
-                    <li><a href="{{ route('cek-laporan.index') }}" class="hover:text-indigo-600">Cek Status Laporan</a></li>
-                    <li><a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener" class="hover:text-indigo-600">Data GeoJSON</a></li>
+                    <li><a href="{{ route('publik.perumahan.index') }}" class="hover:text-brand-600">Daftar Perumahan</a></li>
+                    <li><a href="{{ route('publik.peta') }}" class="hover:text-brand-600">Peta Sebaran</a></li>
+                    <li><a href="{{ route('lapor.create') }}" class="hover:text-brand-600">Lapor Kerusakan / Pengaduan</a></li>
+                    <li><a href="{{ route('cek-laporan.index') }}" class="hover:text-brand-600">Cek Status Laporan</a></li>
+                    <li><a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener" class="hover:text-brand-600">Data GeoJSON</a></li>
                 </ul>
             </div>
 
             <div>
                 <p class="text-sm font-semibold text-slate-900">Akses Petugas</p>
                 <ul class="mt-3 space-y-2 text-sm text-slate-600">
-                    <li><a href="{{ route('login') }}" class="hover:text-indigo-600">Masuk Admin / Petugas</a></li>
+                    <li><a href="{{ route('login') }}" class="hover:text-brand-600">Masuk Admin / Petugas</a></li>
                     <li class="text-slate-500">Pendataan &amp; pemutakhiran data dilakukan oleh petugas terverifikasi.</li>
                 </ul>
             </div>
@@ -134,6 +134,14 @@
             &copy; {{ date('Y') }} {{ config('app.name') }}. Data diperbarui secara berkala oleh petugas pendataan.
         </div>
     </footer>
+
+    {{-- Tombol kembali ke atas: muncul setelah halaman digulir (lihat publik/kembali-atas.js). --}}
+    <button type="button" id="kembali-atas" aria-label="Kembali ke atas" title="Kembali ke atas"
+            class="pointer-events-none fixed bottom-5 right-4 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-900/90 text-white opacity-0 shadow-lg ring-1 ring-white/20 backdrop-blur transition duration-300 hover:bg-slate-800 sm:bottom-6 sm:right-6">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0-6 6m6-6 6 6"/>
+        </svg>
+    </button>
 
     @stack('scripts')
 </body>

@@ -3,13 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ImportPerumahanRequest;
 use App\Http\Requests\Admin\StorePerumahanRequest;
 use App\Models\Kecamatan;
 use App\Models\Laporan;
 use App\Models\LaporanFoto;
 use App\Models\Perumahan;
 use App\Services\DashboardStatistikService;
+use App\Services\PerumahanImportService;
 use App\Services\PerumahanPetaService;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Support\FilterQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -228,6 +233,119 @@ class PerumahanController extends Controller
     public function geojson(): JsonResponse
     {
         return response()->json($this->peta->featureCollection());
+    }
+
+    /**
+     * Halaman impor data perumahan dari file CSV / XLSX / XLS.
+     * Tersedia untuk admin maupun petugas.
+     */
+    public function import(): View
+    {
+        return view('admin.perumahan.import', [
+            'kolom' => $this->kolomTemplate(),
+        ]);
+    }
+
+    public function simpanImport(ImportPerumahanRequest $request): RedirectResponse
+    {
+        $jumlah = app(PerumahanImportService::class)->impor($request->file('file'));
+
+        $this->peta->hapusCache();
+        Cache::forget(DashboardStatistikService::CACHE_KEY);
+
+        return redirect()->route('perumahan.index')
+            ->with('success', "Impor berhasil. {$jumlah} data perumahan baru telah ditambahkan.");
+    }
+
+    /** Template kosong CSV (pemisah koma). */
+    public function templateCsv(): StreamedResponse
+    {
+        $kolom = $this->kolomTemplate();
+
+        return response()->streamDownload(function () use ($kolom): void {
+            $keluar = fopen('php://output', 'w');
+            fwrite($keluar, "\xEF\xBB\xBF"); // BOM agar tidak berantakan di Excel
+            fputcsv($keluar, $kolom);
+            fputcsv($keluar, $this->barisContoh());
+            fclose($keluar);
+        }, 'template-impor-perumahan.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /** Template kosong XLSX (+ contoh isi pada baris 2). */
+    public function templateXlsx(): StreamedResponse
+    {
+        $kolom = $this->kolomTemplate();
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $barisAkhir = chr(ord('A') + count($kolom) - 1);
+        $sheet->fromArray([$kolom, $this->barisContoh()], null, 'A1');
+        $sheet->getStyle("A1:{$barisAkhir}1")->getFont()->setBold(true);
+        $sheet->freezePane('A2');
+
+        return response()->streamDownload(function () use ($spreadsheet): void {
+            (new XlsxWriter($spreadsheet))->save('php://output');
+            $spreadsheet->disconnectWorksheets();
+        }, 'template-impor-perumahan.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /** Judul kolom template — cocok dengan alias pada PerumahanImportService. */
+    private function kolomTemplate(): array
+    {
+        return [
+            'Nama Perumahan',
+            'Pengembang',
+            'Kecamatan',
+            'Kelurahan',
+            'Alamat',
+            'RT',
+            'RW',
+            'Latitude',
+            'Longitude',
+            'Luas Lahan',
+            'Jumlah Unit',
+            'Status Perumahan',
+            'Tahun Pembuatan',
+            'Tahun Selesai',
+            'Jumlah RTH',
+            'Luas RTH',
+            'KDB',
+            'KDH',
+            'Ada Lahan Pemakaman',
+            'Luas Lahan Pemakaman',
+            'Lokasi Lahan Pemakaman',
+            'Keterangan',
+        ];
+    }
+
+    private function barisContoh(): array
+    {
+        return [
+            'Contoh Perumahan ABC',
+            'PT Pengembang',
+            'Coblong',
+            'Dago',
+            'Jl. Contoh No. 12',
+            '001',
+            '002',
+            -6.7320,
+            108.5523,
+            '15000',
+            '100',
+            'Subsidi',
+            '2020',
+            '2022',
+            '2',
+            '2000',
+            '70',
+            '40',
+            'Ya',
+            '500',
+            'Blok D',
+            'Baris contoh — hapus atau ganti sebelum diimpor',
+        ];
     }
 
     /**

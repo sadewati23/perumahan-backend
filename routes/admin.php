@@ -30,6 +30,12 @@ Route::middleware(['auth', 'active', 'tanpa-cache'])->prefix('admin')->group(fun
     Route::get('/perumahan/peta', [PerumahanController::class, 'peta'])->name('perumahan.peta');
     Route::get('/perumahan/geojson', [PerumahanController::class, 'geojson'])->name('perumahan.geojson');
 
+    // Impor data perumahan dari CSV / Excel (dipakai admin & petugas)
+    Route::get('/perumahan/impor', [PerumahanController::class, 'import'])->name('perumahan.import');
+    Route::get('/perumahan/impor/template.csv', [PerumahanController::class, 'templateCsv'])->name('perumahan.import.template-csv');
+    Route::get('/perumahan/impor/template.xlsx', [PerumahanController::class, 'templateXlsx'])->name('perumahan.import.template-xlsx');
+    Route::post('/perumahan/impor', [PerumahanController::class, 'simpanImport'])->name('perumahan.import.simpan');
+
     Route::resource('perumahan', PerumahanController::class)->except('destroy');
     Route::delete('/perumahan/{perumahan}', [PerumahanController::class, 'destroy'])
         ->name('perumahan.destroy')->middleware(['role:admin', 'simpan-tujuan-konfirmasi', 'password.confirm']);

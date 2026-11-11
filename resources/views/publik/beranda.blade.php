@@ -210,7 +210,7 @@
                     <p class="text-sm text-slate-600">Berdasarkan tahun selesai pembangunan.</p>
                 </div>
                 <a href="{{ route('publik.perumahan.index') }}"
-                   class="text-sm font-semibold text-indigo-600 hover:text-indigo-700">Semua perumahan &rarr;</a>
+                   class="text-sm font-semibold text-brand-600 hover:text-brand-700">Semua perumahan &rarr;</a>
             </div>
 
             <div class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">

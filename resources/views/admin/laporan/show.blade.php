@@ -191,10 +191,15 @@
                         @csrf
                         <div>
                             <label for="foto_perbaikan" class="mb-1.5 block text-sm font-medium text-slate-700">
-                                Tambah Foto Hasil Perbaikan <span class="font-normal text-slate-500">(maks. 5 foto, 5 MB / foto)</span>
+                                Tambah Foto Hasil Perbaikan <span class="font-normal text-slate-500">(maks. 5 foto, 5 MB / foto — foto besar otomatis dikompres)</span>
                             </label>
-                            <input type="file" id="foto_perbaikan" name="foto_perbaikan[]" accept=".jpg,.jpeg,.png,.webp" multiple required
-                                   class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-indigo-700">
+                            <div data-foto-upload data-maks="5" data-maks-ukuran="5120"
+                                 data-tipe="image/jpeg,image/png,image/webp">
+                                <input type="file" id="foto_perbaikan" name="foto_perbaikan[]" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" multiple required
+                                       class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-indigo-700">
+                                <ul data-foto-daftar class="mt-2 space-y-2"></ul>
+                                <p data-foto-pesan class="mt-1 text-xs font-medium" aria-live="polite"></p>
+                            </div>
                             @error('foto_perbaikan.*')
                                 <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                             @enderror

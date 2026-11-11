@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\Laporan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class CacheAdminTest extends TestCase
@@ -18,7 +19,7 @@ class CacheAdminTest extends TestCase
         foreach ([route('dashboard'), route('perumahan.index')] as $url) {
             $this->actingAs($admin)->get($url)->assertHeader('Cache-Control', 'no-store, private');
         }
-        auth()->logout();
+        Auth::logout();
         $this->get(route('login'))->assertHeader('Cache-Control', 'no-store, private');
         $this->actingAs($admin)->get(route('password.confirm'))->assertHeader('Cache-Control', 'no-store, private');
 

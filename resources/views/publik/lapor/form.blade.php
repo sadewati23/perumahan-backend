@@ -24,7 +24,7 @@
         </div>
     </section>
 
-    <div class="bg-indigo-50/40">
+    <div class="bg-brand-50/40">
     <div class="mx-auto max-w-7xl px-4 py-8 pb-24 sm:pb-8 lg:px-8">
         <div class="grid gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2">
@@ -121,7 +121,7 @@
                         {{-- 1. Jenis laporan --}}
                         <div id="langkah-1" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
                             <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
-                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700" aria-hidden="true">1</span>
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700" aria-hidden="true">1</span>
                                 Pilih Jenis Laporan
                             </h2>
 
@@ -152,7 +152,7 @@
                         {{-- 2. Lokasi — tampilan dinamis per jenis --}}
                         <div id="langkah-2" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
                             <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
-                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700" aria-hidden="true">2</span>
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700" aria-hidden="true">2</span>
                                 Lokasi
                             </h2>
 
@@ -266,7 +266,7 @@
                         {{-- 3. Data pelapor --}}
                         <div id="langkah-3" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
                             <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
-                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700" aria-hidden="true">3</span>
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700" aria-hidden="true">3</span>
                                 Data Pelapor
                             </h2>
 
@@ -285,7 +285,7 @@
                         {{-- 4. Detail per jenis --}}
                         <div id="langkah-4" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
                             <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
-                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700" aria-hidden="true">4</span>
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700" aria-hidden="true">4</span>
                                 Detail Laporan
                             </h2>
 
@@ -359,10 +359,10 @@
                                               class="input">{{ old('deskripsi') }}</textarea>
                                 </x-field>
 
-                                <x-field name="foto" for="foto" label="Foto Bukti" hint="JPG / PNG / WEBP, maksimal 2 MB per foto.">
+                                <x-field name="foto" for="foto" label="Foto Bukti" hint="JPG / PNG / WEBP, maksimal 5 MB per foto. Foto besar otomatis dikompres.">
                                     <span id="foto-keterangan" class="font-normal text-slate-500">(opsional, maks. 3 foto)</span>
 
-                                    <div id="foto-upload" data-foto-upload data-maks="3" data-maks-ukuran="2048"
+                                    <div id="foto-upload" data-foto-upload data-maks="3" data-maks-ukuran="5120"
                                          data-min="1" data-min-jenis="bangunan_liar" data-tipe="image/jpeg,image/png,image/webp">
                                         <button type="button" data-foto-buka
                                                 class="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition hover:border-brand-400 hover:bg-brand-50">
@@ -370,10 +370,10 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0-12l-4 4m4-4l4 4"/>
                                             </svg>
                                             <span class="block text-sm font-medium text-slate-700">Pilih foto atau seret ke sini</span>
-                                            <span class="block text-xs text-slate-500">Bisa beberapa file sekaligus. Format JPG / PNG / WEBP, maksimal {{ (int) round(2048/1024) }} MB per foto.</span>
+                                            <span class="block text-xs text-slate-500">Bisa beberapa file sekaligus. Format JPG / PNG / WEBP / HEIC, foto besar otomatis dikompres di perangkat.</span>
                                         </button>
 
-                                        <input type="file" id="foto" name="foto[]" multiple accept=".jpg,.jpeg,.png,.webp"
+                                        <input type="file" id="foto" name="foto[]" multiple accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
                                                class="hidden" aria-describedby="foto-petunjuk">
 
                                         <ul id="foto-daftar" data-foto-daftar class="mt-2 space-y-2"></ul>
@@ -458,7 +458,7 @@
                         </div>
                         <p data-kirim-pesan class="mt-1 text-center text-[11px] font-medium text-amber-700" aria-live="polite"></p>
                     </div>
-                    <p class="mt-4 text-center text-sm text-slate-600">Sudah punya kode? <a href="{{ route('cek-laporan.index') }}" class="font-semibold text-indigo-600 hover:underline">Cek status laporan</a></p>
+                    <p class="mt-4 text-center text-sm text-slate-600">Sudah punya kode? <a href="{{ route('cek-laporan.index') }}" class="font-semibold text-brand-600 hover:underline">Cek status laporan</a></p>
                 @endif
             </div>
 
@@ -632,8 +632,8 @@
                     const wajib = jenis === 'bangunan_liar';
                     keteranganFoto.textContent = wajib ? '(wajib minimal 1 foto, maks. 3)' : '(opsional, maks. 3 foto)';
                     petunjukFoto.textContent = wajib
-                        ? 'Wajib lampirkan foto bangunan tersebut. Format JPG / PNG / WEBP, masing-masing maksimal 2 MB.'
-                        : 'Format JPG / PNG / WEBP, masing-masing maksimal 2 MB.';
+                        ? 'Wajib lampirkan foto bangunan tersebut. Format JPG / PNG / WEBP, masing-masing maksimal 5 MB — foto besar otomatis dikompres.'
+                        : 'Format JPG / PNG / WEBP, masing-masing maksimal 5 MB — foto besar otomatis dikompres.';
                 }
             }
 
@@ -701,13 +701,13 @@
 
             const gayaNav = {
                 idle: 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-medium text-slate-500 transition hover:bg-slate-50',
-                aktif: 'flex items-center gap-2 rounded-lg bg-indigo-600 px-2.5 py-1.5 font-medium text-white shadow-sm transition',
-                selesai: 'flex items-center gap-2 rounded-lg bg-indigo-50 px-2.5 py-1.5 font-medium text-indigo-700 transition hover:bg-indigo-100',
+                aktif: 'flex items-center gap-2 rounded-lg bg-brand-600 px-2.5 py-1.5 font-medium text-white shadow-sm transition',
+                selesai: 'flex items-center gap-2 rounded-lg bg-brand-50 px-2.5 py-1.5 font-medium text-brand-700 transition hover:bg-brand-100',
             };
             const gayaNomor = {
                 idle: 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[11px] font-bold text-slate-600',
                 aktif: 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/20 text-[11px] font-bold text-white',
-                selesai: 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-indigo-600 text-[11px] font-bold text-white',
+                selesai: 'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-brand-600 text-[11px] font-bold text-white',
             };
 
             const tandaiLangkah = (idAktif) => {

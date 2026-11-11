@@ -5,11 +5,11 @@ namespace App\Http\Requests\Publik;
 use App\Models\Laporan;
 use App\Models\Perumahan;
 use App\Models\PsuPerumahan;
-use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\TurnstileTerverifikasi;
+use App\Support\TurnstileKonfigurasi;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
-use App\Support\TurnstileKonfigurasi;
 
 class StoreLaporanRequest extends FormRequest
 {
@@ -51,7 +51,7 @@ class StoreLaporanRequest extends FormRequest
             'judul' => ['required', 'string', 'max:150'],
             'deskripsi' => ['required', 'string', 'max:2000'],
             'foto' => ['nullable', 'array', 'max:3'],
-            'foto.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:max_width=6000,max_height=6000'],
+            'foto.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=6000,max_height=6000'],
             // Titik GPS opsional dari pemilih peta: dua-duanya harus terisi bersamaan
             // (dicek di after()) dan berada dalam rentang nilai koordinat dunia.
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
@@ -111,7 +111,7 @@ class StoreLaporanRequest extends FormRequest
             'foto.min' => 'Laporan bangunan liar wajib melampirkan minimal 1 foto.',
             'foto.*.image' => 'Lampiran harus berupa gambar.',
             'foto.*.mimes' => 'Format foto harus JPG, PNG, atau WEBP.',
-            'foto.*.max' => 'Ukuran setiap foto maksimal 2 MB.',
+            'foto.*.max' => 'Ukuran setiap foto maksimal 5 MB.',
             'foto.*.dimensions' => 'Dimensi foto terlalu besar (maksimal 6000 × 6000 piksel).',
             'cf-turnstile-response.required' => 'Selesaikan verifikasi keamanan terlebih dahulu.',
             'kelurahan_id.required' => 'Kelurahan/kecamatan lokasi wajib dipilih.',

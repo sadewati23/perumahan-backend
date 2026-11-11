@@ -29,6 +29,10 @@
                class="rounded-lg border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-800 transition hover:bg-sky-100">
                 Lihat Peta
             </a>
+            <a href="{{ route('perumahan.import') }}"
+               class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100">
+                Impor CSV / Excel
+            </a>
             <a href="{{ route('perumahan.create') }}"
                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">
                 + Tambah Perumahan

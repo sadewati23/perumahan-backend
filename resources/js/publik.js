@@ -9,10 +9,16 @@
 import { initFlashMessages } from './umum/flash';
 import { initSubmitGuard } from './umum/form-submit';
 import { initFormFields } from './umum/form-fields';
-import { initFotoUpload } from './publik/foto-upload';
+import { initFotoUpload } from './umum/foto-upload';
 import { initCopyTicket } from './publik/copy-ticket';
 import { initHitungNaik } from './umum/hitung-naik';
 import { initRevealScroll } from './publik/reveal-scroll';
+import { initFilterOtomatis } from './publik/filter-otomatis';
+import { initFilterLipat } from './publik/filter-lipat';
+import { initNavBagian } from './publik/nav-bagian';
+import { initPetaDetail } from './publik/peta-detail';
+import { initLightbox } from './publik/lightbox';
+import { initKembaliAtas } from './publik/kembali-atas';
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Fondasi UI/UX: flash, anti klik ganda ---
@@ -27,4 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Animasi & util ---
     initRevealScroll();
     initHitungNaik();
+
+    // --- Halaman daftar & detail perumahan ---
+    initFilterOtomatis();
+    initFilterLipat();
+    initNavBagian();
+    initPetaDetail();
+    initLightbox();
+    initKembaliAtas();
 });

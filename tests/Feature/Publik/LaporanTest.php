@@ -6,11 +6,11 @@ use App\Models\Kecamatan;
 use App\Models\Kelurahan;
 use App\Models\Laporan;
 use App\Models\Perumahan;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
-use App\Models\User;
 
 class LaporanTest extends TestCase
 {
@@ -131,6 +131,90 @@ class LaporanTest extends TestCase
             Storage::disk('public')->assertExists($foto->path);
             $this->assertStringStartsWith('laporan/', $foto->path);
         }
+    }
+
+    public function test_foto_lebih_dari_dua_mb_diterima_dan_dikecilkan(): void
+    {
+        Storage::fake('public');
+        $perumahan = $this->buatPerumahan();
+
+        // Kasus umum foto iPhone: JPEG 2,5–6 MB yang sebelumnya digugurkan
+        // gerbang "maks 2 MB" tanpa sempat dikompres FotoBersih.
+        $file = UploadedFile::fake()->createWithContent(
+            'IMG_0001.jpg',
+            $this->buatJpegBerisik(3_500_000)
+        );
+
+        $this->post(route('lapor.store'), $this->dataLaporan($perumahan, ['foto' => [$file]]))
+            ->assertSessionHasNoErrors();
+
+        $laporan = Laporan::first();
+        $this->assertNotNull($laporan);
+        $this->assertCount(1, $laporan->fotos);
+
+        $path = $laporan->fotos[0]->path;
+        Storage::disk('public')->assertExists($path);
+
+        // Hasil simpan adalah re-encode FotoBersih: sisi terpanjang <= 1600 px
+        // (SISI_MAKS-nya private) dan ukuran jauh lebih kecil dari unggahan
+        // mentah yang > 3 MB.
+        $hasil = imagecreatefromstring(Storage::disk('public')->get($path));
+        $this->assertNotFalse($hasil);
+        $this->assertLessThanOrEqual(1600, max(imagesx($hasil), imagesy($hasil)));
+        imagedestroy($hasil);
+
+        $this->assertLessThan(1.5 * 1024 * 1024, Storage::disk('public')->size($path));
+    }
+
+    public function test_foto_lebih_dari_lima_mb_tetap_ditolak(): void
+    {
+        Storage::fake('public');
+        $perumahan = $this->buatPerumahan();
+
+        $file = UploadedFile::fake()->createWithContent(
+            'IMG_0002.jpg',
+            $this->buatJpegBerisik(6_000_000)
+        );
+
+        $this->post(route('lapor.store'), $this->dataLaporan($perumahan, ['foto' => [$file]]))
+            ->assertSessionHasErrors(['foto.0']);
+
+        $this->assertNull(Laporan::first());
+    }
+
+    /**
+     * JPEG berisik (blok warna acak, padat secara byte) dinaikkan ke ukuran
+     * target dengan byte pengisi di belakang data gambar — kasus umum berkas
+     * asli, dan tetap terbaca getimagesize/imagecreatefromjpeg.
+     */
+    private function buatJpegBerisik(int $targetBait): string
+    {
+        $img = imagecreatetruecolor(1000, 1000);
+
+        for ($y = 0; $y < 1000; $y += 8) {
+            for ($x = 0; $x < 1000; $x += 8) {
+                imagefilledrectangle(
+                    $img,
+                    $x,
+                    $y,
+                    $x + 7,
+                    $y + 7,
+                    imagecolorallocate($img, random_int(0, 255), random_int(0, 255), random_int(0, 255))
+                );
+            }
+        }
+
+        ob_start();
+        imagejpeg($img, null, 85);
+        imagedestroy($img);
+
+        $isi = (string) ob_get_clean();
+
+        if (strlen($isi) < $targetBait) {
+            $isi .= str_repeat('A', $targetBait - strlen($isi));
+        }
+
+        return $isi;
     }
 
     public function test_validasi_menolak_laporan_tidak_lengkap(): void

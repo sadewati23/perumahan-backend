@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\ResetPasswordNotification;
 use App\Support\SesiPengguna;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -109,7 +110,7 @@ class PatchKeamananTest extends TestCase
         $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->put(route('users.update', $user), $update)
             ->assertSessionHasNoErrors();
 
-        auth()->logout();
+        Auth::logout();
         foreach (['123456', 'password', 'Rahasia1', 'rahasiauji12345'] as $password) {
             $token = Password::createToken($user);
             $this->post(route('password.update'), [
@@ -253,7 +254,7 @@ class PatchKeamananTest extends TestCase
             ->assertSessionHasErrors('name');
         $this->assertStringNotContainsString('validation.', (string) session('errors')->first('name'));
 
-        auth()->logout();
+        Auth::logout();
         $this->post(route('password.email'), [])
             ->assertSessionHasErrors('email');
         $this->assertStringNotContainsString('validation.', (string) session('errors')->first('email'));

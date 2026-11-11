@@ -51,9 +51,14 @@
                             Jalankan <code>php artisan storage:link</code> di terminal, lalu muat ulang halaman ini.
                         </div>
                     @endunless
-                    <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png,.webp"
-                           class="input file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white">
-                    <p class="mt-1 text-xs text-slate-500">JPG, PNG, atau WEBP, maksimal 5 MB.</p>
+                    <div data-foto-upload data-maks="1" data-maks-ukuran="5120"
+                         data-tipe="image/jpeg,image/png,image/webp">
+                        <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
+                               class="input file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white">
+                        <ul data-foto-daftar class="mt-2 space-y-2"></ul>
+                        <p data-foto-pesan class="mt-1 text-xs font-medium" aria-live="polite"></p>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-500">JPG, PNG, atau WEBP, maksimal 5 MB — foto besar otomatis dikompres.</p>
                     @if ($perumahan->foto_url)
                         <x-foto-perumahan :perumahan="$perumahan" class="mt-3 h-32 w-48 rounded-lg ring-1 ring-slate-200" />
                     @endif

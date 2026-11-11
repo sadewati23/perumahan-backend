@@ -5,7 +5,7 @@ namespace Tests\Feature\Publik;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class ExampleTest extends TestCase
+class AksesDasarTest extends TestCase
 {
     use RefreshDatabase;
 
