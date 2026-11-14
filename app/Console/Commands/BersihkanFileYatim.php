@@ -8,32 +8,43 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Melaporkan (dan bila diminta menghapus) file foto yatim.
+ *
+ * Foto laporan kini disimpan di disk privat (`local`), sedangkan foto
+ * perumahan tetap di disk publik. Command ini memeriksa masing-masing
+ * folder pada disk yang benar agar tidak salah hapus.
+ */
 class BersihkanFileYatim extends Command
 {
     protected $signature = 'storage:bersihkan-yatim {--hapus} {--umur=24}';
 
-    protected $description = 'Melaporkan dan, bila diminta, menghapus file foto yatim pada disk public.';
+    protected $description = 'Melaporkan dan, bila diminta, menghapus file foto yatim pada disk yang sesuai.';
 
     public function handle(): int
     {
         $umur = filter_var($this->option('umur'), FILTER_VALIDATE_INT);
         $umur = $umur !== false && $umur >= 1 ? $umur : 24;
-        $disk = Storage::disk('public');
         $sekarang = time();
         $batas = $sekarang - ($umur * 3600);
 
         $rujukanLaporan = $this->rujukanLaporan();
         $rujukanPerumahan = $this->rujukanPerumahan();
+
+        $target = [
+            ['disk' => LaporanFoto::DISK, 'folder' => 'laporan', 'rujukan' => $rujukanLaporan],
+            ['disk' => 'public', 'folder' => 'perumahan', 'rujukan' => $rujukanPerumahan],
+        ];
+
         $fileYatim = [];
 
-        foreach ([
-            'laporan' => $rujukanLaporan,
-            'perumahan' => $rujukanPerumahan,
-        ] as $folder => $rujukan) {
-            foreach ($disk->allFiles($folder) as $path) {
+        foreach ($target as $item) {
+            $disk = Storage::disk($item['disk']);
+
+            foreach ($disk->allFiles($item['folder']) as $path) {
                 $path = $this->normalisasi($path);
 
-                if (isset($rujukan[$path])) {
+                if (isset($item['rujukan'][$path])) {
                     continue;
                 }
 
@@ -43,6 +54,7 @@ class BersihkanFileYatim extends Command
                 }
 
                 $fileYatim[] = [
+                    'disk' => $item['disk'],
                     'path' => $path,
                     'ukuran' => $disk->size($path),
                     'umur' => round(($sekarang - $modified) / 3600, 1),
@@ -51,8 +63,9 @@ class BersihkanFileYatim extends Command
         }
 
         $this->laporkanFileYatim($fileYatim, $umur);
-        $this->laporkanBerkasTakDikenal($disk);
-        $this->laporkanRujukanHilang($disk, $rujukanLaporan, $rujukanPerumahan);
+        $this->laporkanBerkasTakDikenal();
+        $this->laporkanSisaPublik();
+        $this->laporkanRujukanHilang($rujukanLaporan, $rujukanPerumahan);
 
         if (! $this->option('hapus')) {
             $this->info('Simulasi: tidak ada file yang dihapus. Gunakan --hapus untuk penghapusan nyata.');
@@ -64,17 +77,17 @@ class BersihkanFileYatim extends Command
         $gagal = 0;
         foreach ($fileYatim as $file) {
             try {
-                if (! $disk->delete($file['path'])) {
+                if (! Storage::disk($file['disk'])->delete($file['path'])) {
                     $gagal++;
-                    $this->error('Gagal menghapus: '.$file['path']);
+                    $this->error('Gagal menghapus: ['.$file['disk'].'] '.$file['path']);
                     continue;
                 }
 
                 $berhasil++;
-                $this->line('Dihapus: '.$file['path']);
+                $this->line('Dihapus: ['.$file['disk'].'] '.$file['path']);
             } catch (\Throwable) {
                 $gagal++;
-                $this->error('Gagal menghapus: '.$file['path']);
+                $this->error('Gagal menghapus: ['.$file['disk'].'] '.$file['path']);
             }
         }
 
@@ -100,13 +113,13 @@ class BersihkanFileYatim extends Command
         )->all();
     }
 
-    /** @param array<int, array{path: string, ukuran: int, umur: float}> $files */
+    /** @param array<int, array{disk: string, path: string, ukuran: int, umur: float}> $files */
     private function laporkanFileYatim(array $files, int $umur): void
     {
         $this->line("File yatim (lebih tua dari {$umur} jam):");
         if ($files !== []) {
-            $this->table(['path', 'ukuran', 'umur (jam)'], array_map(
-                fn (array $file): array => [$file['path'], $file['ukuran'].' byte', $file['umur']],
+            $this->table(['disk', 'path', 'ukuran', 'umur (jam)'], array_map(
+                fn (array $file): array => [$file['disk'], $file['path'], $file['ukuran'].' byte', $file['umur']],
                 $files
             ));
         } else {
@@ -116,11 +129,19 @@ class BersihkanFileYatim extends Command
         $this->info('Jumlah file yatim: '.count($files).'; total ukuran: '.array_sum(array_column($files, 'ukuran')).' byte.');
     }
 
-    private function laporkanBerkasTakDikenal($disk): void
+    private function laporkanBerkasTakDikenal(): void
     {
-        $takDikenal = collect($disk->allFiles(''))->map(fn (string $path): string => $this->normalisasi($path))
-            ->reject(fn (string $path): bool => str_starts_with($path, 'laporan/') || str_starts_with($path, 'perumahan/'))
-            ->values()->all();
+        $publik = collect(Storage::disk('public')->allFiles(''))
+            ->map(fn (string $path): string => $this->normalisasi($path))
+            ->reject(fn (string $path): bool => str_starts_with($path, 'perumahan/') || str_starts_with($path, 'laporan/'))
+            ->map(fn (string $path): string => 'public:'.$path);
+
+        $privat = collect(Storage::disk(LaporanFoto::DISK)->allFiles(''))
+            ->map(fn (string $path): string => $this->normalisasi($path))
+            ->reject(fn (string $path): bool => str_starts_with($path, 'laporan/'))
+            ->map(fn (string $path): string => LaporanFoto::DISK.':'.$path);
+
+        $takDikenal = $publik->merge($privat)->unique()->values()->all();
 
         $this->line('Berkas tak dikenal (tidak pernah dihapus):');
         foreach ($takDikenal as $path) {
@@ -131,18 +152,43 @@ class BersihkanFileYatim extends Command
         }
     }
 
+    /**
+     * Salinan foto laporan di disk publik tidak dihapus otomatis di sini:
+     * selama migrasi belum dijalankan, file itulah satu-satunya sumber foto.
+     */
+    private function laporkanSisaPublik(): void
+    {
+        $sisa = collect(Storage::disk('public')->allFiles('laporan'))
+            ->map(fn (string $path): string => $this->normalisasi($path))
+            ->values()
+            ->all();
+
+        $this->line('Sisa foto laporan di disk publik (tidak dihapus otomatis):');
+        if ($sisa === []) {
+            $this->line('Tidak ada.');
+        } else {
+            foreach ($sisa as $path) {
+                $this->line('- '.$path);
+            }
+            $this->warn('Jalankan `php artisan foto:pindahkan-ke-privat` untuk memindahkannya ke disk privat.');
+        }
+    }
+
     /** @param array<string, true> $laporan @param array<string, true> $perumahan */
-    private function laporkanRujukanHilang($disk, array $laporan, array $perumahan): void
+    private function laporkanRujukanHilang(array $laporan, array $perumahan): void
     {
         $hilang = [];
+        $diskLaporan = Storage::disk(LaporanFoto::DISK);
+        $diskPerumahan = Storage::disk('public');
+
         foreach (array_keys($laporan) as $path) {
-            if (! $disk->exists($path)) {
-                $hilang[] = ['sumber' => 'laporan_fotos.path', 'path' => $path];
+            if (! $diskLaporan->exists($path)) {
+                $hilang[] = ['sumber' => 'laporan_fotos.path ('.LaporanFoto::DISK.')', 'path' => $path];
             }
         }
         foreach (array_keys($perumahan) as $path) {
-            if (! $disk->exists($path)) {
-                $hilang[] = ['sumber' => 'perumahans.foto_path', 'path' => $path];
+            if (! $diskPerumahan->exists($path)) {
+                $hilang[] = ['sumber' => 'perumahans.foto_path (public)', 'path' => $path];
             }
         }
 

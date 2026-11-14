@@ -97,6 +97,15 @@ class Perumahan extends Model
         return $this->hasMany(TipeUnit::class);
     }
 
+    /**
+     * Laporan warga yang terkait. Dipakai command perumahan:cek-duplikat
+     * untuk menghitung dampak sebelum data duplikat dirapikan.
+     */
+    public function laporans(): HasMany
+    {
+        return $this->hasMany(Laporan::class);
+    }
+
     public function scopeFilter(Builder $query, array $filters): Builder
     {
         return $query

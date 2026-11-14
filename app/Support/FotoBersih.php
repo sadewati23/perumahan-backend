@@ -26,9 +26,12 @@ final class FotoBersih
      * Decode file asli, buang seluruh metadata (EXIF), lalu simpan hasil
      * encode ulang ke disk. Mengembalikan path relatif di disk tujuan.
      *
+     * Default disk adalah `local` (privat). Foto perumahan yang memang
+     * dipublikasikan harus meminta disk `public` secara eksplisit.
+     *
      * @throws RuntimeException bila tipe file bukan JPEG/PNG/WEBP atau GD gagal.
      */
-    public static function simpan(UploadedFile $file, string $folder = 'laporan', string $disk = 'public'): string
+    public static function simpan(UploadedFile $file, string $folder = 'laporan', string $disk = 'local'): string
     {
         $info = getimagesize($file->getRealPath());
 

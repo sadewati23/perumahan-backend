@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Kelurahan;
 use App\Models\Perumahan;
+use App\Support\NamaPerumahan;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -123,12 +125,28 @@ class PerumahanImportService
     {
         $barisData = $this->bacaBaris($file);
 
+        // Satu kueri untuk seluruh kunci yang sudah ada di database.
+        $kunciDatabase = $this->kunciDatabase();
+
         $kesalahan = [];
         $sisipan = [];
+        $kunciFile = [];
         foreach ($barisData as $i => $row) {
             $nomor = $i + 2; // +2: baris template ke-1 dipakai judul kolom
             try {
-                $sisipan[] = $this->validasiBaris($row);
+                $data = $this->validasiBaris($row, $kunciDatabase);
+
+                $kunci = $this->kunciDuplikat((string) $data['nama'], $data['kelurahan_id']);
+                if (isset($kunciFile[$kunci])) {
+                    throw ValidationException::withMessages(['file' => [sprintf(
+                        'Perumahan "%s" sudah ada pada baris %d file ini. Setiap perumahan hanya boleh muncul sekali pada kelurahan yang sama.',
+                        $data['nama'],
+                        $kunciFile[$kunci],
+                    )]]);
+                }
+                $kunciFile[$kunci] = $nomor;
+
+                $sisipan[] = $data;
             } catch (ValidationException $e) {
                 foreach (array_merge(...array_values($e->errors())) as $pesan) {
                     $kesalahan[] = sprintf('Baris %d: %s', $nomor, $pesan);
@@ -145,17 +163,56 @@ class PerumahanImportService
             ]);
         }
 
-        \DB::transaction(function () use ($sisipan): void {
-            foreach ($sisipan as $data) {
-                Perumahan::create($data);
-            }
-        });
+        try {
+            \DB::transaction(function () use ($sisipan): void {
+                foreach ($sisipan as $data) {
+                    Perumahan::create($data);
+                }
+            });
+        } catch (UniqueConstraintViolationException) {
+            // Balapan dengan permintaan lain yang menyimpan nama+kelurahan sama
+            // setelah validasi di atas. Semua baris sudah di-rollback.
+            throw ValidationException::withMessages([
+                'file' => 'Data perumahan bentrok dengan data yang baru saja ditambahkan pengguna lain, sehingga TIDAK ada data yang disimpan. Muat ulang halaman lalu unggah kembali.',
+            ]);
+        }
 
         return count($sisipan);
     }
 
+    /**
+     * Peta kunci (nama ternormalisasi + kelurahan_id) untuk data yang sudah ada.
+     * Dimuat sekali agar impor tidak menjalankan satu kueri per baris.
+     *
+     * @return array<string, array{nama: string, kelurahan: string}>
+     */
+    private function kunciDatabase(): array
+    {
+        $kunci = [];
+
+        Perumahan::query()
+            ->leftJoin('kelurahans', 'kelurahans.id', '=', 'perumahans.kelurahan_id')
+            ->select('perumahans.nama', 'perumahans.kelurahan_id', 'kelurahans.nama as kelurahan_nama')
+            ->orderBy('perumahans.id')
+            ->get()
+            ->each(function ($row) use (&$kunci): void {
+                $kunci[$this->kunciDuplikat((string) $row->nama, $row->kelurahan_id)]
+                    ??= [
+                        'nama' => (string) $row->nama,
+                        'kelurahan' => (string) ($row->kelurahan_nama ?? ''),
+                    ];
+            });
+
+        return $kunci;
+    }
+
+    private function kunciDuplikat(string $nama, int|string|null $kelurahanId): string
+    {
+        return NamaPerumahan::kunci($nama).'|'.($kelurahanId ?? '');
+    }
+
     /** Validasi & konversi nilai baris menjadi isi $fillable Perumahan. */
-    private function validasiBaris(array $row): array
+    private function validasiBaris(array $row, array $kunciDatabase): array
     {
         // Kolom yang tidak ada di header file tetap dianggap kosong.
         foreach (array_keys(self::KOLOM) as $field) {
@@ -163,7 +220,7 @@ class PerumahanImportService
         }
 
         $data = [
-            'nama' => $row['nama'] ?? null,
+            'nama' => NamaPerumahan::normalisasi($row['nama'] ?? null),
             'pengembang' => $row['pengembang'] ?: null,
             'alamat' => $row['alamat'] ?: null,
             'rt' => $this->potong($row['rt'] ?? null, 5),
@@ -237,6 +294,20 @@ class PerumahanImportService
 
         if ($gagal === []) {
             $gagal = $this->validasiTambahan($data);
+        }
+
+        // Duplikat terhadap database: nama sama (tanpa beda huruf/spasi) pada
+        // kelurahan yang sama. Pesannya menyebut data yang sudah ada.
+        if ($gagal === []) {
+            $kunci = $this->kunciDuplikat((string) $data['nama'], $data['kelurahan_id']);
+            if (isset($kunciDatabase[$kunci])) {
+                $ada = $kunciDatabase[$kunci];
+                $gagal[] = sprintf(
+                    'Perumahan "%s" sudah terdaftar pada kelurahan %s. Perumahan dengan nama sama tidak boleh diduplikasi pada kelurahan yang sama.',
+                    $ada['nama'],
+                    $ada['kelurahan'] !== '' ? $ada['kelurahan'] : 'yang dipilih',
+                );
+            }
         }
 
         if ($gagal !== []) {

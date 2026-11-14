@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Publik\StoreLaporanRequest;
 use App\Models\Kelurahan;
 use App\Models\Laporan;
+use App\Models\LaporanFoto;
 use App\Models\Perumahan;
 use App\Models\PsuPerumahan;
 use App\Support\FotoBersih;
@@ -79,7 +80,7 @@ class LaporanController extends Controller
         try {
             foreach ((array) $request->file('foto', []) as $foto) {
                 if ($foto && $foto->isValid()) {
-                    $paths[] = FotoBersih::simpan($foto);
+                    $paths[] = FotoBersih::simpan($foto, 'laporan', LaporanFoto::DISK);
                 }
             }
 
@@ -98,7 +99,7 @@ class LaporanController extends Controller
         } catch (\Throwable $e) {
             // Jangan tinggalkan file yatim di disk bila ada langkah yang gagal.
             if ($paths !== []) {
-                Storage::disk('public')->delete($paths);
+                Storage::disk(LaporanFoto::DISK)->delete($paths);
             }
 
             throw $e;

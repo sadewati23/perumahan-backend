@@ -113,6 +113,12 @@ class Laporan extends Model
         return $this->belongsTo(User::class, 'ditangani_oleh');
     }
 
+    /** Riwayat perubahan status, urut kronologis (paling lama lebih dulu). */
+    public function riwayats(): HasMany
+    {
+        return $this->hasMany(LaporanRiwayat::class)->orderBy('created_at')->orderBy('id');
+    }
+
     public function scopeFilter(Builder $query, array $filters): Builder
     {
         return $query
@@ -170,7 +176,7 @@ class Laporan extends Model
         DB::transaction(fn () => $this->delete());
         $gagal = [];
         foreach ($paths as $path) {
-            try { if (! Storage::disk('public')->delete($path)) $gagal[] = $path; } catch (\Throwable) { $gagal[] = $path; }
+            try { if (! Storage::disk(LaporanFoto::DISK)->delete($path)) $gagal[] = $path; } catch (\Throwable) { $gagal[] = $path; }
         }
         if ($gagal) Log::warning('laporan.file_yatim', ['path' => $gagal]);
     }

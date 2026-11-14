@@ -28,10 +28,10 @@ class LaporanWordTest extends TestCase
 
     public function test_admin_dapat_mengunduh_laporan_word(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $user = User::factory()->create(['role' => 'petugas']);
         $laporan = $this->laporan();
-        Storage::disk('public')->putFileAs('laporan', UploadedFile::fake()->image('uji.jpg'), 'uji.jpg');
+        Storage::disk('local')->putFileAs('laporan', UploadedFile::fake()->image('uji.jpg'), 'uji.jpg');
         LaporanFoto::create([
             'laporan_id' => $laporan->id,
             'path' => 'laporan/uji.jpg',

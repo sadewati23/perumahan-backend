@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#f1f5f9">
     <title>@yield('title', 'Dashboard') — {{ config('app.name') }}</title>
     @include('partials.favicon')
 
@@ -109,7 +110,7 @@
         </div>
     </aside>
 
-    <div class="flex min-h-screen flex-1 flex-col">
+    <div id="konten-utama" class="flex min-h-screen flex-1 flex-col">
         {{-- Topbar --}}
         <header class="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur lg:px-8">
             <div class="flex items-center gap-3">

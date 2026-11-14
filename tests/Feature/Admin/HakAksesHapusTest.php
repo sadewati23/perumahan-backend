@@ -88,7 +88,7 @@ class HakAksesHapusTest extends TestCase
 
     public function test_penghapusan_foto_perbaikan_mengikuti_pengunggah_atau_admin(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $petugas = $this->petugas();
         $orangLain = $this->petugas();
         $admin = $this->admin();
@@ -113,18 +113,18 @@ class HakAksesHapusTest extends TestCase
 
     public function test_hapus_perumahan_membersihkan_foto_laporan_miliknya_saja(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $milik = $this->perumahan('Milik');
         $lain = $this->perumahan('Lain');
         $fotoMilik = 'laporan/milik.jpg';
         $fotoLain = 'laporan/lain.jpg';
-        Storage::disk('public')->put($fotoMilik, 'foto');
-        Storage::disk('public')->put($fotoLain, 'foto');
+        Storage::disk('local')->put($fotoMilik, 'foto');
+        Storage::disk('local')->put($fotoLain, 'foto');
         $this->laporan($milik->id)->fotos()->create(['path' => $fotoMilik]);
         $this->laporan($lain->id)->fotos()->create(['path' => $fotoLain]);
 
         $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($this->admin())->delete(route('perumahan.destroy', $milik))->assertRedirect();
-        Storage::disk('public')->assertMissing($fotoMilik);
-        Storage::disk('public')->assertExists($fotoLain);
+        Storage::disk('local')->assertMissing($fotoMilik);
+        Storage::disk('local')->assertExists($fotoLain);
     }
 }

@@ -64,20 +64,20 @@ class LaporanPerbaikanController extends Controller
         try {
             foreach ($data['foto_perbaikan'] as $file) {
                 if ($file && $file->isValid()) {
-                    $paths[] = FotoBersih::simpan($file, 'laporan/perbaikan');
+                    $paths[] = FotoBersih::simpan($file, 'laporan/perbaikan', LaporanFoto::DISK);
                 }
             }
 
             $this->simpanDenganKuota($laporan, $data['keterangan'] ?? null, $paths);
         } catch (KuotaFotoTerlewati $e) {
             if ($paths !== []) {
-                Storage::disk('public')->delete($paths);
+                Storage::disk(LaporanFoto::DISK)->delete($paths);
             }
 
             return back()->with('error', $e->getMessage());
         } catch (Throwable $e) {
             if ($paths !== []) {
-                Storage::disk('public')->delete($paths);
+                Storage::disk(LaporanFoto::DISK)->delete($paths);
             }
 
             throw $e;
@@ -119,7 +119,7 @@ class LaporanPerbaikanController extends Controller
         }
         abort_unless(auth()->user()->isAdmin() || $foto->diunggah_oleh === auth()->id(), 403);
 
-        Storage::disk('public')->delete($foto->path);
+        Storage::disk(LaporanFoto::DISK)->delete($foto->path);
         $foto->delete();
 
         return back()->with('success', 'Satu foto hasil perbaikan dihapus dari laporan '.$laporan->kode.'.');

@@ -314,6 +314,31 @@
                         </li>
                     @endif
                 </ul>
+
+                <h3 class="mt-4 border-t border-slate-100 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Perubahan Status
+                </h3>
+                @if ($laporan->riwayats->isEmpty())
+                    <p class="mt-2">Belum ada perubahan status.</p>
+                @else
+                    <ol class="mt-2 space-y-3">
+                        @foreach ($laporan->riwayats as $riwayat)
+                            <li class="border-l-2 border-slate-200 pl-3">
+                                <p class="font-medium text-slate-700">
+                                    {{ $riwayat->label_status_lama }} &rarr; {{ $riwayat->label_status_baru }}
+                                </p>
+                                <p class="mt-0.5">
+                                    {{ $riwayat->created_at?->translatedFormat('d F Y, H:i') ?? '-' }} WIB
+                                    &middot; oleh
+                                    <span class="font-medium text-slate-700">{{ $riwayat->user->name ?? 'Pengguna tidak dikenal' }}</span>
+                                </p>
+                                @if ($riwayat->catatan)
+                                    <p class="mt-1 whitespace-pre-line text-slate-600">{{ $riwayat->catatan }}</p>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ol>
+                @endif
             </div>
         </div>
     </div>

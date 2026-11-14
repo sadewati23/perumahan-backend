@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Beranda') — {{ config('app.name') }}</title>
     @include('partials.favicon')
+    <meta name="theme-color" content="#fafafa">
     <meta name="description" content="@yield('description', 'Informasi data perumahan: lokasi, luasan lahan, jumlah unit, RTH, KDB/KDH, PSU, dan status perumahan.')">
 
     <link rel="preconnect" href="https://fonts.bunny.net">

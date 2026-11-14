@@ -37,6 +37,8 @@
                         </div>
 
                         <div class="flex items-center gap-3">
+                            {{-- ID field diberi prefix "ubah-m-" agar tidak bentrok dengan
+                                 form edit yang sama di tabel desktop (keduanya dirender di DOM). --}}
                             <details class="relative">
                                 <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
                                     Ubah
@@ -46,36 +48,36 @@
                                     @csrf
                                     @method('PUT')
                                     @php $popover = true; @endphp
-                                    <x-field name="name" for="ubah-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
-                                        <input id="ubah-{{ $user->id }}-name" type="text" name="name" value="{{ $user->name }}"
+                                    <x-field name="m-{{ $user->id }}-name" for="ubah-m-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
+                                        <input id="ubah-m-{{ $user->id }}-name" type="text" name="name" value="{{ $user->name }}"
                                                required autocomplete="name" class="input">
                                     </x-field>
-                                    <x-field name="username" for="ubah-{{ $user->id }}-username" label="Username" hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung." :show-errors="false">
-                                        <input id="ubah-{{ $user->id }}-username" type="text" name="username" value="{{ $user->username }}"
+                                    <x-field name="m-{{ $user->id }}-username" for="ubah-m-{{ $user->id }}-username" label="Username" hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung." :show-errors="false">
+                                        <input id="ubah-m-{{ $user->id }}-username" type="text" name="username" value="{{ $user->username }}"
                                                required autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" class="input">
                                     </x-field>
-                                    <x-field name="email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
-                                        <input id="ubah-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
+                                    <x-field name="m-{{ $user->id }}-email" for="ubah-m-{{ $user->id }}-email" label="Email" :show-errors="false">
+                                        <input id="ubah-m-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
                                                required autocomplete="email" enterkeyhint="done" class="input">
                                         <p class="text-xs text-slate-500">Dipakai untuk reset password.</p>
                                     </x-field>
-                                    <x-field name="role" for="ubah-{{ $user->id }}-role" label="Role" :show-errors="false">
-                                        <select id="ubah-{{ $user->id }}-role" name="role" class="input">
+                                    <x-field name="m-{{ $user->id }}-role" for="ubah-m-{{ $user->id }}-role" label="Role" :show-errors="false">
+                                        <select id="ubah-m-{{ $user->id }}-role" name="role" class="input">
                                             @foreach (\App\Models\User::ROLE as $value => $label)
                                                 <option value="{{ $value }}" @selected($user->role === $value)>{{ $label }}</option>
                                             @endforeach
                                         </select>
                                     </x-field>
-                                    <x-field name="jabatan" for="ubah-{{ $user->id }}-jabatan" label="Jabatan" optional :show-errors="false">
-                                        <input id="ubah-{{ $user->id }}-jabatan" type="text" name="jabatan" value="{{ $user->jabatan }}"
+                                    <x-field name="m-{{ $user->id }}-jabatan" for="ubah-m-{{ $user->id }}-jabatan" label="Jabatan" optional :show-errors="false">
+                                        <input id="ubah-m-{{ $user->id }}-jabatan" type="text" name="jabatan" value="{{ $user->jabatan }}"
                                                autocomplete="organization-title" class="input">
                                     </x-field>
-                                     <x-field name="password" for="ubah-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
-                                        <input id="ubah-{{ $user->id }}-password" type="password" name="password"
+                                     <x-field name="m-{{ $user->id }}-password" for="ubah-m-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
+                                        <input id="ubah-m-{{ $user->id }}-password" type="password" name="password"
                                                 autocomplete="new-password" class="input" placeholder="Minimal 12 karakter">
                                     </x-field>
-                                    <x-field name="password_confirmation" for="ubah-{{ $user->id }}-password-confirmation" label="Konfirmasi password" optional :show-errors="false">
-                                        <input id="ubah-{{ $user->id }}-password-confirmation" type="password" name="password_confirmation"
+                                    <x-field name="m-{{ $user->id }}-password_confirmation" for="ubah-m-{{ $user->id }}-password-confirmation" label="Konfirmasi password" optional :show-errors="false">
+                                        <input id="ubah-m-{{ $user->id }}-password-confirmation" type="password" name="password_confirmation"
                                                autocomplete="new-password" class="input">
                                     </x-field>
                                     <label class="flex min-h-11 items-center gap-2 text-xs text-slate-600">
@@ -133,6 +135,8 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end gap-2">
+                                        {{-- Key data-field diberi prefix "t-" agar id petunjuk (mis. *-petunjuk)
+                                             tidak bentrok dengan form "Tambah Pengguna" di kolom kanan. --}}
                                         <details class="relative">
                                             <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
                                                 Ubah
@@ -142,35 +146,35 @@
                                                 @csrf
                                                 @method('PUT')
                                                 @php $popover = true; @endphp
-                                                    <x-field name="name" for="ubah-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
+                                                    <x-field name="t-{{ $user->id }}-name" for="ubah-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-name" type="text" name="name" value="{{ $user->name }}"
                                                            required autocomplete="name" class="input">
                                                     </x-field>
-                                                    <x-field name="username" for="ubah-{{ $user->id }}-username" label="Username" hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung." :show-errors="false">
+                                                    <x-field name="t-{{ $user->id }}-username" for="ubah-{{ $user->id }}-username" label="Username" hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung." :show-errors="false">
                                                         <input id="ubah-{{ $user->id }}-username" type="text" name="username" value="{{ $user->username }}"
                                                                required autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" class="input">
                                                     </x-field>
-                                                    <x-field name="email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
+                                                    <x-field name="t-{{ $user->id }}-email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
                                                         <input id="ubah-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
                                                                required autocomplete="email" enterkeyhint="done" class="input">
                                                         <p class="text-xs text-slate-500">Dipakai untuk reset password.</p>
                                                 </x-field>
-                                                <x-field name="role" for="ubah-{{ $user->id }}-role" label="Role" :show-errors="false">
+                                                <x-field name="t-{{ $user->id }}-role" for="ubah-{{ $user->id }}-role" label="Role" :show-errors="false">
                                                     <select id="ubah-{{ $user->id }}-role" name="role" class="input">
                                                         @foreach (\App\Models\User::ROLE as $value => $label)
                                                             <option value="{{ $value }}" @selected($user->role === $value)>{{ $label }}</option>
                                                         @endforeach
                                                     </select>
                                                 </x-field>
-                                                <x-field name="jabatan" for="ubah-{{ $user->id }}-jabatan" label="Jabatan" optional :show-errors="false">
+                                                <x-field name="t-{{ $user->id }}-jabatan" for="ubah-{{ $user->id }}-jabatan" label="Jabatan" optional :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-jabatan" type="text" name="jabatan" value="{{ $user->jabatan }}"
                                                            autocomplete="organization-title" class="input">
                                                 </x-field>
-                                                 <x-field name="password" for="ubah-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
+                                                 <x-field name="t-{{ $user->id }}-password" for="ubah-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-password" type="password" name="password"
                                                         autocomplete="new-password" class="input" placeholder="Minimal 12 karakter">
                                                 </x-field>
-                                                <x-field name="password_confirmation" for="ubah-{{ $user->id }}-password-confirmation" label="Konfirmasi password" optional :show-errors="false">
+                                                <x-field name="t-{{ $user->id }}-password_confirmation" for="ubah-{{ $user->id }}-password-confirmation" label="Konfirmasi password" optional :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-password-confirmation" type="password" name="password_confirmation"
                                                            autocomplete="new-password" class="input">
                                                 </x-field>

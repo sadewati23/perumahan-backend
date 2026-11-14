@@ -37,13 +37,13 @@
 
             <form method="GET" class="mt-6 grid gap-3 md:grid-cols-4">
                 <div class="md:col-span-2">
-                    <label class="mb-1 block text-xs font-medium text-slate-600">Pencarian</label>
-                    <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nama perumahan / kelurahan / kecamatan..."
+                    <label for="filter-peta-q" class="mb-1 block text-xs font-medium text-slate-600">Pencarian</label>
+                    <input type="text" id="filter-peta-q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nama perumahan / kelurahan / kecamatan…"
                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-600">Kecamatan</label>
-                    <select name="kecamatan_id" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                    <label for="filter-peta-kecamatan" class="mb-1 block text-xs font-medium text-slate-600">Kecamatan</label>
+                    <select id="filter-peta-kecamatan" name="kecamatan_id" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
                         <option value="">Semua kecamatan</option>
                         @foreach ($kecamatans as $kecamatan)
                             <option value="{{ $kecamatan->id }}" @selected(($filters['kecamatan_id'] ?? '') == $kecamatan->id)>{{ $kecamatan->nama }}</option>
@@ -51,8 +51,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-600">Status</label>
-                    <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                    <label for="filter-peta-status" class="mb-1 block text-xs font-medium text-slate-600">Status</label>
+                    <select id="filter-peta-status" name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
                         <option value="">Semua status</option>
                         @foreach (\App\Models\Perumahan::STATUS as $value => $label)
                             <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
@@ -81,9 +81,10 @@
 
             <div class="order-1 space-y-4 lg:order-2">
                 <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <label class="mb-1 block text-xs font-medium text-slate-600">Saring daftar lokasi</label>
-                    <input type="text" id="cari-lokasi" placeholder="Ketik nama perumahan..."
-                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">                        <ul id="daftar-lokasi" class="no-scrollbar mt-3 max-h-80 divide-y divide-slate-100 overflow-y-auto text-sm">
+                    <label for="cari-lokasi" class="mb-1 block text-xs font-medium text-slate-600">Saring daftar lokasi</label>
+                    <input type="text" id="cari-lokasi" placeholder="Ketik nama perumahan…"
+                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+                    <ul id="daftar-lokasi" class="no-scrollbar mt-3 max-h-80 divide-y divide-slate-100 overflow-y-auto text-sm">
                         @foreach ($titik as $item)
                             <li data-cari="{{ strtolower($item['nama'].' '.$item['alamat']) }}">
                                 <button type="button" data-fokus="{{ $item['id'] }}"

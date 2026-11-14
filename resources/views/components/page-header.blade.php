@@ -26,10 +26,12 @@
         </nav>
     @endif
 
+    {{-- Judul halaman memakai h2 karena layouts/admin sudah menyediakan satu
+         h1 (sr-only) dengan teks yang sama — menghindari h1 ganda per halaman. --}}
     <div class="mt-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-xl font-semibold text-slate-900 sm:text-2xl">
+        <h2 class="text-xl font-semibold text-slate-900 sm:text-2xl">
             {{ $title }}
-        </h1>
+        </h2>
         @isset($actions)
             <div class="flex flex-wrap items-center gap-2">
                 {{ $actions }}

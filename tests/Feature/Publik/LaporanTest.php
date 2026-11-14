@@ -114,7 +114,7 @@ class LaporanTest extends TestCase
 
     public function test_laporan_bisa_melampirkan_foto_bukti(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $perumahan = $this->buatPerumahan();
 
         $this->post(route('lapor.store'), $this->dataLaporan($perumahan, [
@@ -128,14 +128,14 @@ class LaporanTest extends TestCase
 
         $this->assertCount(2, $laporan->fotos);
         foreach ($laporan->fotos as $foto) {
-            Storage::disk('public')->assertExists($foto->path);
+            Storage::disk('local')->assertExists($foto->path);
             $this->assertStringStartsWith('laporan/', $foto->path);
         }
     }
 
     public function test_foto_lebih_dari_dua_mb_diterima_dan_dikecilkan(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $perumahan = $this->buatPerumahan();
 
         // Kasus umum foto iPhone: JPEG 2,5–6 MB yang sebelumnya digugurkan
@@ -153,22 +153,22 @@ class LaporanTest extends TestCase
         $this->assertCount(1, $laporan->fotos);
 
         $path = $laporan->fotos[0]->path;
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('local')->assertExists($path);
 
         // Hasil simpan adalah re-encode FotoBersih: sisi terpanjang <= 1600 px
         // (SISI_MAKS-nya private) dan ukuran jauh lebih kecil dari unggahan
         // mentah yang > 3 MB.
-        $hasil = imagecreatefromstring(Storage::disk('public')->get($path));
+        $hasil = imagecreatefromstring(Storage::disk('local')->get($path));
         $this->assertNotFalse($hasil);
         $this->assertLessThanOrEqual(1600, max(imagesx($hasil), imagesy($hasil)));
         imagedestroy($hasil);
 
-        $this->assertLessThan(1.5 * 1024 * 1024, Storage::disk('public')->size($path));
+        $this->assertLessThan(1.5 * 1024 * 1024, Storage::disk('local')->size($path));
     }
 
     public function test_foto_lebih_dari_lima_mb_tetap_ditolak(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $perumahan = $this->buatPerumahan();
 
         $file = UploadedFile::fake()->createWithContent(
@@ -229,7 +229,7 @@ class LaporanTest extends TestCase
 
     public function test_menolak_lebih_dari_tiga_foto(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $perumahan = $this->buatPerumahan();
 
         $this->post(route('lapor.store'), $this->dataLaporan($perumahan, [
@@ -259,15 +259,15 @@ class LaporanTest extends TestCase
 
     public function test_hapus_laporan_juga_menghapus_foto_di_storage_dan_db(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $perumahan = $this->buatPerumahan();
         $laporan = Laporan::create($this->dataLaporan($perumahan) + ['kode' => Laporan::buatKode()]);
 
         // Upload dua foto, simpan path yang sama untuk verifikasi nanti.
         $foto1 = UploadedFile::fake()->image('bukti.jpg');
-        $pathFoto1 = $foto1->store('laporan', 'public');
+        $pathFoto1 = $foto1->store('laporan', 'local');
         $laporan->fotos()->create(['path' => $pathFoto1]);
-        $laporan->fotos()->create(['path' => UploadedFile::fake()->image('bukti2.png')->store('laporan', 'public')]);
+        $laporan->fotos()->create(['path' => UploadedFile::fake()->image('bukti2.png')->store('laporan', 'local')]);
 
         $this->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]));
 
@@ -280,7 +280,7 @@ class LaporanTest extends TestCase
         $this->assertDatabaseMissing('laporan_fotos', ['laporan_id' => $laporan->id]);
 
         // Foto dipindahkan dari storage public (tidak ada lagi di disk).
-        Storage::disk('public')->assertMissing($pathFoto1);
+        Storage::disk('local')->assertMissing($pathFoto1);
     }
 
     public function test_hapus_laporan_hanya_menghapus_laporan_bukan_perumahan(): void
@@ -331,7 +331,7 @@ class LaporanTest extends TestCase
 
     public function test_tabel_laporan_admin_menampilkan_detail_data_dari_warga(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $perumahan = $this->buatPerumahan();
 
         // Laporan kerusakan berfoto: foto wajib namun pengaduan tidak.
@@ -434,7 +434,7 @@ class LaporanTest extends TestCase
 
     public function test_pengaduan_bisa_menyertakan_perumahan_dan_foto_opsional(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $perumahan = $this->buatPerumahan();
 
         $this->post(route('lapor.store'), $this->dataPengaduan([
@@ -451,7 +451,7 @@ class LaporanTest extends TestCase
 
     public function test_publik_bisa_melaporkan_bangunan_liar_dengan_kelurahan_dan_foto(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $kelurahan = $this->buatKelurahan();
 
         $this->post(route('lapor.store'), $this->dataBangunanLiar([
@@ -499,7 +499,7 @@ class LaporanTest extends TestCase
 
     public function test_bangunan_liar_dengan_perumahan_mengikuti_kelurahan_perumahan(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $perumahan = $this->buatPerumahan();
         $kelurahanLain = $this->buatKelurahan('Kelurahan Lain', 'Kecamatan Lain');
 

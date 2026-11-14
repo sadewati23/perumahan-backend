@@ -128,6 +128,7 @@
                     Gunakan lokasi saya
                 </button>
             </div>
+            <p id="pesan-lokasi-saya" class="hidden mb-2 text-xs font-medium text-danger-600" role="status" aria-live="polite"></p>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <x-field name="latitude" label="Latitude" for="input-latitude" optional hint="Koordinat lintang, misal -6.9147440">

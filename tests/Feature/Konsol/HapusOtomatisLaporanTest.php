@@ -27,16 +27,16 @@ class HapusOtomatisLaporanTest extends TestCase
     private function foto(Laporan $laporan, string $path, string $tipe): void
     {
         LaporanFoto::create(['laporan_id' => $laporan->id, 'path' => $path, 'tipe' => $tipe]);
-        Storage::disk('public')->put($path, 'foto');
+        Storage::disk('local')->put($path, 'foto');
     }
 
     public function test_01_perintah_menghapus_laporan_dan_semua_foto(): void
     {
-        Storage::fake('public'); Carbon::setTestNow('2026-10-21 12:00'); config(['laporan.hapus_otomatis_sejak' => '2026-10-01']);
+        Storage::fake('local'); Carbon::setTestNow('2026-10-21 12:00'); config(['laporan.hapus_otomatis_sejak' => '2026-10-01']);
         $l = $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(3)->subMinute()]); $this->foto($l, 'a.jpg', 'laporan'); $this->foto($l, 'b.jpg', 'perbaikan');
         $lain = $this->laporan(); $this->foto($lain, 'lain.jpg', 'laporan');
         Artisan::call('laporan:hapus-kedaluwarsa');
-        $this->assertDatabaseMissing('laporans', ['id' => $l->id]); $this->assertDatabaseCount('laporan_fotos', 1); Storage::disk('public')->assertMissing('a.jpg'); Storage::disk('public')->assertMissing('b.jpg'); Storage::disk('public')->assertExists('lain.jpg');
+        $this->assertDatabaseMissing('laporans', ['id' => $l->id]); $this->assertDatabaseCount('laporan_fotos', 1); Storage::disk('local')->assertMissing('a.jpg'); Storage::disk('local')->assertMissing('b.jpg'); Storage::disk('local')->assertExists('lain.jpg');
     }
 
     public function test_02_tidak_menghapus_status_tidak_selesai_ditahan_atau_null(): void
@@ -116,7 +116,7 @@ class HapusOtomatisLaporanTest extends TestCase
 
     public function test_14_destroy_manual_menghapus_semua_file(): void
     {
-        Storage::fake('public'); $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]); $l = $this->laporan(); $this->foto($l, 'manual.jpg', 'laporan'); $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->delete(route('laporan.destroy', $l))->assertRedirect(route('laporan.index')); $this->assertDatabaseMissing('laporans', ['id' => $l->id]); Storage::disk('public')->assertMissing('manual.jpg');
+        Storage::fake('local'); $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]); $l = $this->laporan(); $this->foto($l, 'manual.jpg', 'laporan'); $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->delete(route('laporan.destroy', $l))->assertRedirect(route('laporan.index')); $this->assertDatabaseMissing('laporans', ['id' => $l->id]); Storage::disk('local')->assertMissing('manual.jpg');
     }
 
     public function test_peringatan_sejak_kosong_muncul_di_dry_run_dan_normal(): void

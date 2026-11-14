@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
+use App\Models\LaporanFoto;
 use App\Models\Perumahan;
 use App\Services\DashboardStatistikService;
 use App\Support\FilterQuery;
@@ -11,8 +12,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LaporanController extends Controller
 {
@@ -52,6 +55,7 @@ class LaporanController extends Controller
             'fotosLaporan',
             'fotosPerbaikan.pengunggah',
             'penangan',
+            'riwayats.user',
         ]);
 
         return view('admin.laporan.show', compact('laporan'));
@@ -70,15 +74,29 @@ class LaporanController extends Controller
         ]);
 
         $data['jangan_hapus_otomatis'] = $request->boolean('jangan_hapus_otomatis');
-        $laporan->update($data + [
-            'ditangani_oleh' => auth()->id(),
-            'ditangani_pada' => now(),
-            // Timestamp selesai diunci pada pertama kali ditandai selesai;
-            // kembali ke status lain mengosongkannya kembali.
-            'selesai_pada' => $data['status'] === 'selesai'
-                ? ($laporan->selesai_pada ?? now())
-                : null,
-        ]);
+
+        DB::transaction(function () use ($laporan, $data, $statusSebelumnya): void {
+            $laporan->update($data + [
+                'ditangani_oleh' => auth()->id(),
+                'ditangani_pada' => now(),
+                // Timestamp selesai diunci pada pertama kali ditandai selesai;
+                // kembali ke status lain mengosongkannya kembali.
+                'selesai_pada' => $data['status'] === 'selesai'
+                    ? ($laporan->selesai_pada ?? now())
+                    : null,
+            ]);
+
+            // Catat hanya saat status benar-benar berubah; perubahan catatan
+            // saja tidak membuat baris riwayat baru.
+            if ($statusSebelumnya !== $data['status']) {
+                $laporan->riwayats()->create([
+                    'user_id' => auth()->id(),
+                    'status_lama' => $statusSebelumnya,
+                    'status_baru' => $data['status'],
+                    'catatan' => $data['catatan_petugas'] ?? null,
+                ]);
+            }
+        });
 
         // Statistik dashboard & badge sidebar tergantung status laporan → reset cache.
         Cache::forget(Laporan::CACHE_BAIK_BARU);
@@ -210,9 +228,30 @@ class LaporanController extends Controller
             ->header('Content-Disposition', 'attachment; filename="rekap-laporan.doc"');
     }
 
+    /**
+     * Sajikan satu foto laporan dari disk privat. Hanya untuk pengguna login.
+     *
+     * Foto wajib benar-benar milik laporan pada URL — mencegah penebakan ID
+     * foto milik laporan lain. Header no-store + nosniff menjaga foto tidak
+     * tersimpan di cache bersama dan tidak disalahartikan tipe kontennya.
+     */
+    public function foto(Laporan $laporan, LaporanFoto $foto): StreamedResponse
+    {
+        abort_unless($foto->laporan_id === $laporan->id, 404);
+        abort_if(str_contains($foto->path, '..'), 404);
+
+        $disk = Storage::disk(LaporanFoto::DISK);
+        abort_unless($disk->exists($foto->path), 404);
+
+        return $disk->response($foto->path, null, [
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     private function gambarUntukWord(string $path): ?string
     {
-        $disk = Storage::disk('public');
+        $disk = Storage::disk(LaporanFoto::DISK);
 
         if (! $disk->exists($path)) {
             return null;

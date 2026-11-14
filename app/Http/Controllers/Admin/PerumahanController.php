@@ -6,16 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ImportPerumahanRequest;
 use App\Http\Requests\Admin\StorePerumahanRequest;
 use App\Models\Kecamatan;
+use App\Models\Kelurahan;
 use App\Models\Laporan;
 use App\Models\LaporanFoto;
 use App\Models\Perumahan;
 use App\Services\DashboardStatistikService;
 use App\Services\PerumahanImportService;
 use App\Services\PerumahanPetaService;
+use App\Support\NamaPerumahan;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Support\FilterQuery;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -69,7 +72,7 @@ class PerumahanController extends Controller
         $fotoPath = null;
         if ($request->hasFile('foto')) {
             try {
-                $fotoPath = \App\Support\FotoBersih::simpan($request->file('foto'), 'perumahan');
+                $fotoPath = \App\Support\FotoBersih::simpan($request->file('foto'), 'perumahan', 'public');
             } catch (\RuntimeException) {
                 throw ValidationException::withMessages([
                     'foto' => 'Foto tidak dapat diproses. Gunakan file JPG, PNG, atau WEBP yang valid.',
@@ -88,6 +91,14 @@ class PerumahanController extends Controller
 
                 return $perumahan;
             });
+        } catch (UniqueConstraintViolationException $exception) {
+            // Balapan dua permintaan bersamaan: unique index menangkap duplikat
+            // yang lolos dari validasi. Kembalikan sebagai pesan validasi, bukan 500.
+            if ($fotoPath) {
+                Storage::disk('public')->delete($fotoPath);
+            }
+
+            throw $this->galatDuplikat($data['nama'], (int) $data['kelurahan_id']);
         } catch (\Throwable $exception) {
             if ($fotoPath) {
                 Storage::disk('public')->delete($fotoPath);
@@ -128,7 +139,7 @@ class PerumahanController extends Controller
         $fotoPath = null;
         if ($request->hasFile('foto')) {
             try {
-                $fotoPath = \App\Support\FotoBersih::simpan($request->file('foto'), 'perumahan');
+                $fotoPath = \App\Support\FotoBersih::simpan($request->file('foto'), 'perumahan', 'public');
             } catch (\RuntimeException) {
                 throw ValidationException::withMessages([
                     'foto' => 'Foto tidak dapat diproses. Gunakan file JPG, PNG, atau WEBP yang valid.',
@@ -145,6 +156,12 @@ class PerumahanController extends Controller
                 $perumahan->update($data);
                 $this->syncDetail($perumahan, $request);
             });
+        } catch (UniqueConstraintViolationException $exception) {
+            if ($fotoPath) {
+                Storage::disk('public')->delete($fotoPath);
+            }
+
+            throw $this->galatDuplikat($data['nama'], (int) $data['kelurahan_id'], $perumahan->getKey());
         } catch (\Throwable $exception) {
             if ($fotoPath) {
                 Storage::disk('public')->delete($fotoPath);
@@ -163,21 +180,49 @@ class PerumahanController extends Controller
             ->with('success', 'Data perumahan "'.$perumahan->nama.'" berhasil diperbarui.');
     }
 
+    /**
+     * Pesan validasi untuk bentrok unique index (nama + kelurahan_id).
+     * Record baru tidak disimpan; pengguna diminta memilih nama/kelurahan lain.
+     */
+    private function galatDuplikat(string $nama, int $kelurahanId, ?int $kecualiId = null): ValidationException
+    {
+        $bentrok = Perumahan::query()
+            ->where('kelurahan_id', $kelurahanId)
+            ->when($kecualiId !== null, fn ($query) => $query->where('id', '!=', $kecualiId))
+            ->get(['id', 'nama'])
+            ->first(fn (Perumahan $perumahan) => NamaPerumahan::sama($perumahan->nama, $nama));
+
+        $kelurahan = Kelurahan::with('kecamatan')->find($kelurahanId);
+
+        return ValidationException::withMessages([
+            'nama' => sprintf(
+                '%s sudah terdaftar di %s. Gunakan nama lain atau pilih kelurahan yang berbeda.',
+                $bentrok ? 'Perumahan "'.$bentrok->nama.'"' : 'Perumahan dengan nama tersebut',
+                $kelurahan?->nama_lengkap ?? 'kelurahan yang dipilih',
+            ),
+        ]);
+    }
+
     public function destroy(Perumahan $perumahan): RedirectResponse
     {
         $nama = $perumahan->nama;
-        $paths = LaporanFoto::whereIn(
+        $fotoPerumahan = $perumahan->foto_path;
+        $pathsLaporan = LaporanFoto::whereIn(
             'laporan_id',
             Laporan::where('perumahan_id', $perumahan->id)->select('id'),
-        )->pluck('path')->all();
-        if ($perumahan->foto_path) {
-            $paths[] = $perumahan->foto_path;
-        }
+        )->pluck('path')->filter()->values()->all();
 
         // Hard delete permanen: baris induk dihapus, psu_perumahans &
         // tipe_units ikut terhapus lewat foreign key cascadeOnDelete().
         DB::transaction(fn () => $perumahan->delete());
-        Storage::disk('public')->delete($paths);
+
+        // Foto laporan berada di disk privat, foto perumahan tetap di disk publik.
+        if ($pathsLaporan !== []) {
+            Storage::disk(LaporanFoto::DISK)->delete($pathsLaporan);
+        }
+        if ($fotoPerumahan) {
+            Storage::disk('public')->delete($fotoPerumahan);
+        }
 
         $this->peta->hapusCache();
         Cache::forget(DashboardStatistikService::CACHE_KEY);

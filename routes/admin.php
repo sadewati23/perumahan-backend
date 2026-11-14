@@ -54,6 +54,9 @@ Route::middleware(['auth', 'active', 'tanpa-cache'])->prefix('admin')->group(fun
     Route::post('/laporan/{laporan}/foto-perbaikan', [LaporanPerbaikanController::class, 'store'])->name('laporan.foto-perbaikan.store');
     Route::delete('/laporan/{laporan}/foto-perbaikan/{foto}', [LaporanPerbaikanController::class, 'destroy'])->name('laporan.foto-perbaikan.destroy');
 
+    // Penyajian foto laporan dari disk privat (butuh login + akun aktif).
+    Route::get('/laporan/{laporan}/foto/{foto}', [LaporanController::class, 'foto'])->name('laporan.foto');
+
     Route::get('/laporan/{laporan}', [LaporanController::class, 'show'])->name('laporan.show');
     Route::put('/laporan/{laporan}', [LaporanController::class, 'update'])->name('laporan.update');
     Route::delete('/laporan/{laporan}', [LaporanController::class, 'destroy'])->name('laporan.destroy')->middleware(['role:admin', 'simpan-tujuan-konfirmasi', 'password.confirm']);

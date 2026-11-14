@@ -23,6 +23,8 @@ Dokumentasi riwayat pekerjaan pada proyek ini, mencatat setiap perubahan fitur y
 | 2026-10-06 | Perbaikan Stored XSS popup peta | Nilai perumahan (nama/alamat/status) yang diinterpolasi ke HTML popup Leaflet kini di-escape di 3 halaman peta (penemuan user) |
 | 2026-10-12 | SRI pada CDN Leaflet & Chart.js | Tag CDN di 8 view kini pakai `integrity` + `crossorigin` agar browser memverifikasi checksum file eksternal (penemuan user) |
 | 2026-10-27 | Animasi situs & perbaikan hapus laporan | Animasi transform/opacity publik-admin, count-up statistik, reduced-motion, print guard, serta perbaikan tombol hapus di dashboard dan admin/laporan |
+| 2026-11-12 | Audit & perbaikan UI/UX admin (Web Interface Guidelines) | 4 perbaikan prioritas: ID duplikat di manajemen pengguna, drawer sidebar (Escape + fokus + inert), h1 ganda, dan penggantian `alert()` geolokasi dengan pesan inline |
+| 2026-11-12 | Audit & perbaikan UI/UX publik (Web Interface Guidelines) | Label filter peta terasosiasi, label pencarian hero, placeholder `…`, `theme-color`, rapikan markup daftar lokasi |
 
 ---
 
@@ -498,3 +500,123 @@ tipe_units
 - Admin & dashboard: topbar breadcrumb + menu pengguna, sidebar berkelompok, KPI dashboard + panel laporan menunggu penanganan, chart aksesibel.
 - Publik: hero CTA lapor/peta, lapor/form kartu radio, halaman sukses dengan salin tiket, placeholder gambar, bobot aksesibilitas.
 - Audit CSS/JS lintas halaman; npm run build dan php artisan test lulus.
+
+---
+
+## 2026-11-12 — Perbaikan UI/UX Admin Berdasarkan Web Interface Guidelines
+
+Sumber: audit halaman admin (layout, dashboard, users, perumahan, laporan, login) terhadap [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines). Hanya 4 temuan prioritas yang diperbaiki; **tidak ada logic aplikasi (controller, model, route, name field POST) yang diubah.**
+
+### 1. ID Elemen Duplikat — Manajemen Pengguna
+
+**Masalah:** kartu mobile dan tabel desktop sama-sama dirender di DOM (disembunyikan via CSS), sehingga form edit pengguna punya ID ganda (`ubah-1-name`, dst.) dan id petunjuk `x-field` (`username-petunjuk`, `password-petunjuk`) bentrok 3 kali dalam satu halaman. Akibatnya `<label for>` di tabel desktop menunjuk ke input milik kartu mobile.
+
+| | Sebelum | Sesudah |
+|---|---|---|
+| Form edit di kartu mobile | `id="ubah-1-name"` (duplikat dengan tabel) | `id="ubah-m-1-name"` + key `data-field="m-1-name"` |
+| Form edit di tabel desktop | `id="ubah-1-name"` (duplikat) | `id="ubah-1-name"` (tetap) + key `data-field="t-1-name"` |
+| Id petunjuk (`*-petunjuk`) | `username-petunjuk` ×3 (bentrok) | `m-1-username-petunjuk`, `t-1-username-petunjuk`, `username-petunjuk` (unik) |
+| Atribut `name` input (POST) | `name="username"` | **Tidak diubah** — data terkirim tetap identik |
+
+**File:** `resources/views/admin/users/index.blade.php`
+
+### 2. Drawer Sidebar Tanpa Escape & Manajemen Fokus
+
+**Masalah:** drawer sidebar di layar kecil tidak bisa ditutup dengan tombol Escape, fokus tidak dipindah ke dalam drawer saat dibuka, tidak dikembalikan ke tombol pembuka saat ditutup, dan Tab masih bisa lolos ke konten di belakang backdrop.
+
+| | Sebelum | Sesudah |
+|---|---|---|
+| Tombol Escape | — | Menutup drawer (hanya mode drawer ≤1023px) |
+| Fokus saat buka | tetap di tombol hamburger | dipindah ke kontrol pertama di sidebar |
+| Fokus saat tutup | hilang | dikembalikan ke elemen pembuka terakhir |
+| Konten utama | masih bisa di-Tab saat drawer terbuka | `inert` saat drawer aktif di layar kecil |
+
+**File:** `resources/js/admin/sidebar.js`, `resources/views/layouts/admin.blade.php` (tambahan `id="konten-utama"` saja)
+
+### 3. H1 Ganda per Halaman
+
+**Masalah:** `layouts/admin` merender `<h1 class="sr-only">` (dipakai dashboard yang tidak punya judul terlihat), sementara komponen `x-page-header` juga merender `<h1>` — halaman ber-page-header punya dua h1.
+
+| | Sebelum | Sesudah |
+|---|---|---|
+| Layout admin | `<h1 class="sr-only">Judul</h1>` | Tetap — satu-satunya h1 |
+| `x-page-header` | `<h1>Judul</h1>` (h1 ganda) | `<h2>Judul</h2>` — gaya visual tidak berubah |
+
+**File:** `resources/views/components/page-header.blade.php`
+
+### 4. `alert()` pada Geolokasi Form Perumahan
+
+**Masalah:** kegagalan geolokasi memakai `alert()` yang memblokir interaksi dan tidak bisa di-styling. Diganti pesan inline ber-`aria-live="polite"` di bawah tombol, dengan saran langkah berikutnya.
+
+| | Sebelum | Sesudah |
+|---|---|---|
+| Browser tanpa geolokasi | `alert('Browser tidak mendukung geolokasi.')` | Pesan inline + saran "Gunakan klik peta" |
+| Izin lokasi gagal | `alert('Gagal mengambil lokasi. …')` | Pesan inline + saran "coba lagi atau klik peta manual" |
+| Logic titik koordinat (`setPoint`) | — | **Tidak diubah** |
+
+**File:** `resources/views/admin/perumahan/_form.blade.php`, `resources/views/admin/perumahan/_form-scripts.blade.php`
+
+### Temuan Tertunda (belum diperbaiki)
+
+- Menu pengguna `<details>` di topbar belum bisa ditutup dengan Escape/klik luar.
+- Ikon pin GIS di tabel perumahan hanya memakai `title` (tidak dibaca screen reader).
+- `window.confirm` fallback di `confirm-dialog.js:87` dan `laporan/show.blade.php:354` (dipertahankan karena hanya fallback bila dialog custom gagal).
+- Tombol "Hapus" di daftar pengguna target sentuh < 44px.
+- Input filter memakai `focus:` alih-alih `focus-visible:`.
+
+### Verifikasi
+
+- `npm run build` lulus (Vite, 20 modul).
+- Tidak ada perubahan pada controller, model, route, atau atribut `name` form POST.
+
+---
+
+## 2026-11-12 — Perbaikan UI/UX Area Publik Berdasarkan Web Interface Guidelines
+
+Audit lanjutan untuk halaman publik (beranda, daftar, peta, lapor, cek status) dengan pedoman yang sama. Kualitas sudah tinggi (skip link, XSS-escape popup peta, honeypot, reduced-motion, `scroll-mt` pada langkah form) sehingga perbaikan berfokus pada celah aksesibilitas kecil. **Tidak ada logic yang diubah.**
+
+### 1. Label Filter Peta Tidak Terasosiasi dengan Kontrolnya
+
+**Masalah:** 4 label di `publik/peta` dirender terpisah dari input/select tanpa `for`/`id` — klik label tidak memfokuskan kontrol, dan pembaca layar tidak mengumumkan labelnya.
+
+| Kontrol | Sebelum | Sesudah |
+|---|---|---|
+| Pencarian | `<label>` tanpa `for`, input tanpa `id` | `for="filter-peta-q"` + `id="filter-peta-q"` |
+| Kecamatan | `<label>` tanpa `for` | `for="filter-peta-kecamatan"` + `id="filter-peta-kecamatan"` |
+| Status | `<label>` tanpa `for` | `for="filter-peta-status"` + `id="filter-peta-status"` |
+| Saring daftar lokasi | `<label>` tanpa `for` (input sudah ber-id) | `for="cari-lokasi"` |
+
+**File:** `resources/views/publik/peta.blade.php`
+
+### 2. Input Pencarian Hero Tanpa Label & Placeholder `...`
+
+| Lokasi | Sebelum | Sesudah |
+|---|---|---|
+| Beranda hero (`beranda.blade.php:43`) | `<input type="text" name="q">` tanpa label/aria-label | `aria-label="Cari perumahan"` + `enterkeyhint="search"` |
+| Placeholder `beranda` | `Cari nama perumahan...` | `Cari nama perumahan…` |
+| Placeholder `index.blade.php:94` | `...kecamatan...` | `…kecamatan…` |
+| Placeholder `peta.blade.php:41` | `...kecamatan...` | `…kecamatan…` |
+| Placeholder `peta.blade.php:85` | `Ketik nama perumahan...` | `Ketik nama perumahan…` |
+
+### 3. Atribut Redundan & Markup
+
+| Lokasi | Sebelum | Sesudah |
+|---|---|---|
+| `peta.blade.php:86` | tag `</input>` dan `<ul>` menempel di satu baris | Baris dipisah agar terbaca |
+| `layouts/publik.blade.php` | tanpa `theme-color` | `<meta name="theme-color" content="#fafafa">` (match `bg-neutral-50`) |
+| `layouts/admin.blade.php` | tanpa `theme-color` | `<meta name="theme-color" content="#f1f5f9">` (match `bg-slate-100`) |
+
+> Catatan: `aria-label` pada `<p>` statistik beranda awalnya dihapus, lalu dikembalikan karena
+> `Tests\Feature\Konfigurasi\AnimasiTest` mengunci markup persis elemen `data-hitung` (keputusan
+> desain yang sudah ada dan dijaga test) — sesuai prinsip tidak mengubah logic yang berjalan.
+
+### Temuan Tertunda Publik (belum diperbaiki)
+
+- Ikon legenda titik di `peta.blade.php:28-30` tanpa `aria-hidden="true"` (bersifat dekoratif).
+- Input filter masih `outline-none` dengan `focus:` alih-alih `focus-visible:`.
+- Halaman status laporan (`lapor/status.blade.php`) memakai teks "Diterima → Diproses → Selesai" — bisa ditingkatkan menjadi stepper visual pada iterasi berikutnya.
+
+### Verifikasi
+
+- Perubahan bersifat atribut/markup; `npm run build` tidak terpengaruh (tidak ada perubahan JS).
+- `php artisan test`: 225 lulus setelah `aria-label` statistik dikembalikan (dijaga oleh `AnimasiTest`).

@@ -93,7 +93,7 @@ class KeamananLaporanTest extends TestCase
 
     public function test_exif_foto_dibuang_saat_dengan_reencode(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         // JPEG valid dari GD (sebagai gambar HP sintetik).
         $img = imagecreatetruecolor(20, 20);
@@ -127,7 +127,7 @@ class KeamananLaporanTest extends TestCase
         $this->assertStringStartsWith('laporan/', $foto->path);
 
         // Isi file tersimpan adalah hasil encode ulang PHP: EXIF/GPS asli harus hilang.
-        $isi = Storage::disk('public')->get($foto->path);
+        $isi = Storage::disk('local')->get($foto->path);
         $this->assertStringNotContainsString('GPSLatitude-RAHASIA', $isi);
         $this->assertStringNotContainsString('Exif', $isi);
     }

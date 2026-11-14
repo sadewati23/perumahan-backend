@@ -48,7 +48,7 @@ class LaporanPerbaikanTest extends TestCase
     /** @test */
     public function petugas_bisa_upload_foto_perbaikan_dan_tercatat_tepat(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $petugas = $this->petugas();
         $laporan = $this->buatLaporan();
         $this->tandaiBuktiPelapor($laporan);
@@ -67,7 +67,7 @@ class LaporanPerbaikanTest extends TestCase
         $this->assertSame($petugas->id, $foto->diunggah_oleh);
         $this->assertSame('PJU blok C diganti tegangan baru', $foto->keterangan);
         $this->assertStringStartsWith('laporan/perbaikan/', $foto->path);
-        $this->assertTrue(Storage::disk('public')->exists($foto->path));
+        $this->assertTrue(Storage::disk('local')->exists($foto->path));
 
         // Foto perbaikan TIDAK masuk kartu foto bukti warga.
         $laporan->refresh();
@@ -78,7 +78,7 @@ class LaporanPerbaikanTest extends TestCase
     /** @test */
     public function tamu_dan_akun_nonaktif_ditolak(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $laporan = $this->buatLaporan();
 
         // Tamu diarahkan ke login.
@@ -99,7 +99,7 @@ class LaporanPerbaikanTest extends TestCase
     /** @test */
     public function status_ditolak_menolak_upload(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $laporan = $this->buatLaporan(['status' => 'ditolak']);
 
         $this->actingAs($this->petugas())
@@ -113,7 +113,7 @@ class LaporanPerbaikanTest extends TestCase
     /** @test */
     public function file_non_gambar_lebih_dari_5_dan_lebih_dari_10_ditolak(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $petugas = $this->petugas();
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         $laporan = $this->buatLaporan();
@@ -158,7 +158,7 @@ class LaporanPerbaikanTest extends TestCase
     /** @test */
     public function hapus_foto_perbaikan_dan_guard_idor_bekerja(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $petugas = $this->petugas();
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         $laporan = $this->buatLaporan();
@@ -173,24 +173,24 @@ class LaporanPerbaikanTest extends TestCase
             ->where('laporan_id', $laporan->id)
             ->firstOrFail();
         $path = $foto->path;
-        $this->assertTrue(Storage::disk('public')->exists($path));
+        $this->assertTrue(Storage::disk('local')->exists($path));
 
         // Hapus foto perbaikan menghapus file + baris.
         $this->actingAs($admin)
             ->delete(route('laporan.foto-perbaikan.destroy', [$laporan, $foto]))
             ->assertRedirect();
 
-        $this->assertFalse(Storage::disk('public')->exists($path));
+        $this->assertFalse(Storage::disk('local')->exists($path));
         $this->assertNull(LaporanFoto::find($foto->id));
 
         // FOTO BUKTI WARGA dilindungi: rute hapus menolak dengan 404.
         $buktiWarga = $this->tandaiBuktiPelapor($laporan);
-        Storage::disk('public')->put($buktiWarga->path, 'data-warga');
+        Storage::disk('local')->put($buktiWarga->path, 'data-warga');
 
         $this->actingAs($admin)
             ->delete(route('laporan.foto-perbaikan.destroy', [$laporan, $buktiWarga]))
             ->assertStatus(404); // abort(404) di controller: cegah IDOR & hapus foto bukti warga
-        $this->assertTrue(Storage::disk('public')->exists($buktiWarga->path));
+        $this->assertTrue(Storage::disk('local')->exists($buktiWarga->path));
         $this->assertNotNull(LaporanFoto::find($buktiWarga->id));
 
         // Foto milik LAPORAN LAIN juga ditolak 404.
@@ -253,7 +253,7 @@ class LaporanPerbaikanTest extends TestCase
     /** @test */
     public function halaman_cetak_benar(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $petugas = $this->petugas();
         $laporan = $this->buatLaporan([
             'nama_pelapor' => "<script>alert(1)</script>",
@@ -321,7 +321,7 @@ class LaporanPerbaikanTest extends TestCase
     /** @test */
     public function hapus_laporan_ikut_menghapus_foto_perbaikan(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $petugas = $this->petugas();
         $laporan = $this->buatLaporan();
 
@@ -332,16 +332,16 @@ class LaporanPerbaikanTest extends TestCase
 
         $foto = LaporanFoto::query()->where('tipe', LaporanFoto::TIPE_PERBAIKAN)->firstOrFail();
         $buktiWarga = $this->tandaiBuktiPelapor($laporan);
-        Storage::disk('public')->put($buktiWarga->path, 'data-warga');
+        Storage::disk('local')->put($buktiWarga->path, 'data-warga');
 
-        $this->assertTrue(Storage::disk('public')->exists($foto->path));
+        $this->assertTrue(Storage::disk('local')->exists($foto->path));
 
         $this->withSession(['auth.password_confirmed_at' => time()])->actingAs(User::factory()->create(['role' => 'admin', 'is_active' => true]))
             ->delete(route('laporan.destroy', $laporan))
             ->assertRedirect(route('laporan.index'));
 
-        $this->assertFalse(Storage::disk('public')->exists($foto->path));
-        $this->assertFalse(Storage::disk('public')->exists($buktiWarga->path));
+        $this->assertFalse(Storage::disk('local')->exists($foto->path));
+        $this->assertFalse(Storage::disk('local')->exists($buktiWarga->path));
         $this->assertSame(0, LaporanFoto::count());
         $this->assertNull(Laporan::find($laporan->id));
     }

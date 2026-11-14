@@ -40,7 +40,7 @@
                     Lihat Peta
                 </a>
                 <form method="GET" action="{{ route('publik.perumahan.index') }}" class="flex flex-1 gap-2">
-                    <input type="text" name="q" placeholder="Cari nama perumahan..."
+                    <input type="text" name="q" aria-label="Cari perumahan" enterkeyhint="search" placeholder="Cari nama perumahan…"
                            class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder-neutral-300 outline-none backdrop-blur focus:border-amber-300 focus:ring-2 focus:ring-amber-300/40">
                     <button type="submit" class="rounded-lg bg-amber-400 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-amber-300">
                         Cari

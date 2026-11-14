@@ -63,14 +63,23 @@
         latInput?.addEventListener('change', syncFromInput);
         lngInput?.addEventListener('change', syncFromInput);
 
+        // Pesan hasil geolokasi tampil inline (bukan alert) agar tidak
+        // memblokir interaksi dan tetap terbaca pembaca layar.
+        const pesanLokasi = document.getElementById('pesan-lokasi-saya');
+        const tampilPesanLokasi = (teks) => {
+            if (!pesanLokasi) return;
+            pesanLokasi.textContent = teks;
+            pesanLokasi.classList.remove('hidden');
+        };
+
         document.getElementById('btn-lokasi-saya')?.addEventListener('click', () => {
             if (!navigator.geolocation) {
-                alert('Browser tidak mendukung geolokasi.');
+                tampilPesanLokasi('Browser tidak mendukung geolokasi. Gunakan klik peta untuk mengisi koordinat.');
                 return;
             }
             navigator.geolocation.getCurrentPosition(
                 (pos) => setPoint(pos.coords.latitude, pos.coords.longitude, true),
-                () => alert('Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan.'),
+                () => tampilPesanLokasi('Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan, lalu coba lagi atau klik peta secara manual.'),
             );
         });
 

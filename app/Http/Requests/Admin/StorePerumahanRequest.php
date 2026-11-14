@@ -4,7 +4,9 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
+use App\Models\Kelurahan;
 use App\Models\Perumahan;
+use App\Support\NamaPerumahan;
 
 class StorePerumahanRequest extends FormRequest
 {
@@ -19,6 +21,12 @@ class StorePerumahanRequest extends FormRequest
         $this->merge([
             'ada_lahan_pemakaman' => $this->boolean('ada_lahan_pemakaman'),
         ]);
+
+        // Rapikan nama sebelum validasi & simpan: trim dan spasi berulang jadi satu.
+        $nama = $this->input('nama');
+        if (is_string($nama)) {
+            $this->merge(['nama' => NamaPerumahan::normalisasi($nama)]);
+        }
     }
 
     public function rules(): array
@@ -93,7 +101,46 @@ class StorePerumahanRequest extends FormRequest
             $this->validasiLuasRth(...),
             $this->validasiTotalTipeUnit(...),
             $this->validasiKoordinat(...),
+            $this->validasiDuplikat(...),
         ];
+    }
+
+    /**
+     * Tolak nama perumahan yang sama pada kelurahan yang sama (tanpa membedakan
+     * huruf besar/kecil dan spasi ganda). Saat mengubah data, record yang sedang
+     * diedit diabaikan agar nama yang tidak berubah tidak dianggap duplikat.
+     */
+    private function validasiDuplikat(Validator $validator): void
+    {
+        $nama = $this->input('nama');
+        $kelurahanId = $this->input('kelurahan_id');
+
+        if (! is_string($nama) || trim($nama) === '' || (! is_string($kelurahanId) && ! is_int($kelurahanId)) || blank($kelurahanId)) {
+            return;
+        }
+
+        $rute = $this->route('perumahan');
+        $idSekarang = $rute instanceof Perumahan
+            ? $rute->getKey()
+            : (is_numeric($rute) ? (int) $rute : null);
+
+        $bentrok = Perumahan::query()
+            ->where('kelurahan_id', $kelurahanId)
+            ->when($idSekarang !== null, fn ($query) => $query->where('id', '!=', $idSekarang))
+            ->get(['id', 'nama'])
+            ->first(fn (Perumahan $perumahan) => NamaPerumahan::sama($perumahan->nama, $nama));
+
+        if (! $bentrok) {
+            return;
+        }
+
+        $kelurahan = Kelurahan::with('kecamatan')->find($kelurahanId);
+
+        $validator->errors()->add('nama', sprintf(
+            'Perumahan "%s" sudah terdaftar di %s. Gunakan nama lain atau pilih kelurahan yang berbeda.',
+            $bentrok->nama,
+            $kelurahan?->nama_lengkap ?? 'kelurahan yang dipilih',
+        ));
     }
 
     private function validasiTahun(Validator $validator): void

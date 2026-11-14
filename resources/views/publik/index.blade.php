@@ -91,7 +91,7 @@
                             <div class="md:col-span-2">
                                 <label for="filter-q" class="mb-1 block text-xs font-medium text-slate-600">Pencarian</label>
                                 <input type="text" id="filter-q" name="q" value="{{ $filters['q'] ?? '' }}"
-                                       placeholder="Nama perumahan, pengembang, kelurahan, kecamatan..."
+                                       placeholder="Nama perumahan, pengembang, kelurahan, kecamatan…"
                                        class="input">
                             </div>
                             <div>
