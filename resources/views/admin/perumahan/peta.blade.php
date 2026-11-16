@@ -27,15 +27,15 @@
             <span class="flex items-center gap-2">
                 <span class="h-3 w-3 rounded-full bg-violet-500"></span> Campuran
             </span>
-            <span class="text-slate-500">{{ $titik->count() }} dari {{ $perumahans->count() }} perumahan sudah punya titik</span>
+            <span class="text-slate-600">{{ $titik->count() }} dari {{ $perumahans->count() }} perumahan sudah punya titik</span>
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('perumahan.geojson') }}" target="_blank"
-               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-kertas">
                 Lihat GeoJSON
             </a>
             <a href="{{ route('perumahan.index') }}"
-               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-kertas">
                 Daftar Data
             </a>
         </div>
@@ -43,21 +43,21 @@
 
     <div class="grid gap-4 lg:grid-cols-4">
         <div class="lg:col-span-3">
-            <div id="map-sebaran" class="h-[70vh] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm"></div>
+            <div id="map-sebaran" class="h-[70vh] w-full overflow-hidden rounded-card border border-garis bg-kertas-tua shadow-card"></div>
         </div>
 
         <div class="space-y-4">
             @if ($kecamatanFokus)
-                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="rounded-card border border-garis bg-white p-4 shadow-card">
                     <div class="flex items-center justify-between gap-2">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fokus Kecamatan</p>
+                        <p class="text-sm font-semibold text-slate-600">Fokus Kecamatan</p>
                         <button type="button" data-fokus-kecamatan="0"
-                                class="text-xs font-medium text-slate-500 transition hover:text-indigo-600">Reset</button>
+                                class="text-xs font-medium text-slate-600 transition hover:text-brand-600">Reset</button>
                     </div>
                     <div class="mt-2 flex flex-wrap gap-1.5">
                         @foreach ($kecamatanFokus as $kec)
                             <button type="button" data-fokus-kecamatan="{{ $kec['id'] }}"
-                                    class="rounded-full border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700">
+                                    class="rounded-full border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700">
                                 {{ $kec['nama'] }}
                             </button>
                         @endforeach
@@ -65,33 +65,33 @@
                 </div>
             @endif
 
-            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="rounded-card border border-garis bg-white p-4 shadow-card">
                 <label class="mb-1 block text-xs font-medium text-slate-600">Cari lokasi</label>
                 <input type="text" id="cari-lokasi" placeholder="Nama perumahan / kecamatan..."
-                       class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                       class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
 
                 <ul id="daftar-lokasi" class="mt-3 max-h-72 space-y-1 overflow-y-auto text-sm">
                     @foreach ($titik as $item)
                         <li data-cari="{{ strtolower($item['nama'].' '.$item['alamat']) }}">
                             <button type="button" data-fokus="{{ $item['id'] }}"
-                                    class="w-full rounded-md px-2 py-1.5 text-left transition hover:bg-slate-50">
+                                    class="w-full rounded-md px-2 py-1.5 text-left transition hover:bg-kertas">
                                 <span class="flex items-center gap-2">
                                          <span class="h-2 w-2 shrink-0 rounded-full {{ match ($item['status']) { 'Subsidi' => 'bg-emerald-500', 'Komersil' => 'bg-sky-500', 'Campuran' => 'bg-violet-500', default => 'bg-slate-500' } }}"></span>
                                     <span class="truncate font-medium text-slate-700">{{ $item['nama'] }}</span>
                                 </span>
-                                <span class="block truncate pl-4 text-xs text-slate-500">{{ $item['alamat'] }}</span>
+                                <span class="block truncate pl-4 text-xs text-slate-600">{{ $item['alamat'] }}</span>
                             </button>
                         </li>
                     @endforeach
                 </ul>
 
                 @if ($titik->isEmpty())
-                    <p class="mt-3 text-sm text-slate-500">Belum ada perumahan dengan titik koordinat.</p>
+                    <p class="mt-3 text-sm text-slate-600">Belum ada perumahan dengan titik koordinat.</p>
                 @endif
             </div>
 
             @if ($tanpaKoordinat->isNotEmpty())
-                <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm shadow-sm">
+                <div class="rounded-card border border-amber-200 bg-amber-50 p-4 text-sm shadow-card">
                     <p class="font-semibold text-amber-800">Belum ada titik koordinat ({{ $tanpaKoordinat->count() }})</p>
                     <ul class="mt-2 space-y-1">
                         @foreach ($tanpaKoordinat as $item)

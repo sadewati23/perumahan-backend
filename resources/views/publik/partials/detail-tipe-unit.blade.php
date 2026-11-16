@@ -1,15 +1,15 @@
-<section id="unit" class="scroll-mt-28 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 md:scroll-mt-36">
+<section id="unit" class="scroll-mt-28 rounded-card border border-garis bg-white p-5 shadow-card sm:p-6 md:scroll-mt-36">
     <div class="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 class="text-base font-semibold text-slate-900">Unit &amp; Tipe Rumah</h2>
+        <h2 class="font-judul text-xl font-semibold tracking-tight text-tinta">Unit &amp; Tipe Rumah</h2>
         @if ($perumahan->tipeUnits->isNotEmpty())
-            <span class="text-xs text-slate-500">
+            <span class="text-xs text-slate-600">
                 Total {{ number_format($perumahan->total_unit_tipe, 0, ',', '.') }} unit terinci
             </span>
         @endif
     </div>
 
     @if ($perumahan->tipeUnits->isEmpty())
-        <p class="mt-4 text-sm text-slate-500">Rincian tipe unit belum tersedia.</p>
+        <p class="mt-4 text-sm text-slate-600">Rincian tipe unit belum tersedia.</p>
     @else
         <div class="mt-4 overflow-x-auto">
             <table class="tabel-mini min-w-full divide-y divide-slate-200 text-sm">
@@ -21,7 +21,7 @@
                         <th class="whitespace-nowrap py-2 pr-4 text-right">L. Bangunan</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-garis">
                     @foreach ($perumahan->tipeUnits as $tipe)
                         <tr>
                             <td data-label="Tipe" class="py-3 pr-4 font-medium text-slate-700">{{ $tipe->tipe }}</td>

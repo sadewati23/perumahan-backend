@@ -28,11 +28,11 @@
             <p class="text-sm text-slate-600">
                 Menampilkan
                 @if ($paginator->firstItem())
-                    <span class="font-semibold text-slate-900">{{ $paginator->firstItem() }}</span>–<span class="font-semibold text-slate-900">{{ $paginator->lastItem() }}</span>
+                    <span class="font-semibold text-tinta">{{ $paginator->firstItem() }}</span>–<span class="font-semibold text-tinta">{{ $paginator->lastItem() }}</span>
                 @else
-                    <span class="font-semibold text-slate-900">{{ $paginator->count() }}</span>
+                    <span class="font-semibold text-tinta">{{ $paginator->count() }}</span>
                 @endif
-                dari <span class="font-semibold text-slate-900">{{ $paginator->total() }}</span> data
+                dari <span class="font-semibold text-tinta">{{ $paginator->total() }}</span> data
             </p>
 
             <span class="inline-flex rounded-control shadow-card">

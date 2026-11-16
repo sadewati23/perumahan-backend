@@ -11,8 +11,6 @@ import { initSubmitGuard } from './umum/form-submit';
 import { initFormFields } from './umum/form-fields';
 import { initFotoUpload } from './umum/foto-upload';
 import { initCopyTicket } from './publik/copy-ticket';
-import { initHitungNaik } from './umum/hitung-naik';
-import { initRevealScroll } from './publik/reveal-scroll';
 import { initFilterOtomatis } from './publik/filter-otomatis';
 import { initFilterLipat } from './publik/filter-lipat';
 import { initNavBagian } from './publik/nav-bagian';
@@ -29,10 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormFields();
     initFotoUpload();
     initCopyTicket();
-
-    // --- Animasi & util ---
-    initRevealScroll();
-    initHitungNaik();
 
     // --- Halaman daftar & detail perumahan ---
     initFilterOtomatis();

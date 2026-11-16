@@ -6,20 +6,20 @@
     <title>Masuk — {{ config('app.name') }}</title>
     @include('partials.favicon')
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=archivo-narrow:500,600,700|instrument-sans:400,500,600,700" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
 </head>
-<body class="flex min-h-screen items-center justify-center bg-slate-900 px-4 py-10 font-sans text-slate-800 antialiased">
+<body class="flex min-h-screen items-center justify-center bg-tinta px-4 py-10 font-sans text-slate-800 antialiased">
     <div class="w-full max-w-md">
         <div class="mb-6 text-center">
             <x-logo tile ukuran="mx-auto mb-3 h-14 w-14" />
-            <h1 class="text-xl font-semibold text-white">Sistem Informasi Data Perumahan</h1>
+            <h1 class="font-judul text-2xl font-semibold tracking-tight text-white">Sistem Informasi Data Perumahan</h1>
             <p class="mt-1 text-sm text-slate-400">
                 {{ config('peta.nama_wilayah') }} &middot; masuk untuk mengelola data perumahan, PSU, dan titik lokasi
             </p>
         </div>
 
-        <div class="masuk-naik rounded-2xl bg-white p-6 shadow-xl sm:p-8">
+        <div class="rounded-modal bg-white p-6 shadow-pop sm:p-8">
             @if ($errors->any())
                 <div class="mb-5 rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700">
                     {{ $errors->first() }}
@@ -47,7 +47,7 @@
                                autocomplete="current-password" enterkeyhint="go" class="input pr-24"
                                placeholder="••••••••">
                         <button type="button" data-password-toggle aria-controls="password" aria-label="Tampilkan password"
-                                class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md px-2 py-2 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+                                class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md px-2 py-2 text-xs font-medium text-slate-600 transition hover:bg-kertas-tua hover:text-slate-700">
                             <span data-password-text>Tampilkan</span>
                         </button>
                     </div>
@@ -60,11 +60,11 @@
                 </label>
 
                 <button type="submit"
-                        class="w-full min-h-11 rounded-control bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-card transition hover:bg-brand-700 active:bg-brand-800">
+                        class="tombol-utama w-full">
                     Masuk
                 </button>
 
-                <p class="text-center text-sm text-slate-500">
+                <p class="text-center text-sm text-slate-600">
                     <a href="{{ route('password.request') }}" class="font-medium text-brand-600 hover:text-brand-700 hover:underline">
                         Lupa password?
                     </a>
@@ -72,9 +72,11 @@
             </form>
         </div>
 
-        <p class="mt-6 text-center text-xs text-slate-500">
-            Akun awal lokal: <span class="font-medium text-slate-300">admin / password</span>
-        </p>
+        @env('local')
+            <p class="mt-6 text-center text-xs text-slate-400">
+                Akun awal lokal: <span class="font-medium text-slate-200">admin / password</span>
+            </p>
+        @endenv
     </div>
 </body>
 </html>

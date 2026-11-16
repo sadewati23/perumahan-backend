@@ -5,33 +5,33 @@
 
 @section('content')
     <div class="mb-4 grid gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-medium text-slate-500">Jumlah Kecamatan</p>
-            <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $kecamatans->count() }}</p>
+        <div class="rounded-card border border-garis bg-white p-4 shadow-card">
+            <p class="text-xs font-medium text-slate-600">Jumlah Kecamatan</p>
+            <p class="mt-1 text-2xl font-semibold text-tinta">{{ $kecamatans->count() }}</p>
         </div>
-        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-medium text-slate-500">Jumlah Kelurahan</p>
-            <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $totalKelurahan }}</p>
+        <div class="rounded-card border border-garis bg-white p-4 shadow-card">
+            <p class="text-xs font-medium text-slate-600">Jumlah Kelurahan</p>
+            <p class="mt-1 text-2xl font-semibold text-tinta">{{ $totalKelurahan }}</p>
         </div>
-        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-medium text-slate-500">Perumahan Terdata</p>
-            <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $totalPerumahan }}</p>
+        <div class="rounded-card border border-garis bg-white p-4 shadow-card">
+            <p class="text-xs font-medium text-slate-600">Perumahan Terdata</p>
+            <p class="mt-1 text-2xl font-semibold text-tinta">{{ $totalPerumahan }}</p>
         </div>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="space-y-3 lg:col-span-2">
             @forelse ($kecamatans as $kecamatan)
-                <div class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="rounded-card border border-garis bg-white p-4 shadow-card">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div>
                             <p class="font-semibold text-slate-800">
                                 @if ($kecamatan->kode)
-                                    <span class="mr-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600">{{ $kecamatan->kode }}</span>
+                                    <span class="mr-1 rounded bg-kertas-tua px-1.5 py-0.5 text-xs font-medium text-slate-600">{{ $kecamatan->kode }}</span>
                                 @endif
                                 Kec. {{ $kecamatan->nama }}
                             </p>
-                            <p class="text-xs text-slate-500">
+                            <p class="text-xs text-slate-600">
                                 {{ $kecamatan->kabupaten_kota ?: 'Kabupaten/kota belum diisi' }} &middot;
                                 {{ $kecamatan->kelurahans_count }} kelurahan
                             </p>
@@ -39,11 +39,11 @@
 
                         <div class="flex items-center gap-3">
                             <details class="relative">
-                                <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
+                                <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-kertas">
                                     Ubah
                                 </summary>
                                 <form method="POST" action="{{ route('kecamatan.update', $kecamatan) }}"
-                                      class="absolute right-0 z-20 mt-2 w-72 max-w-[calc(100vw-2.5rem)] space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                                      class="absolute right-0 z-20 mt-2 w-72 max-w-[calc(100vw-2.5rem)] space-y-2 rounded-lg border border-garis bg-white p-3 shadow-pop">
                                     @csrf
                                     @method('PUT')
                                     <x-field name="kode" for="kecamatan-{{ $kecamatan->id }}-kode" label="Kode kecamatan" optional :show-errors="false">
@@ -74,9 +74,9 @@
                     </div>
 
                     @if ($kecamatan->kelurahans->isEmpty())
-                        <p class="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">Belum ada kelurahan pada kecamatan ini.</p>
+                        <p class="mt-3 rounded-lg bg-kertas px-3 py-2 text-xs text-slate-600">Belum ada kelurahan pada kecamatan ini.</p>
                     @else
-                        <ul class="mt-3 divide-y divide-slate-100 border-t border-slate-100">
+                        <ul class="mt-3 divide-y divide-garis border-t border-garis">
                             @foreach ($kecamatan->kelurahans as $kelurahan)
                                 <li class="flex flex-wrap items-center justify-between gap-2 py-2">
                                     <div class="text-sm">
@@ -84,14 +84,14 @@
                                         @if ($kelurahan->kode_pos)
                                             <span class="ml-1 text-xs text-slate-400">({{ $kelurahan->kode_pos }})</span>
                                         @endif
-                                        <span class="ml-2 text-xs text-slate-500">{{ $kelurahan->perumahans_count ?? $kelurahan->perumahans()->count() }} perumahan</span>
+                                        <span class="ml-2 text-xs text-slate-600">{{ $kelurahan->perumahans_count ?? $kelurahan->perumahans()->count() }} perumahan</span>
                                     </div>
 
                                     <div class="flex items-center gap-3">
                                         <details class="relative">
                                             <summary class="cursor-pointer list-none rounded-md px-2 py-2 text-xs font-medium text-warning-700 transition hover:text-warning-800">Ubah</summary>
                                             <form method="POST" action="{{ route('kelurahan.update', $kelurahan) }}"
-                                                  class="absolute right-0 z-20 mt-2 w-64 max-w-[calc(100vw-3.5rem)] space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                                                  class="absolute right-0 z-20 mt-2 w-64 max-w-[calc(100vw-3.5rem)] space-y-2 rounded-lg border border-garis bg-white p-3 shadow-pop">
                                                 @csrf
                                                 @method('PUT')
                                                 <x-field name="kecamatan_id" for="kelurahan-{{ $kelurahan->id }}-kecamatan" label="Kecamatan" :show-errors="false">
@@ -141,7 +141,7 @@
         </div>
 
         <div class="space-y-4">
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="rounded-card border border-garis bg-white p-5 shadow-card">
                 <h2 class="mb-3 text-sm font-semibold text-slate-800">Tambah Kecamatan</h2>
                 <form method="POST" action="{{ route('kecamatan.store') }}" class="space-y-3" data-unsaved-guard="Data kecamatan belum disimpan.">
                     @csrf
@@ -161,7 +161,7 @@
                 </form>
             </div>
 
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="rounded-card border border-garis bg-white p-5 shadow-card">
                 <h2 class="mb-3 text-sm font-semibold text-slate-800">Tambah Kelurahan</h2>
                 <form method="POST" action="{{ route('kelurahan.store') }}" class="space-y-3" data-unsaved-guard="Data kelurahan belum disimpan.">
                     @csrf

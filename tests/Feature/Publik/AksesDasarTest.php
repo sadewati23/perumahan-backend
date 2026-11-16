@@ -11,7 +11,7 @@ class AksesDasarTest extends TestCase
 
     public function test_beranda_publik_bisa_diakses_tanpa_login(): void
     {
-        $this->get('/')->assertOk()->assertSee('Informasi Data Perumahan');
+        $this->get('/')->assertOk()->assertSee('Data perumahan di');
     }
 
     public function test_halaman_admin_mengarahkan_tamu_ke_login(): void

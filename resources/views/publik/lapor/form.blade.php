@@ -8,15 +8,15 @@
 @endpush
 
 @section('content')
-    <section class="border-b border-slate-200 bg-white">
+    <section class="border-b border-garis bg-white">
         <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-            <nav class="text-xs text-slate-500">
+            <nav class="text-xs text-slate-600">
                 <a href="{{ route('publik.beranda') }}" class="hover:text-brand-600">Beranda</a>
                 <span class="mx-1">/</span>
                 <span class="text-slate-700">Lapor</span>
             </nav>
 
-            <h1 class="mt-3 text-2xl font-semibold text-slate-900">Lapor Kerusakan, Pengaduan, &amp; Bangunan Liar</h1>
+            <h1 class="mt-3 font-judul text-3xl font-semibold tracking-tight text-tinta sm:text-4xl">Lapor Kerusakan, Pengaduan, &amp; Bangunan Liar</h1>
             <p class="mt-2 max-w-3xl text-sm text-slate-600">
                 Menemukan jalan berlubang, lampu jalan mati, ingin mengadu, atau melihat bangunan tanpa izin?
                 Laporkan di sini. Tidak perlu akun — laporan Anda akan ditindaklanjuti oleh petugas.
@@ -24,12 +24,12 @@
         </div>
     </section>
 
-    <div class="bg-brand-50/40">
+    <div class="bg-kertas">
     <div class="mx-auto max-w-7xl px-4 py-8 pb-24 sm:pb-8 lg:px-8">
         <div class="grid gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 @if (session('laporan_kode'))
-                    <div class="pop-masuk mb-6 rounded-xl border border-success-200 bg-success-50 p-6">
+                    <div class="pop-masuk mb-6 rounded-card border border-success-200 bg-success-50 p-6">
                         <div class="flex items-start gap-3">
                             <svg class="mt-0.5 h-6 w-6 shrink-0 text-success-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -82,14 +82,14 @@
                 @endif
 
                 @if ($perumahans->isEmpty() && $kelurahans->isEmpty())
-                    <div class="rounded-xl border border-warning-200 bg-warning-50 p-6 text-sm text-warning-800">
+                    <div class="rounded-card border border-warning-200 bg-warning-50 p-6 text-sm text-warning-800">
                         Belum ada data perumahan maupun wilayah yang bisa dipilih. Laporan dapat dikirim setelah petugas
                         mendata wilayah terlebih dahulu.
                     </div>
                 @else
                     {{-- Indikator langkah: navigasi cepat + penanda langkah aktif saat scroll. --}}
                     <nav aria-label="Langkah pengisian laporan"
-                         class="no-scrollbar mb-4 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm">
+                         class="no-scrollbar mb-4 overflow-x-auto rounded-modal border border-garis/80 bg-white p-1.5 shadow-card">
                         <ol class="flex min-w-max items-center gap-1 text-xs">
                             @foreach ([
                                 ['langkah-1', 'Jenis', 'Jenis laporan'],
@@ -99,7 +99,7 @@
                             ] as $i => [$idLangkah, $labelPendek, $labelPanjang])
                                 <li>
                                     <a href="#{{ $idLangkah }}" data-langkah-nav="{{ $idLangkah }}"
-                                       class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-medium text-slate-500 transition hover:bg-slate-50">
+                                       class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-medium text-slate-600 transition hover:bg-kertas">
                                         <span data-langkah-nomor
                                               class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[11px] font-bold text-slate-600">{{ $i + 1 }}</span>
                                         <span class="hidden sm:inline">{{ $labelPanjang }}</span>
@@ -119,8 +119,8 @@
                                style="position:absolute;left:-9999px"
                                aria-hidden="true" tabindex="-1" autocomplete="off">
                         {{-- 1. Jenis laporan --}}
-                        <div id="langkah-1" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
-                            <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+                        <div id="langkah-1" data-langkah class="scroll-mt-28 rounded-modal border border-garis/80 bg-white p-5 shadow-card sm:scroll-mt-24 sm:p-6">
+                            <h2 class="flex items-center gap-2.5 font-judul text-xl font-semibold tracking-tight text-tinta">
                                 <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700" aria-hidden="true">1</span>
                                 Pilih Jenis Laporan
                             </h2>
@@ -134,7 +134,7 @@
                                                class="mt-0.5 h-4 w-4 text-brand-600 focus:ring-brand-500">
                                         <span>
                                             <span class="block text-sm font-medium text-slate-800">{{ $label }}</span>
-                                            <span class="mt-0.5 block text-xs text-slate-500">
+                                            <span class="mt-0.5 block text-xs text-slate-600">
                                                 @if ($value === 'kerusakan')
                                                     Jalan, drainase, PJU, air bersih, dll. yang rusak.
                                                 @elseif ($value === 'pengaduan')
@@ -150,8 +150,8 @@
                         </div>
 
                         {{-- 2. Lokasi — tampilan dinamis per jenis --}}
-                        <div id="langkah-2" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
-                            <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+                        <div id="langkah-2" data-langkah class="scroll-mt-28 rounded-modal border border-garis/80 bg-white p-5 shadow-card sm:scroll-mt-24 sm:p-6">
+                            <h2 class="flex items-center gap-2.5 font-judul text-xl font-semibold tracking-tight text-tinta">
                                 <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700" aria-hidden="true">2</span>
                                 Lokasi
                             </h2>
@@ -179,7 +179,7 @@
                                             class="input">
                                         <option value="">— Pilih perumahan dahulu —</option>
                                     </select>
-                                    <p id="sarana-kosong" class="mt-1 text-xs text-slate-500"></p>
+                                    <p id="sarana-kosong" class="mt-1 text-xs text-slate-600"></p>
                                 </x-field>
                             </div>
 
@@ -223,26 +223,26 @@
                             </div>
 
                             {{-- Pengaduan: tanpa lokasi wajib --}}
-                            <p class="panel-jenis mt-4 hidden rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500" data-panel="pengaduan">
+                            <p class="panel-jenis mt-4 hidden rounded-lg bg-kertas px-3 py-2 text-xs text-slate-600" data-panel="pengaduan">
                                 Pengaduan tidak wajib menyebut lokasi. Bila berkaitan dengan perumahan tertentu,
                                 sebutkan nama perumahannya di uraian laporan.
                             </p>
 
                             {{-- Titik GPS opsional: berlaku untuk semua jenis, di luar panel --}}
                             {{-- jenis agar tidak ikut disabled oleh toggle panel. --}}
-                            <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <div class="mt-4 rounded-lg border border-garis bg-kertas p-4">
                                 <div class="flex flex-wrap items-start justify-between gap-3">
                                     <div class="min-w-0">
                                         <p class="text-sm font-medium text-slate-700">
-                                            Titik lokasi di peta <span class="font-normal text-slate-500">(opsional — membantu petugas menemukan titiknya)</span>
+                                            Titik lokasi di peta <span class="font-normal text-slate-600">(opsional — membantu petugas menemukan titiknya)</span>
                                         </p>
-                                        <p id="peta-keterangan" class="mt-0.5 text-xs text-slate-500">
+                                        <p id="peta-keterangan" class="mt-0.5 text-xs text-slate-600">
                                             Belum ada titik — klik langsung di peta untuk menandai lokasi.
                                         </p>
                                     </div>
                                     <div class="flex shrink-0 gap-2">
                                         <button type="button" id="peta-posisi-saya"
-                                                class="min-h-11 rounded-control border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 md:min-h-10">
+                                                class="min-h-11 rounded-control border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-kertas md:min-h-10">
                                             Gunakan posisi saya
                                         </button>
                                         <button type="button" id="peta-hapus" class="hidden min-h-11 rounded-control border border-danger-200 bg-white px-3 py-1.5 text-xs font-medium text-danger-600 transition hover:bg-danger-50 md:min-h-10">
@@ -251,7 +251,7 @@
                                     </div>
                                 </div>
 
-                                <div id="peta-pemilih" class="mt-3 z-0 h-64 w-full rounded-lg border border-slate-200 bg-slate-100"
+                                <div id="peta-pemilih" class="mt-3 z-0 h-64 w-full rounded-lg border border-garis bg-kertas-tua"
                                      aria-label="Peta pemilih titik lokasi"></div>
 
                                 <input type="hidden" id="peta-latitude" name="latitude" value="{{ old('latitude') }}">
@@ -264,8 +264,8 @@
                         </div>
 
                         {{-- 3. Data pelapor --}}
-                        <div id="langkah-3" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
-                            <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+                        <div id="langkah-3" data-langkah class="scroll-mt-28 rounded-modal border border-garis/80 bg-white p-5 shadow-card sm:scroll-mt-24 sm:p-6">
+                            <h2 class="flex items-center gap-2.5 font-judul text-xl font-semibold tracking-tight text-tinta">
                                 <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700" aria-hidden="true">3</span>
                                 Data Pelapor
                             </h2>
@@ -283,8 +283,8 @@
                         </div>
 
                         {{-- 4. Detail per jenis --}}
-                        <div id="langkah-4" data-langkah class="scroll-mt-28 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:scroll-mt-24 sm:p-6">
-                            <h2 class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+                        <div id="langkah-4" data-langkah class="scroll-mt-28 rounded-modal border border-garis/80 bg-white p-5 shadow-card sm:scroll-mt-24 sm:p-6">
+                            <h2 class="flex items-center gap-2.5 font-judul text-xl font-semibold tracking-tight text-tinta">
                                 <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700" aria-hidden="true">4</span>
                                 Detail Laporan
                             </h2>
@@ -311,7 +311,7 @@
                                                            class="mt-0.5 h-4 w-4 text-brand-600 focus:ring-brand-500">
                                                     <span>
                                                         <span class="block text-sm font-medium text-slate-800">{{ $label }}</span>
-                                                        <span class="block text-xs text-slate-500">
+                                                        <span class="block text-xs text-slate-600">
                                                             {{ $value === 'rusak_ringan' ? 'Masih dapat dilewati / digunakan dengan hati-hati.' : 'Berbahaya atau tidak dapat digunakan sama sekali.' }}
                                                         </span>
                                                     </span>
@@ -322,7 +322,7 @@
 
                                     <div>
                                         <span class="mb-1.5 block text-sm font-medium text-slate-700">
-                                            Ukuran Kerusakan <span class="font-normal text-slate-500">(opsional)</span>
+                                            Ukuran Kerusakan <span class="font-normal text-slate-600">(opsional)</span>
                                         </span>
 
                                         <div class="grid gap-4 sm:grid-cols-2">
@@ -345,7 +345,7 @@
                                                        class="input">
                                             </x-field>
                                         </div>
-                                        <p class="mt-1 text-xs text-slate-500">
+                                        <p class="mt-1 text-xs text-slate-600">
                                             Isi yang relevan saja — misal jalan rusak: panjang &amp; persentase; lampu PJU mati: cukup dikosongkan.
                                         </p>
                                     </div>
@@ -360,17 +360,17 @@
                                 </x-field>
 
                                 <x-field name="foto" for="foto" label="Foto Bukti" hint="JPG / PNG / WEBP, maksimal 5 MB per foto. Foto besar otomatis dikompres.">
-                                    <span id="foto-keterangan" class="font-normal text-slate-500">(opsional, maks. 3 foto)</span>
+                                    <span id="foto-keterangan" class="font-normal text-slate-600">(opsional, maks. 3 foto)</span>
 
                                     <div id="foto-upload" data-foto-upload data-maks="3" data-maks-ukuran="5120"
                                          data-min="1" data-min-jenis="bangunan_liar" data-tipe="image/jpeg,image/png,image/webp">
                                         <button type="button" data-foto-buka
-                                                class="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition hover:border-brand-400 hover:bg-brand-50">
+                                                class="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-kertas px-4 py-6 text-center transition hover:border-brand-400 hover:bg-brand-50">
                                             <svg class="h-6 w-6 text-brand-600" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0-12l-4 4m4-4l4 4"/>
                                             </svg>
                                             <span class="block text-sm font-medium text-slate-700">Pilih foto atau seret ke sini</span>
-                                            <span class="block text-xs text-slate-500">Bisa beberapa file sekaligus. Format JPG / PNG / WEBP / HEIC, foto besar otomatis dikompres di perangkat.</span>
+                                            <span class="block text-xs text-slate-600">Bisa beberapa file sekaligus. Format JPG / PNG / WEBP / HEIC, foto besar otomatis dikompres di perangkat.</span>
                                         </button>
 
                                         <input type="file" id="foto" name="foto[]" multiple accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
@@ -385,8 +385,8 @@
                         </div>
 
                         {{-- Ringkasan isian: bantuan pemeriksaan sebelum mengirim --}}
-                        <details class="group rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-slate-900 sm:px-6">
+                        <details class="group rounded-modal border border-garis/80 bg-white shadow-card">
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-tinta sm:px-6">
                                 <span class="flex items-center gap-2.5">
                                     <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600" aria-hidden="true">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -395,40 +395,40 @@
                                     </span>
                                     Ringkasan laporan
                                 </span>
-                                <span class="flex items-center gap-1.5 text-xs font-normal text-slate-500">
+                                <span class="flex items-center gap-1.5 text-xs font-normal text-slate-600">
                                     Periksa sebelum mengirim
                                     <svg class="h-4 w-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
                                     </svg>
                                 </span>
                             </summary>
-                            <dl class="grid gap-x-6 gap-y-3 border-t border-slate-100 px-5 py-4 text-sm sm:grid-cols-2 sm:px-6">
+                            <dl class="grid gap-x-6 gap-y-3 border-t border-garis px-5 py-4 text-sm sm:grid-cols-2 sm:px-6">
                                 <div>
-                                    <dt class="text-xs text-slate-500">Jenis laporan</dt>
+                                    <dt class="text-xs text-slate-600">Jenis laporan</dt>
                                     <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="jenis">—</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs text-slate-500">Lokasi</dt>
+                                    <dt class="text-xs text-slate-600">Lokasi</dt>
                                     <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="lokasi">—</dd>
                                 </div>
                                 <div class="sm:col-span-2">
-                                    <dt class="text-xs text-slate-500">Judul</dt>
+                                    <dt class="text-xs text-slate-600">Judul</dt>
                                     <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="judul">—</dd>
                                 </div>
                                 <div class="sm:col-span-2">
-                                    <dt class="text-xs text-slate-500">Uraian</dt>
+                                    <dt class="text-xs text-slate-600">Uraian</dt>
                                     <dd class="mt-0.5 text-slate-700" data-ringkas="uraian">—</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs text-slate-500">Foto bukti</dt>
+                                    <dt class="text-xs text-slate-600">Foto bukti</dt>
                                     <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="foto">—</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs text-slate-500">Titik koordinat</dt>
+                                    <dt class="text-xs text-slate-600">Titik koordinat</dt>
                                     <dd class="mt-0.5 font-medium text-slate-800" data-ringkas="koordinat">—</dd>
                                 </div>
                             </dl>
-                            <p class="border-t border-slate-100 px-5 py-3 text-xs text-slate-500 sm:px-6">
+                            <p class="border-t border-garis px-5 py-3 text-xs text-slate-600 sm:px-6">
                                 Ringkasan ini hanya bantuan pemeriksaan — data yang dikirim tetap mengikuti isian form.
                             </p>
                         </details>
@@ -451,7 +451,7 @@
                     {{-- Bar aksi tetap di bawah layar kecil; disembunyikan saat area tombol asli terlihat. --}}
                     <div id="bar-aksi-mobile"
                          data-turnstile-aktif="{{ \App\Support\TurnstileKonfigurasi::tampilkanWidget() ? '1' : '0' }}"
-                         class="fixed inset-x-0 bottom-0 z-30 hidden border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] backdrop-blur sm:hidden">
+                         class="fixed inset-x-0 bottom-0 z-30 hidden border-t border-garis bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(22,33,28,0.08)] backdrop-blur sm:hidden">
                         <div class="flex items-center gap-2">
                             <x-button variant="secondary" href="{{ route('publik.beranda') }}" class="flex-1">Batal</x-button>
                             <x-button type="submit" form="form-lapor" data-kirim-mobile class="flex-[1.6]">Kirim Laporan</x-button>
@@ -463,8 +463,8 @@
             </div>
 
             <aside class="space-y-6">
-                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
-                    <h2 class="text-sm font-semibold text-slate-900">Cara Melapor</h2>
+                <div class="rounded-modal border border-garis/80 bg-white p-5 shadow-card sm:p-6">
+                    <h2 class="font-judul text-lg font-semibold tracking-tight text-tinta">Cara Melapor</h2>
                     <ol class="mt-4 space-y-4">
                         @foreach ([
                             'Pilih jenis laporan: kerusakan, pengaduan, atau bangunan liar.',
@@ -481,8 +481,8 @@
                     </ol>
                 </div>
 
-                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
-                    <h2 class="text-sm font-semibold text-slate-900">Setelah Dilaporkan</h2>
+                <div class="rounded-modal border border-garis/80 bg-white p-5 shadow-card sm:p-6">
+                    <h2 class="font-judul text-lg font-semibold tracking-tight text-tinta">Setelah Dilaporkan</h2>
                     <ul class="mt-4 space-y-3 text-sm">
                         @foreach ([
                             'Baru' => ['bg-warning-50 text-warning-700 ring-warning-200', 'bg-warning-500', 'Laporan diterima dan menunggu peninjauan petugas.'],
@@ -500,7 +500,7 @@
                     </ul>
                 </div>
 
-                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 text-xs text-slate-500 shadow-sm sm:p-6">
+                <div class="rounded-modal border border-garis/80 bg-white p-5 text-xs text-slate-600 shadow-card sm:p-6">
                     Laporan dikirim tanpa perlu membuat akun. Nama pelapor hanya digunakan untuk
                     tindak lanjut laporan dan tidak ditampilkan pada halaman publik.
                 </div>
@@ -700,8 +700,8 @@
             const bagianLangkah = [...document.querySelectorAll('[data-langkah]')];
 
             const gayaNav = {
-                idle: 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-medium text-slate-500 transition hover:bg-slate-50',
-                aktif: 'flex items-center gap-2 rounded-lg bg-brand-600 px-2.5 py-1.5 font-medium text-white shadow-sm transition',
+                idle: 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-medium text-slate-600 transition hover:bg-kertas',
+                aktif: 'flex items-center gap-2 rounded-lg bg-brand-600 px-2.5 py-1.5 font-medium text-white shadow-card transition',
                 selesai: 'flex items-center gap-2 rounded-lg bg-brand-50 px-2.5 py-1.5 font-medium text-brand-700 transition hover:bg-brand-100',
             };
             const gayaNomor = {

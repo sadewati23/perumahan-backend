@@ -9,12 +9,12 @@
     @include('partials.favicon')
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=archivo-narrow:500,600,700|instrument-sans:400,500,600,700" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
     @stack('head')
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 antialiased">
+<body class="bg-kertas font-sans text-slate-700 antialiased">
 {{-- Skip link untuk navigasi keyboard --}}
 <a href="#main"
    class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg">
@@ -27,7 +27,7 @@
 
     {{-- Sidebar --}}
     <aside id="sidebar"
-           class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-slate-900 text-slate-300 transition-transform duration-200 lg:static lg:translate-x-0">
+           class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-tinta text-slate-300 transition-transform duration-200 lg:static lg:translate-x-0">
         <div class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
             <x-logo tile />
             <div class="min-w-0 leading-tight">
@@ -65,7 +65,7 @@
                 @endphp
                 @if ($visibleItems->isNotEmpty())
                     <div>
-                        <p class="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{{ $groupLabel }}</p>
+                        <p class="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $groupLabel }}</p>
                         <div class="space-y-1">
                             @foreach ($visibleItems as $item)
                                 @php $isActive = request()->routeIs($item['active']); @endphp
@@ -112,23 +112,26 @@
 
     <div id="konten-utama" class="flex min-h-screen flex-1 flex-col">
         {{-- Topbar --}}
-        <header class="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur lg:px-8">
-            <div class="flex items-center gap-3">
+        <header class="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-garis bg-kertas/90 px-4 py-3 backdrop-blur lg:px-8">
+            <div class="flex min-w-0 items-center gap-3">
                 <button type="button" data-toggle-sidebar aria-controls="sidebar" aria-expanded="false" aria-label="Buka menu"
-                        class="rounded-md border border-slate-300 p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden">
+                        class="rounded-md border border-slate-300 p-2 text-slate-600 transition hover:bg-white lg:hidden">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <div>
+                <div class="min-w-0">
                     <nav aria-label="Breadcrumb" class="mb-0.5">
-                        <ol class="flex items-center gap-1 text-xs text-slate-500">
+                        <ol class="flex items-center gap-1 text-xs text-slate-600">
                             <li><a href="{{ route('dashboard') }}" class="hover:text-brand-700 hover:underline">Admin</a></li>
                             <li aria-hidden="true">/</li>
                             <li class="font-medium text-slate-700" aria-current="page">@yield('title', 'Dashboard')</li>
                         </ol>
                     </nav>
-                    <h1 class="sr-only">@yield('title', 'Dashboard')</h1>
+                    <h1 class="truncate font-judul text-xl font-semibold tracking-tight text-tinta">@yield('title', 'Dashboard')</h1>
+                    @hasSection('subtitle')
+                        <p class="truncate text-xs text-slate-600">@yield('subtitle')</p>
+                    @endif
                 </div>
             </div>
 
@@ -141,7 +144,7 @@
                         <span class="hidden sm:inline">{{ auth()->user()?->name }}</span>
                     </summary>
                     <div class="pop-masuk absolute right-0 z-40 mt-2 w-64 rounded-card border border-slate-200 bg-white p-3 shadow-pop">
-                        <p class="text-sm font-semibold text-slate-900">{{ auth()->user()?->name }}</p>
+                        <p class="text-sm font-semibold text-tinta">{{ auth()->user()?->name }}</p>
                         <p class="mt-0.5 text-xs text-slate-500">{{ auth()->user()?->label_role }}</p>
                         <form method="POST" action="{{ route('logout') }}" class="mt-3">
                             @csrf
@@ -187,7 +190,7 @@
             @yield('content')
         </main>
 
-        <footer class="border-t border-slate-200 px-4 py-4 text-center text-xs text-slate-600 lg:px-8">
+        <footer class="border-t border-garis px-4 py-4 text-center text-xs text-slate-600 lg:px-8">
             {{ config('app.name') }} &middot; &copy; {{ date('Y') }}
         </footer>
     </div>

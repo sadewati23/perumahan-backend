@@ -41,7 +41,9 @@ class PublikController extends Controller
             'publik.perumahan.show'
         );
 
-        return view('publik.beranda', compact('statistik', 'perKecamatan', 'terbaru', 'titik'));
+        $terakhirDiperbarui = Perumahan::max('updated_at');
+
+        return view('publik.beranda', compact('statistik', 'perKecamatan', 'terbaru', 'titik', 'terakhirDiperbarui'));
     }
 
     public function index(Request $request): View

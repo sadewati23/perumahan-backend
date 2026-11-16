@@ -39,25 +39,6 @@ class AnimasiTest extends TestCase
         }
     }
 
-    public function test_statistik_publik_memiliki_data_hitung_dengan_teks_server(): void
-    {
-        $html = $this->get(route('publik.beranda'))->assertOk()->getContent();
-
-        $this->assertSame(4, substr_count($html, 'data-hitung='));
-        $this->assertSame(2, substr_count($html, 'data-hitung="0" data-desimal="2" aria-label="0,00">0,00</p>'));
-        $this->assertSame(2, substr_count($html, 'data-hitung="0" data-desimal="0" aria-label="0">0</p>'));
-    }
-
-    public function test_kpi_dashboard_memiliki_data_hitung(): void
-    {
-        $user = \App\Models\User::factory()->create(['role' => 'admin', 'is_active' => true]);
-        $html = $this->actingAs($user)->get(route('dashboard'))->assertOk()->getContent();
-
-        $this->assertSame(4, substr_count($html, 'data-hitung='));
-        $this->assertStringContainsString('data-hitung="0" data-desimal="0"', $html);
-        $this->assertStringContainsString('data-hitung="0" data-desimal="2"', $html);
-    }
-
     public function test_hapus_laporan_dashboard_memakai_form_konfirmasi_global(): void
     {
         $html = file_get_contents(resource_path('views/admin/dashboard.blade.php'));
@@ -77,20 +58,22 @@ class AnimasiTest extends TestCase
         $this->assertStringNotContainsString('data-action="', $html);
     }
 
-    public function test_modul_javascript_animasi_terhubung(): void
+    public function test_modul_javascript_umpan_balik_terhubung(): void
     {
         $publik = file_get_contents(resource_path('js/publik.js'));
         $admin = file_get_contents(resource_path('js/admin.js'));
-        $hitung = file_get_contents(resource_path('js/umum/hitung-naik.js'));
         $flash = file_get_contents(resource_path('js/umum/flash.js'));
 
-        $this->assertFileExists(resource_path('js/umum/hitung-naik.js'));
-        $this->assertStringContainsString("from './umum/hitung-naik'", $publik);
-        $this->assertStringContainsString('initHitungNaik()', $publik);
-        $this->assertStringContainsString("from './umum/hitung-naik'", $admin);
-        $this->assertStringContainsString('initHitungNaik()', $admin);
-        $this->assertStringContainsString('prefers-reduced-motion', $hitung);
+        $this->assertStringContainsString("from './umum/flash'", $publik);
+        $this->assertStringContainsString("from './umum/flash'", $admin);
         $this->assertStringContainsString('toast-keluar', $flash);
         $this->assertStringContainsString('prefers-reduced-motion', $flash);
+
+        // Animasi dekoratif (hitung naik & reveal saat menggulir) sengaja
+        // dihapus; angka dirender langsung dari server.
+        $this->assertStringNotContainsString('hitung-naik', $publik);
+        $this->assertStringNotContainsString('reveal-scroll', $publik);
+        $this->assertFileDoesNotExist(resource_path('js/umum/hitung-naik.js'));
+        $this->assertFileDoesNotExist(resource_path('js/publik/reveal-scroll.js'));
     }
 }

@@ -25,7 +25,7 @@ class CekLaporanController extends Controller
     {
         if ($request->filled('jawaban_cadangan')) return back()->withInput()->withErrors(['kode' => self::PESAN]);
         $laporan = Laporan::dapatDicari()
-            ->with(['perumahan', 'kelurahan.kecamatan'])
+            ->with(['perumahan', 'kelurahan.kecamatan', 'riwayats'])
             ->where('kode', $request->validated('kode'))
             ->first();
         if (! $laporan) return back()->withInput()->withErrors(['kode' => self::PESAN]);

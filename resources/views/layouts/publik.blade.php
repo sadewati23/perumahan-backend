@@ -9,33 +9,33 @@
     <meta name="description" content="@yield('description', 'Informasi data perumahan: lokasi, luasan lahan, jumlah unit, RTH, KDB/KDH, PSU, dan status perumahan.')">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=archivo-narrow:500,600,700|instrument-sans:400,500,600,700" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/publik.js'])
     @stack('head')
 </head>
-<body class="flex min-h-screen flex-col bg-neutral-50 font-sans text-slate-800 antialiased">
+<body class="flex min-h-screen flex-col bg-kertas font-sans text-slate-700 antialiased">
     {{-- Skip link untuk navigasi keyboard --}}
     <a href="#main"
        class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg">
         Lewati ke konten utama
     </a>
 
-    <header class="header-masuk sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header class="sticky top-0 z-40 border-b border-garis bg-kertas/95 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 lg:px-8">
             <a href="{{ route('publik.beranda') }}" class="flex min-w-0 items-center gap-3">
                  @if ($tanpaFoto ?? false)
-                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">DP</span>
+                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-tinta text-sm font-bold text-white">DP</span>
                  @else
                      <x-logo />
                  @endif
                 <span class="min-w-0 leading-tight">
-                    <span class="block truncate text-sm font-semibold text-slate-900">Data Perumahan</span>
-                    <span class="block truncate text-xs text-slate-500">{{ config('peta.nama_wilayah') }}</span>
+                    <span class="block truncate text-sm font-semibold text-tinta">Data Perumahan</span>
+                    <span class="block truncate text-xs text-slate-600">{{ config('peta.nama_wilayah') }}</span>
                 </span>
             </a>
 
-            <nav class="hidden items-center gap-1 md:flex" aria-label="Menu utama">
+            <nav class="hidden items-center gap-1 lg:flex" aria-label="Menu utama">
                 @php
                     $menu = [
                         ['label' => 'Beranda', 'route' => 'publik.beranda', 'active' => 'publik.beranda'],
@@ -50,19 +50,19 @@
                     @php $aktif = request()->routeIs($item['active']); @endphp
                     <a href="{{ route($item['route']) }}"
                        @if ($aktif) aria-current="page" @endif
-                       class="nav-animasi rounded-lg px-3 py-2 text-sm font-medium transition {{ $aktif ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                       class="nav-animasi whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition {{ $aktif ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-kertas-tua hover:text-tinta' }}">
                         {{ $item['label'] }}
                     </a>
                 @endforeach
             </nav>
 
             <a href="{{ route('login') }}"
-                class="tombol-animasi shrink-0 whitespace-nowrap rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:px-4">
-                <span class="hidden sm:inline">Masuk </span>Admin
+                class="shrink-0 whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-white hover:text-brand-700">
+                <span class="hidden sm:inline">Masuk </span>Petugas
             </a>
         </div>
 
-        <nav class="no-scrollbar flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden" aria-label="Menu utama">
+        <nav class="no-scrollbar flex gap-1 overflow-x-auto border-t border-garis px-4 py-2 lg:hidden" aria-label="Menu utama">
             @foreach ($menu as $item)
                 @php $aktif = request()->routeIs($item['active']); @endphp
                 <a href="{{ route($item['route']) }}"
@@ -74,7 +74,7 @@
         </nav>
     </header>
 
-    <main id="main" class="halaman-masuk flex-1">
+    <main id="main" class="flex-1">
         @if (session('success'))
             <div class="mx-auto max-w-7xl px-4 pt-4 lg:px-8">
                 <x-flash-message tone="success" auto-dismiss>
@@ -94,51 +94,54 @@
         @yield('content')
     </main>
 
-    <footer class="footer-gradasi mt-12 border-t border-slate-200 bg-gradient-to-b from-white via-slate-50 to-slate-100">
+    <footer class="mt-12 border-t border-garis bg-white">
         <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
             <div class="lg:col-span-2">
                 <div class="flex items-center gap-3">
                      @if ($tanpaFoto ?? false)
-                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white">DP</span>
+                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-tinta text-xs font-bold text-white">DP</span>
                      @else
                          <x-logo ukuran="h-9 w-9" />
                      @endif
-                    <span class="font-semibold text-slate-900">{{ config('app.name') }}</span>
+                    <span class="font-semibold text-tinta">{{ config('app.name') }}</span>
                 </div>
-                <p class="mt-3 max-w-md text-sm text-slate-600">
-                    Portal informasi data perumahan {{ config('peta.nama_wilayah') }} yang memuat identitas perumahan, lokasi administratif, titik koordinat,
-                    luasan lahan, jumlah unit, RTH, KDB/KDH, lahan pemakaman, prasarana-sarana-utilitas (PSU), serta status subsidi/komersil/campuran.
+                <p class="mt-3 max-w-md text-sm leading-6 text-slate-600">
+                    Portal data perumahan {{ config('peta.nama_wilayah') }}: lokasi administratif, titik koordinat,
+                    luas lahan, jumlah unit, RTH, KDB/KDH, lahan pemakaman, PSU, serta status subsidi, komersil, atau campuran.
+                </p>
+                <p class="mt-3 text-xs text-slate-600">
+                    Sumber data: pendataan petugas di lapangan. Data diperbarui secara berkala.
                 </p>
             </div>
 
             <div>
-                <p class="text-sm font-semibold text-slate-900">Jelajahi</p>
+                <p class="text-sm font-semibold text-tinta">Jelajahi</p>
                 <ul class="mt-3 space-y-2 text-sm text-slate-600">
-                    <li><a href="{{ route('publik.perumahan.index') }}" class="hover:text-brand-600">Daftar Perumahan</a></li>
-                    <li><a href="{{ route('publik.peta') }}" class="hover:text-brand-600">Peta Sebaran</a></li>
-                    <li><a href="{{ route('lapor.create') }}" class="hover:text-brand-600">Lapor Kerusakan / Pengaduan</a></li>
-                    <li><a href="{{ route('cek-laporan.index') }}" class="hover:text-brand-600">Cek Status Laporan</a></li>
-                    <li><a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener" class="hover:text-brand-600">Data GeoJSON</a></li>
+                    <li><a href="{{ route('publik.perumahan.index') }}" class="hover:text-brand-700 hover:underline">Daftar Perumahan</a></li>
+                    <li><a href="{{ route('publik.peta') }}" class="hover:text-brand-700 hover:underline">Peta Sebaran</a></li>
+                    <li><a href="{{ route('lapor.create') }}" class="hover:text-brand-700 hover:underline">Lapor Kerusakan / Pengaduan</a></li>
+                    <li><a href="{{ route('cek-laporan.index') }}" class="hover:text-brand-700 hover:underline">Cek Status Laporan</a></li>
+                    <li><a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener" class="hover:text-brand-700 hover:underline">Unduh GeoJSON</a></li>
                 </ul>
             </div>
 
             <div>
-                <p class="text-sm font-semibold text-slate-900">Akses Petugas</p>
+                <p class="text-sm font-semibold text-tinta">Untuk Petugas</p>
                 <ul class="mt-3 space-y-2 text-sm text-slate-600">
-                    <li><a href="{{ route('login') }}" class="hover:text-brand-600">Masuk Admin / Petugas</a></li>
-                    <li class="text-slate-500">Pendataan &amp; pemutakhiran data dilakukan oleh petugas terverifikasi.</li>
+                    <li><a href="{{ route('login') }}" class="hover:text-brand-700 hover:underline">Masuk Admin / Petugas</a></li>
+                    <li class="text-slate-600">Pendataan dan pemutakhiran data dilakukan oleh petugas terverifikasi.</li>
                 </ul>
             </div>
         </div>
 
-        <div class="border-t border-slate-100 px-4 py-4 text-center text-xs text-slate-500 lg:px-8">
-            &copy; {{ date('Y') }} {{ config('app.name') }}. Data diperbarui secara berkala oleh petugas pendataan.
+        <div class="border-t border-garis px-4 py-4 text-center text-xs text-slate-600 lg:px-8">
+            &copy; {{ date('Y') }} {{ config('app.name') }}.
         </div>
     </footer>
 
     {{-- Tombol kembali ke atas: muncul setelah halaman digulir (lihat publik/kembali-atas.js). --}}
     <button type="button" id="kembali-atas" aria-label="Kembali ke atas" title="Kembali ke atas"
-            class="pointer-events-none fixed bottom-5 right-4 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-900/90 text-white opacity-0 shadow-lg ring-1 ring-white/20 backdrop-blur transition duration-300 hover:bg-slate-800 sm:bottom-6 sm:right-6">
+            class="pointer-events-none fixed bottom-5 right-4 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-tinta/90 text-white opacity-0 shadow-pop ring-1 ring-white/20 backdrop-blur transition duration-300 hover:bg-tinta sm:bottom-6 sm:right-6">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0-6 6m6-6 6 6"/>
         </svg>

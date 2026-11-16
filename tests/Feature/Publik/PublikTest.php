@@ -49,9 +49,9 @@ class PublikTest extends TestCase
 
         $this->get(route('publik.beranda'))
             ->assertOk()
-            ->assertSee('Informasi Data Perumahan')
+            ->assertSee('Data perumahan di')
             ->assertSee($perumahan->nama)
-            ->assertSee('Perumahan Terdata');
+            ->assertSee('Perumahan terbaru');
     }
 
     public function test_daftar_perumahan_publik_bisa_difilter(): void
@@ -96,7 +96,7 @@ class PublikTest extends TestCase
     {
         $this->buatPerumahan();
 
-        $this->get(route('publik.peta'))->assertOk()->assertSee('Peta Sebaran Perumahan');
+        $this->get(route('publik.peta'))->assertOk()->assertSee('Peta sebaran perumahan');
 
         $this->get(route('publik.peta.geojson'))
             ->assertOk()

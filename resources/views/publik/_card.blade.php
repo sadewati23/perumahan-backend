@@ -1,10 +1,10 @@
 @php
     $tema = $perumahan->status_theme;
 @endphp
-<article class="{{ $animasi ?? 'kartu-muncul' }} kartu-interaktif group relative flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 border-t-4 {{ $tema['rail_top'] }} bg-white shadow-sm focus-within:ring-2 focus-within:ring-brand-600 focus-within:ring-offset-2">
+<article class="group relative flex h-full flex-col overflow-hidden rounded-card border border-garis border-t-4 {{ $tema['rail_top'] }} bg-white shadow-card transition hover:shadow-card-hover focus-within:ring-2 focus-within:ring-brand-600 focus-within:ring-offset-2">
     <div class="relative">
         <x-foto-perumahan :perumahan="$perumahan" class="aspect-[16/9] w-full" />
-        <span class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold shadow-sm ring-1 ring-slate-200 {{ $perumahan->status_badge_class }}">
+        <span class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 shadow-card {{ $perumahan->status_badge_class }}">
             <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true"></span>
             {{ $perumahan->status_label }}
         </span>
@@ -14,7 +14,7 @@
         <h3 class="text-base leading-snug">
             {{-- Satu-satunya tautan kartu; area klik diperluas ke seluruh kartu. --}}
             <a href="{{ route('publik.perumahan.show', $perumahan) }}"
-               class="line-clamp-2 font-semibold text-slate-900 transition-colors after:absolute after:inset-0 after:z-10 after:content-[''] group-hover:text-brand-700">
+               class="line-clamp-2 font-semibold text-tinta transition-colors after:absolute after:inset-0 after:z-10 after:content-[''] group-hover:text-brand-700">
                 {{ $perumahan->nama }}
             </a>
         </h3>
@@ -26,32 +26,32 @@
             <span>
                 Kel. {{ $perumahan->kelurahan->nama ?? '-' }}, Kec. {{ $perumahan->kelurahan->kecamatan->nama ?? '-' }}
                 @if ($perumahan->rt || $perumahan->rw)
-                    <span class="block text-xs text-slate-500">RT {{ $perumahan->rt ?: '-' }} / RW {{ $perumahan->rw ?: '-' }}</span>
+                    <span class="block text-xs text-slate-600">RT {{ $perumahan->rt ?: '-' }} / RW {{ $perumahan->rw ?: '-' }}</span>
                 @endif
             </span>
         </p>
 
-        <dl class="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3 text-sm">
+        <dl class="mt-3 grid grid-cols-3 gap-2 border-t border-garis pt-3 text-sm">
             <div>
-                <dt class="text-[11px] leading-4 text-slate-500">Jumlah unit</dt>
-                <dd class="mt-0.5 font-semibold tabular-nums text-slate-900">{{ number_format($perumahan->jumlah_unit, 0, ',', '.') }}</dd>
+                <dt class="text-xs leading-4 text-slate-600">Jumlah unit</dt>
+                <dd class="mt-1 font-semibold tabular-nums text-tinta">{{ number_format($perumahan->jumlah_unit, 0, ',', '.') }}</dd>
             </div>
             <div>
-                <dt class="text-[11px] leading-4 text-slate-500">Luas lahan</dt>
-                <dd class="mt-0.5 font-semibold tabular-nums text-slate-900">{{ number_format((float) $perumahan->luas_lahan / 10000, 2, ',', '.') }} ha</dd>
+                <dt class="text-xs leading-4 text-slate-600">Luas lahan</dt>
+                <dd class="mt-1 font-semibold tabular-nums text-tinta">{{ number_format((float) $perumahan->luas_lahan / 10000, 2, ',', '.') }} ha</dd>
             </div>
             <div>
-                <dt class="text-[11px] leading-4 text-slate-500">Tahun selesai</dt>
-                <dd class="mt-0.5 font-semibold tabular-nums text-slate-900">{{ $perumahan->tahun_selesai ?: '-' }}</dd>
+                <dt class="text-xs leading-4 text-slate-600">Tahun selesai</dt>
+                <dd class="mt-1 font-semibold tabular-nums text-tinta">{{ $perumahan->tahun_selesai ?: '-' }}</dd>
             </div>
         </dl>
 
-        <p class="mt-2 text-xs text-slate-500">
+        <p class="mt-2 text-xs text-slate-600">
             Pengembang: {{ $perumahan->pengembang ?: 'tidak tercatat' }}
         </p>
     </div>
 
-    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-[11px] text-slate-500 sm:px-5">
+    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-garis bg-kertas px-4 py-2.5 text-xs text-slate-600 sm:px-5">
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span class="whitespace-nowrap">RTH {{ number_format((float) $perumahan->luas_rth / 10000, 2, ',', '.') }} ha</span>
             <span class="whitespace-nowrap">KDB {{ $perumahan->kdb !== null ? (float) $perumahan->kdb . '%' : '-' }}</span>
@@ -66,7 +66,7 @@
             @endif
         </div>
 
-        <span class="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-xs font-semibold text-brand-700 transition-colors group-hover:underline" aria-hidden="true">
+        <span class="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-xs font-semibold text-brand-700 group-hover:underline" aria-hidden="true">
             Lihat detail <span aria-hidden="true">&rarr;</span>
         </span>
     </div>

@@ -9,7 +9,6 @@ import { initFlashMessages } from './umum/flash';
 import { initConfirmDialog } from './admin/confirm-dialog';
 import { initSubmitGuard } from './umum/form-submit';
 import { initFormFields } from './umum/form-fields';
-import { initHitungNaik } from './umum/hitung-naik';
 import { initSidebar } from './admin/sidebar';
 import { initBarisDinamis } from './admin/baris-dinamis';
 import { initFotoUpload } from './umum/foto-upload';
@@ -29,7 +28,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Fase 2 (formulir): aria field, counter, toggle password, guard ---
     initFormFields();
-
-    // --- Animasi & util ---
-    initHitungNaik();
 });

@@ -1,6 +1,6 @@
-<section id="psu" class="scroll-mt-28 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 md:scroll-mt-36">
+<section id="psu" class="scroll-mt-28 rounded-card border border-garis bg-white p-5 shadow-card sm:p-6 md:scroll-mt-36">
     <div class="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 class="text-base font-semibold text-slate-900">Prasarana, Sarana &amp; Utilitas (PSU)</h2>
+        <h2 class="font-judul text-xl font-semibold tracking-tight text-tinta">Prasarana, Sarana &amp; Utilitas (PSU)</h2>
         <a href="{{ route('lapor.create', ['perumahan' => $perumahan->id]) }}"
            class="text-xs font-medium text-brand-700 hover:underline">
             Ada yang rusak? Laporkan &rarr;
@@ -15,7 +15,7 @@
     @endif
 
     @if ($perumahan->psu->isEmpty())
-        <p class="mt-4 text-sm text-slate-500">Data PSU belum tersedia.</p>
+        <p class="mt-4 text-sm text-slate-600">Data PSU belum tersedia.</p>
     @else
         <div class="mt-4 overflow-x-auto">
             <table class="tabel-mini min-w-full divide-y divide-slate-200 text-sm">
@@ -27,7 +27,7 @@
                         <th class="whitespace-nowrap py-2">Keterangan</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-garis">
                     @foreach ($perumahan->psu as $psu)
                         <tr class="{{ in_array($psu->kondisi, ['rusak_ringan', 'rusak_berat'], true) ? 'bg-danger-50/40' : '' }}">
                             <td data-label="Jenis PSU" class="py-3 pr-4 font-medium text-slate-700">{{ $psu->jenis }}</td>
@@ -40,7 +40,7 @@
                                     {{ $psu->label_kondisi }}
                                 </span>
                             </td>
-                            <td data-label="Keterangan" class="py-3 text-slate-500">{{ $psu->keterangan ?: '-' }}</td>
+                            <td data-label="Keterangan" class="py-3 text-slate-600">{{ $psu->keterangan ?: '-' }}</td>
                         </tr>
                     @endforeach
                 </tbody>

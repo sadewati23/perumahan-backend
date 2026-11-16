@@ -113,8 +113,8 @@ class CakupanJsTest extends TestCase
 
         // Pastikan pemeriksaan bukan no-op: hook ikonik tiap area harus diproses.
         $ikonik = $area === 'admin'
-            ? ['data:confirm', 'data:toggle-sidebar', 'data:dynamic-rows', 'data:field', 'data:flash', 'data:hitung']
-            : ['data:field', 'data:flash', 'data:copy', 'data:foto-upload', 'kelas:reveal-scroll', 'data:hitung'];
+            ? ['data:confirm', 'data:toggle-sidebar', 'data:dynamic-rows', 'data:field', 'data:flash', 'data:foto-upload']
+            : ['data:field', 'data:flash', 'data:copy', 'data:foto-upload', 'data:nav-bagian', 'data:lightbox'];
         foreach ($ikonik as $hookIkonik) {
             $jenis = strtok($hookIkonik, ':');
             $token = substr($hookIkonik, strlen($jenis) + 1);

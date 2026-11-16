@@ -30,10 +30,10 @@
 
 <div class="grid gap-4 xl:grid-cols-3">
     {{-- Kolom kiri --}}
-    <div class="space-y-4 xl:col-span-2">
-        <x-card class="border-t-4 border-t-sky-300">
+    <div class="min-w-0 space-y-4 xl:col-span-2">
+        <x-card>
             <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-sky-100 text-xs font-bold text-sky-700">1</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">1</span>
                 Identitas &amp; Lokasi Administratif
             </h2>
 
@@ -54,13 +54,13 @@
                     <div data-foto-upload data-maks="1" data-maks-ukuran="5120"
                          data-tipe="image/jpeg,image/png,image/webp">
                         <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
-                               class="input file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white">
+                               class="input file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-brand-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white">
                         <ul data-foto-daftar class="mt-2 space-y-2"></ul>
                         <p data-foto-pesan class="mt-1 text-xs font-medium" aria-live="polite"></p>
                     </div>
-                    <p class="mt-1 text-xs text-slate-500">JPG, PNG, atau WEBP, maksimal 5 MB — foto besar otomatis dikompres.</p>
+                    <p class="mt-1 text-xs text-slate-600">JPG, PNG, atau WEBP, maksimal 5 MB — foto besar otomatis dikompres.</p>
                     @if ($perumahan->foto_url)
-                        <x-foto-perumahan :perumahan="$perumahan" class="mt-3 h-32 w-48 rounded-lg ring-1 ring-slate-200" />
+                        <x-foto-perumahan :perumahan="$perumahan" class="mt-3 h-32 w-48 rounded-lg ring-1 ring-garis" />
                     @endif
                 </x-field>
 
@@ -117,14 +117,14 @@
             </div>
         </x-card>
 
-        <x-card class="border-t-4 border-t-indigo-300">
+        <x-card>
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700">2</span>
+                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">2</span>
                     Titik Lokasi (GIS)
                 </h2>
                 <button type="button" id="btn-lokasi-saya"
-                        class="min-h-11 rounded-control border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 md:min-h-10">
+                        class="min-h-11 rounded-control border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-kertas md:min-h-10">
                     Gunakan lokasi saya
                 </button>
             </div>
@@ -143,17 +143,17 @@
                            class="input">
                 </x-field>
             </div>
-            <p class="mt-2 text-xs text-slate-500">
+            <p class="mt-2 text-xs text-slate-600">
                 Klik peta atau geser marker untuk mengisi koordinat secara otomatis.
                 Peta default menampilkan wilayah <span class="font-medium text-slate-700">{{ config('peta.nama_wilayah') }}</span>.
             </p>
 
-            <div id="map-picker" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100 sm:h-80"></div>
+            <div id="map-picker" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-garis bg-kertas-tua sm:h-80"></div>
         </x-card>
 
-        <x-card class="border-t-4 border-t-emerald-300">
+        <x-card>
             <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-xs font-bold text-emerald-700">3</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">3</span>
                 Luasan, Unit, RTH &amp; Koefisien
             </h2>
 
@@ -166,7 +166,7 @@
                 <x-field name="jumlah_unit" label="Jumlah Unit" for="jumlah_unit" required hint="Harus sama dengan total rincian tipe di bawah.">
                     <input type="number" id="jumlah_unit" min="0" inputmode="numeric" name="jumlah_unit"
                            value="{{ $val('jumlah_unit', 0) }}" required class="input">
-                    <p id="total-unit-tipe" class="mt-1 text-xs text-slate-500">
+                    <p id="total-unit-tipe" class="mt-1 text-xs text-slate-600">
                         Total dari rincian tipe: <span class="font-semibold text-slate-700">0</span> unit
                     </p>
                 </x-field>
@@ -203,18 +203,18 @@
             </div>
         </x-card>
 
-        <x-card padded="false" data-dynamic-rows data-template="template-tipe" class="border-t-4 border-t-amber-300">
-            <div class="mb-4 border-b border-amber-100 bg-amber-50/30 p-4 sm:p-5 lg:p-6">
+        <x-card padded="false" data-dynamic-rows data-template="template-tipe">
+            <div class="mb-4 border-b border-garis bg-kertas p-4 sm:p-5 lg:p-6">
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div>
                         <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-100 text-xs font-bold text-amber-700">4</span>
+                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">4</span>
                             Unit &amp; Tipe Rumah
                         </h2>
-                        <p class="mt-0.5 text-xs text-slate-500">Rincikan tipe unit yang dibangun beserta jumlahnya.</p>
+                        <p class="mt-0.5 text-xs text-slate-600">Rincikan tipe unit yang dibangun beserta jumlahnya.</p>
                     </div>
                     <button type="button" data-add-row
-                            class="shrink-0 whitespace-nowrap rounded-control bg-amber-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-amber-600">
+                            class="shrink-0 whitespace-nowrap rounded-control border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-kertas">
                         + Tambah Tipe
                     </button>
                 </div>
@@ -222,7 +222,7 @@
 
             <div class="no-scrollbar overflow-x-auto px-4 pb-4 sm:px-5 lg:px-6">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                         <tr>
                             <th class="py-2 pr-2">Tipe</th>
                             <th class="py-2 pr-2">Jumlah</th>
@@ -232,7 +232,7 @@
                             <th class="py-2"></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-garis">
                         @foreach ($tipeRows as $index => $row)
                             <tr>
                                 <td class="py-2 pr-2">
@@ -277,18 +277,18 @@
             </div>
         </x-card>
 
-        <x-card padded="false" data-dynamic-rows data-template="template-psu" class="border-t-4 border-t-violet-300">
-            <div class="mb-4 border-b border-violet-100 bg-violet-50/30 p-4 sm:p-5 lg:p-6">
+        <x-card padded="false" data-dynamic-rows data-template="template-psu">
+            <div class="mb-4 border-b border-garis bg-kertas p-4 sm:p-5 lg:p-6">
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div>
                         <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-100 text-xs font-bold text-violet-700">5</span>
+                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">5</span>
                             Data PSU
                         </h2>
-                        <p class="mt-0.5 text-xs text-slate-500">Prasarana, sarana, dan utilitas yang tersedia di perumahan.</p>
+                        <p class="mt-0.5 text-xs text-slate-600">Prasarana, sarana, dan utilitas yang tersedia di perumahan.</p>
                     </div>
                     <button type="button" data-add-row
-                            class="shrink-0 whitespace-nowrap rounded-control bg-violet-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-violet-700">
+                            class="shrink-0 whitespace-nowrap rounded-control border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-kertas">
                         + Tambah PSU
                     </button>
                 </div>
@@ -296,7 +296,7 @@
 
             <div class="no-scrollbar overflow-x-auto px-4 pb-4 sm:px-5 lg:px-6">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                         <tr>
                             <th class="py-2 pr-2">Jenis PSU</th>
                             <th class="py-2 pr-2">Jumlah</th>
@@ -306,7 +306,7 @@
                             <th class="py-2"></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-garis">
                         @foreach ($psuRows as $index => $row)
                             <tr>
                                 <td class="py-2 pr-2">
@@ -368,9 +368,9 @@
 
     {{-- Kolom kanan --}}
     <div class="space-y-4">
-        <x-card class="border-t-4 border-t-rose-300">
+        <x-card>
             <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 text-xs font-bold text-rose-700">6</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">6</span>
                 Lahan Pemakaman
             </h2>
 
@@ -395,9 +395,9 @@
             </div>
         </x-card>
 
-        <x-card class="border-t-4 border-t-slate-300">
+        <x-card>
             <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-700">7</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700">7</span>
                 Keterangan Tambahan
             </h2>
             <x-field name="keterangan" optional hint="Maksimal 2000 karakter.">
@@ -409,7 +409,7 @@
 </div>
 
 {{-- --- Action bar lengket: Simpan / Batal --- --}}
-<div class="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-pop backdrop-blur lg:-mx-8 lg:px-8">
+<div class="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-garis bg-white/95 px-4 py-3 shadow-pop backdrop-blur lg:-mx-8 lg:px-8">
     <div class="flex flex-wrap items-center justify-end gap-3">
         <x-button variant="secondary" href="{{ $cancelRoute ?? route('perumahan.index') }}">Batal</x-button>
         <x-button type="submit">{{ $submitLabel ?? 'Simpan Data' }}</x-button>

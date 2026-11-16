@@ -6,109 +6,6 @@
     html { scroll-behavior: smooth; }
 }
 
-/* Teks muncul bertahap dari bawah */
-@keyframes naik-masuk {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: none; }
-}
-@media (prefers-reduced-motion: no-preference) {
-    .masuk-naik { animation: naik-masuk .7s cubic-bezier(.22, 1, .36, 1) both; }
-    .tunda-1 { animation-delay: .1s; }
-    .tunda-2 { animation-delay: .25s; }
-    .tunda-3 { animation-delay: .4s; }
-    .tunda-4 { animation-delay: .55s; }
-}
-
-/* Animasi ringan untuk navigasi dan konten publik. Tidak mengubah warna UI. */
-@keyframes halaman-masuk {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: none; }
-}
-
-@keyframes garis-masuk {
-    from { opacity: 0; transform: scaleX(.94); }
-    to { opacity: 1; transform: scaleX(1); }
-}
-
-@keyframes melayang {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-8px) rotate(1deg); }
-}
-
-@keyframes muncul-scroll {
-    from { opacity: 0; transform: translateY(22px) scale(.985); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .halaman-masuk { animation: halaman-masuk .55s cubic-bezier(.22, 1, .36, 1) both; }
-    .header-masuk { animation: garis-masuk .5s cubic-bezier(.22, 1, .36, 1) both; transform-origin: top center; }
-    .kartu-interaktif {
-        transition: transform .25s cubic-bezier(.22, 1, .36, 1), box-shadow .25s ease;
-    }
-    .kartu-interaktif:hover { transform: translateY(-4px); }
-    .kartu-interaktif img.relative {
-        transition: transform .45s cubic-bezier(.22, 1, .36, 1);
-    }
-    .kartu-interaktif:hover img.relative { transform: scale(1.045); }
-    .nav-animasi { position: relative; }
-    .nav-animasi::after {
-        content: '';
-        position: absolute;
-        right: .75rem;
-        bottom: .3rem;
-        left: .75rem;
-        height: 2px;
-        transform: scaleX(0);
-        transform-origin: center;
-        background: currentColor;
-        transition: transform .25s ease;
-    }
-    .nav-animasi:hover::after,
-    .nav-animasi[aria-current='page']::after { transform: scaleX(1); }
-    .tombol-animasi { transition: transform .2s ease, box-shadow .2s ease; }
-    .tombol-animasi:hover { transform: translateY(-2px); }
-    .tombol-animasi:active { transform: translateY(0) scale(.98); }
-    .hero-mengambang { animation: melayang 6s ease-in-out infinite; }
-    .reveal-scroll { opacity: 0; transform: translateY(22px) scale(.985); }
-    .reveal-scroll.is-visible { animation: muncul-scroll .65s cubic-bezier(.22, 1, .36, 1) both; }
-}
-
-/* Kilau emas yang bergerak pelan pada teks sorotan */
-@keyframes kilau-teks { to { background-position: 200% center; } }
-.teks-kilau {
-    color: #fde68a;
-    background-image: linear-gradient(90deg, #fde68a, #ffffff, #fcd34d, #fde68a);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-@media (prefers-reduced-motion: no-preference) {
-    .teks-kilau { animation: kilau-teks 4s linear infinite; }
-}
-
-@keyframes batang-tumbuh { from { transform: scaleX(0); } }
-@keyframes kartu-muncul { from { opacity: 0; transform: translateY(20px); } }
-
-@media (prefers-reduced-motion: no-preference) {
-    .batang { transform-origin: left center; animation: batang-tumbuh 1s cubic-bezier(.22, 1, .36, 1) both; }
-    .kartu-muncul { animation: kartu-muncul .6s cubic-bezier(.22, 1, .36, 1) both; }
-
-    @supports not (animation-timeline: view()) {
-        .kartu-muncul:nth-child(2) { animation-delay: .08s; }
-        .kartu-muncul:nth-child(3) { animation-delay: .16s; }
-        .kartu-muncul:nth-child(4) { animation-delay: .24s; }
-    }
-
-    @supports (animation-timeline: view()) {
-        .batang, .kartu-muncul {
-            animation-timeline: view();
-            animation-range: entry 0% entry 70%;
-        }
-    }
-}
-
 @source '../../app/**/*.php';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../views/**/*.blade.php';
@@ -117,21 +14,29 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Huruf judul: sempit, seperti papan nama perumahan dan angka denah.
+       Hanya untuk judul halaman dan angka besar (>= 24px). */
+    --font-judul: 'Archivo Narrow', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 
-    /* --- Warna brand (dasar biru/denim) ---
-       Satu warna aksen untuk portal publik: menu aktif, tombol, fokus, tautan.
-       Warna status (emerald/sky/violet) tetap memakai palet status masing-masing. */
+    /* --- Warna brand (satu warna aksi untuk publik & admin) --- */
     --color-brand-50: #eff6ff;
     --color-brand-100: #dbeafe;
     --color-brand-200: #bfdbfe;
     --color-brand-300: #93c5fd;
     --color-brand-400: #60a5fa;
     --color-brand-500: #3b82f6;
-    --color-brand-600: #2563eb;
-    --color-brand-700: #1d4ed8;
-    --color-brand-800: #1e40af;
-    --color-brand-900: #1e3a8a;
-    --color-brand-950: #172554;
+    --color-brand-600: #1d4ed8;
+    --color-brand-700: #1e40af;
+    --color-brand-800: #1e3a8a;
+    --color-brand-900: #172554;
+    --color-brand-950: #0f1a33;
+
+    /* --- Netral "lembar tapak": kertas, tinta, garis --- */
+    --color-kertas: #f5f6f3;
+    --color-kertas-tua: #ecefe9;
+    --color-tinta: #16211c;
+    --color-tinta-lembut: #3f4a44;
+    --color-garis: #cbd2cb;
 
     /* --- Warna status: sukses --- */
     --color-success-50: #ecfdf5;
@@ -187,10 +92,10 @@
     --radius-modal: 1rem;
     --radius-pill: 9999px;
 
-    /* --- Shadow --- */
-    --shadow-card: 0 1px 2px rgb(15 23 42 / 0.05), 0 1px 3px rgb(15 23 42 / 0.08);
-    --shadow-card-hover: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 10px 15px -3px rgb(15 23 42 / 0.1);
-    --shadow-pop: 0 10px 15px -3px rgb(15 23 42 / 0.12), 0 4px 6px -4px rgb(15 23 42 / 0.1);
+    /* --- Shadow: hanya dua tingkat untuk konten + satu untuk overlay --- */
+    --shadow-card: 0 1px 2px rgb(22 33 28 / 0.05), 0 1px 3px rgb(22 33 28 / 0.07);
+    --shadow-card-hover: 0 4px 6px -1px rgb(22 33 28 / 0.08), 0 10px 15px -3px rgb(22 33 28 / 0.1);
+    --shadow-pop: 0 10px 15px -3px rgb(22 33 28 / 0.12), 0 4px 6px -4px rgb(22 33 28 / 0.1);
 }
 
 /* Fokus keyboard yang jelas & konsisten untuk semua elemen interaktif. */
@@ -201,7 +106,7 @@
         border-radius: 0.25rem;
     }
 
-    .bg-slate-900 :is(a, button, [tabindex], summary):focus-visible,
+    .bg-tinta :is(a, button, [tabindex], summary):focus-visible,
     .bg-brand-600 :is(a, button, [tabindex], summary):focus-visible {
         outline-color: var(--color-brand-200);
     }
@@ -232,7 +137,7 @@
         @apply border-brand-500 bg-brand-50 ring-2 ring-brand-500/30;
     }
 
-    /* Tombol aksi standar portal publik: satu warna aksen (brand) + varian netral.
+    /* Tombol aksi standar: satu warna aksen (brand) + varian netral.
        Tinggi minimum 44px di HP agar nyaman disentuh. */
     .tombol-utama {
         @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition
@@ -251,6 +156,13 @@
         .tombol-sekunder {
             min-height: 0;
         }
+    }
+
+    /* Angka utama: huruf judul sempit + tabular agar rapi sejajar. */
+    .angka-utama {
+        @apply font-judul tabular-nums tracking-tight text-tinta;
+        font-size: clamp(1.75rem, 1.35rem + 1.4vw, 2.5rem);
+        line-height: 1.05;
     }
 
     /* Panel filter yang bisa dilipat di HP (elemen <details>).
@@ -295,6 +207,28 @@
         .tabel-mini td > * { justify-self: end; }
         .tabel-mini td:empty { display: none; }
     }
+}
+
+/* Gerak yang tersisa hanya untuk umpan balik aksi, bukan dekorasi. */
+@media (prefers-reduced-motion: no-preference) {
+    .nav-animasi { position: relative; }
+    .nav-animasi::after {
+        content: '';
+        position: absolute;
+        right: .75rem;
+        bottom: .3rem;
+        left: .75rem;
+        height: 2px;
+        transform: scaleX(0);
+        transform-origin: center;
+        background: currentColor;
+        transition: transform .25s ease;
+    }
+    .nav-animasi:hover::after,
+    .nav-animasi[aria-current='page']::after { transform: scaleX(1); }
+    .tombol-animasi { transition: transform .2s ease, box-shadow .2s ease; }
+    .tombol-animasi:hover { transform: translateY(-1px); }
+    .tombol-animasi:active { transform: translateY(0) scale(.99); }
 }
 
 /* Hormati preferensi pengguna yang mengurangi gerakan. */
@@ -372,11 +306,6 @@
     &::-webkit-scrollbar {
         display: none;
     }
-}
-
-/* Angka & satuan yang panjang (m2, ha, koordinat) tidak melipat kata. */
-@utility text-nowrap {
-    white-space: nowrap;
 }
 
 /* Input tidak lagi memicu zoom otomatis di Safari iOS (butuh font >= 16px). */

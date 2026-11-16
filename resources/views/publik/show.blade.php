@@ -15,7 +15,7 @@
             'rusak_berat' => 'bg-danger-100 text-danger-800 ring-danger-300',
             'rusak_ringan' => 'bg-danger-50 text-danger-700 ring-danger-200',
             'baik' => 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-            default => 'bg-slate-100 text-slate-600 ring-slate-200',
+            default => 'bg-slate-100 text-slate-600 ring-garis',
         };
 
         $psuBermasalah = $perumahan->psu
@@ -28,7 +28,7 @@
     <div class="mx-auto max-w-7xl px-4 pb-10 lg:px-8">
         {{-- Navigasi bagian: di desktop menempel di bawah header; di HP tetap satu baris gulir. --}}
         <nav data-nav-bagian aria-label="Navigasi bagian halaman"
-             class="no-scrollbar -mx-4 mb-6 mt-4 flex gap-1 overflow-x-auto border-y border-slate-200 bg-white/95 px-4 py-2 backdrop-blur md:sticky md:top-[65px] md:z-30 md:mx-0 md:mt-6 md:rounded-xl md:border md:px-2 md:shadow-sm">
+             class="no-scrollbar -mx-4 mb-6 mt-4 flex gap-1 overflow-x-auto border-y border-garis bg-white/95 px-4 py-2 backdrop-blur md:sticky md:top-[65px] md:z-30 md:mx-0 md:mt-6 md:rounded-card md:border md:px-2 md:shadow-card">
             @foreach ([
                 ['lokasi', 'Lokasi'],
                 ['tahun-pemakaman', 'Tahun & Pemakaman'],
@@ -37,14 +37,14 @@
                 ['peta', 'Peta'],
             ] as [$bagianId, $bagianLabel])
                 <a href="#{{ $bagianId }}"
-                   class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
+                   class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-kertas-tua hover:text-tinta">
                     {{ $bagianLabel }}
                 </a>
             @endforeach
         </nav>
 
-        <div class="reveal-scroll grid gap-6 lg:grid-cols-3">
-            <div class="kartu-muncul space-y-6 lg:col-span-2">
+        <div class="grid gap-6 lg:grid-cols-3">
+            <div class="space-y-6 lg:col-span-2">
                 @include('publik.partials.detail-lokasi', ['perumahan' => $perumahan])
                 @include('publik.partials.detail-tahun-pemakaman', ['perumahan' => $perumahan])
                 @include('publik.partials.detail-tipe-unit', ['perumahan' => $perumahan])
@@ -56,8 +56,8 @@
                 @include('publik.partials.detail-peta', ['perumahan' => $perumahan])
 
                 @if ($perumahan->keterangan)
-                    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-                        <h2 class="text-base font-semibold text-slate-900">Keterangan</h2>
+                    <div class="rounded-card border border-garis bg-white p-5 shadow-card sm:p-6">
+                        <h2 class="font-judul text-xl font-semibold tracking-tight text-tinta">Keterangan</h2>
                         <p class="mt-3 whitespace-pre-line text-sm text-slate-600">{{ $perumahan->keterangan }}</p>
                     </div>
                 @endif

@@ -138,7 +138,13 @@ class Perumahan extends Model
 
     public function getFotoUrlAttribute(): ?string
     {
-        return $this->foto_path ? Storage::disk('public')->url($this->foto_path) : null;
+        // Bila berkas sudah tidak ada (mis. terhapus manual), kembalikan null
+        // agar tampilan memakai ilustrasi placeholder, bukan gambar rusak.
+        if (! $this->foto_path || ! Storage::disk('public')->exists($this->foto_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->foto_path);
     }
 
     /**

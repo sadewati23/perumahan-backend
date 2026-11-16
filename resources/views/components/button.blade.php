@@ -11,9 +11,9 @@
 
     $variants = [
         'primary' => 'bg-brand-600 text-white shadow-card hover:bg-brand-700 active:bg-brand-800',
-        'secondary' => 'border border-slate-300 bg-white text-slate-700 shadow-card hover:bg-slate-50 active:bg-slate-100',
+        'secondary' => 'border border-slate-300 bg-white text-slate-700 shadow-card hover:bg-kertas active:bg-kertas-tua',
         'danger' => 'bg-danger-600 text-white shadow-card hover:bg-danger-700 active:bg-danger-800',
-        'ghost' => 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+        'ghost' => 'text-slate-600 hover:bg-kertas-tua hover:text-tinta',
     ];
 
     $sizes = [

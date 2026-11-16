@@ -7,17 +7,17 @@
     <title>Konfirmasi Password — {{ config('app.name') }}</title>
     @include('partials.favicon')
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=archivo-narrow:500,600,700|instrument-sans:400,500,600,700" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
 </head>
-<body class="flex min-h-screen items-center justify-center bg-slate-900 px-4 py-10 font-sans text-slate-800 antialiased">
+<body class="flex min-h-screen items-center justify-center bg-tinta px-4 py-10 font-sans text-slate-800 antialiased">
     <div class="w-full max-w-md">
         <div class="mb-6 text-center">
             <x-logo tile ukuran="mx-auto mb-3 h-14 w-14" />
             <h1 class="text-xl font-semibold text-white">Konfirmasi Password</h1>
         </div>
 
-        <div class="rounded-2xl bg-white p-6 shadow-xl sm:p-8">
+        <div class="rounded-modal bg-white p-6 shadow-pop sm:p-8">
             <p class="mb-5 text-sm leading-6 text-slate-600">
                 Demi keamanan, masukkan password Anda untuk melanjutkan. Setelah dikonfirmasi, Anda akan kembali ke halaman sebelumnya dan perlu mengulangi aksi tersebut. Konfirmasi berlaku {{ $menit }} menit.
             </p>
@@ -33,7 +33,7 @@
                 <x-field name="password" for="password" label="Password" required>
                     <input id="password" name="password" type="password" required autofocus autocomplete="current-password" class="input">
                 </x-field>
-                <button type="submit" class="w-full min-h-11 rounded-control bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-card transition hover:bg-brand-700 active:bg-brand-800">
+                <button type="submit" class="tombol-utama w-full">
                     Konfirmasi
                 </button>
             </form>

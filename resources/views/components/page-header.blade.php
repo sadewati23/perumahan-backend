@@ -1,12 +1,14 @@
 @props([
     'title' => '',
     'breadcrumbs' => [],
+    'level' => 'h1',
+    'subtitle' => null,
 ])
 
 <header class="mb-6" {{ $attributes }}>
     @if (! empty($breadcrumbs))
         <nav aria-label="Breadcrumb">
-            <ol class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
+            <ol class="flex flex-wrap items-center gap-1.5 text-sm text-slate-600">
                 @foreach ($breadcrumbs as $crumb)
                     @php $lastCrumb = $loop->last; @endphp
                     <li class="flex items-center gap-1.5">
@@ -26,19 +28,17 @@
         </nav>
     @endif
 
-    {{-- Judul halaman memakai h2 karena layouts/admin sudah menyediakan satu
-         h1 (sr-only) dengan teks yang sama — menghindari h1 ganda per halaman. --}}
-    <div class="mt-1 flex flex-wrap items-center justify-between gap-3">
-        <h2 class="text-xl font-semibold text-slate-900 sm:text-2xl">
+    <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
+        <{{ $level }} class="font-judul text-2xl font-semibold tracking-tight text-tinta sm:text-3xl">
             {{ $title }}
-        </h2>
+        </{{ $level }}>
         @isset($actions)
             <div class="flex flex-wrap items-center gap-2">
                 {{ $actions }}
             </div>
         @endisset
     </div>
-    @isset($subtitle)
+    @if ($subtitle)
         <p class="mt-1 text-sm text-slate-600">{{ $subtitle }}</p>
-    @endisset
+    @endif
 </header>

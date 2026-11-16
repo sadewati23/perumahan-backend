@@ -8,9 +8,9 @@
 @endpush
 
 @section('content')
-    <section class="border-b border-slate-200 bg-white">
+    <section class="border-b border-garis bg-white">
         <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-            <nav class="text-xs text-slate-500">
+            <nav class="text-xs text-slate-600">
                 <a href="{{ route('publik.beranda') }}" class="hover:text-brand-600">Beranda</a>
                 <span class="mx-1">/</span>
                 <span class="text-slate-700">Peta Sebaran</span>
@@ -18,19 +18,18 @@
 
             <div class="mt-3 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-semibold text-slate-900">Peta Sebaran Perumahan</h1>
+                    <h1 class="font-judul text-3xl font-semibold tracking-tight text-tinta sm:text-4xl">Peta sebaran perumahan</h1>
                     <p class="mt-1 text-sm text-slate-600">
                         {{ $titik->count() }} perumahan memiliki titik koordinat dari {{ $perumahans->count() }} data yang cocok filter.
                     </p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3 text-sm">
-                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-emerald-500"></span> Subsidi</span>
-                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-sky-500"></span> Komersil</span>
-                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-violet-500"></span> Campuran</span>
-                    <a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener"
-                       class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        GeoJSON
+                <div class="flex flex-wrap items-center gap-4 text-sm text-slate-700">
+                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-emerald-500" aria-hidden="true"></span> Subsidi</span>
+                    <span class="flex items-center gap-2"><span class="h-3 w-3 rounded-sm bg-sky-500" aria-hidden="true"></span> Komersil</span>
+                    <span class="flex items-center gap-2"><span class="h-3 w-3 rotate-45 rounded-sm bg-violet-500" aria-hidden="true"></span> Campuran</span>
+                    <a href="{{ route('publik.peta.geojson') }}" target="_blank" rel="noopener" class="tombol-sekunder">
+                        Unduh GeoJSON
                     </a>
                 </div>
             </div>
@@ -39,11 +38,11 @@
                 <div class="md:col-span-2">
                     <label for="filter-peta-q" class="mb-1 block text-xs font-medium text-slate-600">Pencarian</label>
                     <input type="text" id="filter-peta-q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nama perumahan / kelurahan / kecamatan…"
-                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+                           class="input">
                 </div>
                 <div>
                     <label for="filter-peta-kecamatan" class="mb-1 block text-xs font-medium text-slate-600">Kecamatan</label>
-                    <select id="filter-peta-kecamatan" name="kecamatan_id" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                    <select id="filter-peta-kecamatan" name="kecamatan_id" class="input">
                         <option value="">Semua kecamatan</option>
                         @foreach ($kecamatans as $kecamatan)
                             <option value="{{ $kecamatan->id }}" @selected(($filters['kecamatan_id'] ?? '') == $kecamatan->id)>{{ $kecamatan->nama }}</option>
@@ -52,7 +51,7 @@
                 </div>
                 <div>
                     <label for="filter-peta-status" class="mb-1 block text-xs font-medium text-slate-600">Status</label>
-                    <select id="filter-peta-status" name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                    <select id="filter-peta-status" name="status" class="input">
                         <option value="">Semua status</option>
                         @foreach (\App\Models\Perumahan::STATUS as $value => $label)
                             <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
@@ -60,14 +59,9 @@
                     </select>
                 </div>
 
-                <div class="flex gap-2 md:col-span-4">
-                    <button type="submit" class="rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-700">
-                        Terapkan Filter
-                    </button>
-                    <a href="{{ route('publik.peta') }}"
-                       class="rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                        Reset
-                    </a>
+                <div class="flex flex-wrap gap-2 md:col-span-4">
+                    <button type="submit" class="tombol-utama">Terapkan filter</button>
+                    <a href="{{ route('publik.peta') }}" class="tombol-sekunder">Reset</a>
                 </div>
             </form>
         </div>
@@ -76,38 +70,37 @@
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         <div class="grid gap-4 lg:grid-cols-4">
             <div class="order-2 lg:order-1 lg:col-span-3">
-                <div id="peta-publik" class="h-[65vh] max-sm:h-[60vh] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm"></div>
+                <div id="peta-publik" class="h-[65vh] w-full overflow-hidden rounded-card border border-garis bg-kertas-tua shadow-card max-sm:h-[60vh]"></div>
             </div>
 
             <div class="order-1 space-y-4 lg:order-2">
-                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="rounded-card border border-garis bg-white p-4 shadow-card">
                     <label for="cari-lokasi" class="mb-1 block text-xs font-medium text-slate-600">Saring daftar lokasi</label>
-                    <input type="text" id="cari-lokasi" placeholder="Ketik nama perumahan…"
-                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
-                    <ul id="daftar-lokasi" class="no-scrollbar mt-3 max-h-80 divide-y divide-slate-100 overflow-y-auto text-sm">
+                    <input type="text" id="cari-lokasi" placeholder="Ketik nama perumahan…" class="input">
+                    <ul id="daftar-lokasi" class="no-scrollbar mt-3 max-h-80 divide-y divide-garis overflow-y-auto text-sm">
                         @foreach ($titik as $item)
                             <li data-cari="{{ strtolower($item['nama'].' '.$item['alamat']) }}">
                                 <button type="button" data-fokus="{{ $item['id'] }}"
                                         class="w-full py-2 text-left transition hover:text-brand-600">
                                     <span class="flex items-center gap-2">
-                                         <span class="h-2 w-2 shrink-0 rounded-full {{ match ($item['status']) { 'Subsidi' => 'bg-emerald-500', 'Komersil' => 'bg-sky-500', 'Campuran' => 'bg-violet-500', default => 'bg-slate-500' } }}"></span>
+                                         <span class="h-2 w-2 shrink-0 {{ match ($item['status']) { 'Subsidi' => 'rounded-full bg-emerald-500', 'Komersil' => 'rounded-sm bg-sky-500', 'Campuran' => 'rotate-45 rounded-sm bg-violet-500', default => 'rounded-full bg-slate-500' } }}"></span>
                                         <span class="truncate font-medium text-slate-700">{{ $item['nama'] }}</span>
                                     </span>
-                                    <span class="block truncate pl-4 text-xs text-slate-500">{{ $item['alamat'] }}</span>
+                                    <span class="block truncate pl-4 text-xs text-slate-600">{{ $item['alamat'] }}</span>
                                 </button>
                             </li>
                         @endforeach
                     </ul>
 
                     @if ($titik->isEmpty())
-                        <p class="mt-3 text-sm text-slate-500">Tidak ada perumahan dengan titik koordinat pada filter ini.</p>
+                        <p class="mt-3 text-sm text-slate-600">Tidak ada perumahan dengan titik koordinat pada filter ini.</p>
                     @endif
                 </div>
 
                 @php $tanpaKoordinat = $perumahans->filter(fn ($p) => ! $p->punya_koordinat); @endphp
 
                 @if ($tanpaKoordinat->isNotEmpty())
-                    <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm shadow-sm">
+                    <div class="rounded-card border border-amber-200 bg-amber-50 p-4 text-sm shadow-card">
                         <p class="font-semibold text-amber-800">Belum memiliki titik koordinat ({{ $tanpaKoordinat->count() }})</p>
                         <ul class="mt-2 max-h-56 space-y-1 overflow-y-auto text-amber-900">
                             @foreach ($tanpaKoordinat as $item)
@@ -154,26 +147,31 @@
 
             titik.forEach((p) => {
                 const warna = colors[p.status] || '#64748b';
+                const bentuk = p.status === 'Komersil'
+                    ? 'border-radius:2px'
+                    : p.status === 'Campuran'
+                        ? 'border-radius:2px;transform:rotate(45deg)'
+                        : 'border-radius:9999px';
                 const icon = L.divIcon({
                     className: '',
-                    html: `<div style="width:16px;height:16px;border-radius:9999px;background:${warna};border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
+                    html: `<div style="width:16px;height:16px;${bentuk};background:${warna};border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
                     iconSize: [16, 16],
                     iconAnchor: [8, 8],
                 });
 
                 const marker = L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(`
-                    <div style="min-width:230px">
-                        <p style="font-weight:600;margin:0 0 2px">${escapeHtml(p.nama)}</p>
+                    <div style="min-width:230px;font-family:'Instrument Sans',sans-serif">
+                        <p style="font-weight:600;margin:0 0 2px;color:#16211c">${escapeHtml(p.nama)}</p>
                         <p style="margin:0 0 6px;color:${warna};font-size:12px">${escapeHtml(p.status)}</p>
-                        <p style="margin:0 0 6px;color:#475569;font-size:12px">${escapeHtml(p.alamat)}</p>
-                        <table style="font-size:12px;color:#334155">
+                        <p style="margin:0 0 6px;color:#3f4a44;font-size:12px">${escapeHtml(p.alamat)}</p>
+                        <table style="font-size:12px;color:#3f4a44">
                             <tr><td>Jumlah unit</td><td style="text-align:right;padding-left:8px">${formatAngka(p.unit)}</td></tr>
                             <tr><td>Luas lahan</td><td style="text-align:right;padding-left:8px">${formatAngka(p.luas_lahan)} m&sup2;</td></tr>
                             <tr><td>Luas RTH</td><td style="text-align:right;padding-left:8px">${formatAngka(p.rth)} m&sup2;</td></tr>
                             <tr><td>KDB / KDH</td><td style="text-align:right;padding-left:8px">${p.kdb ?? '-'}% / ${p.kdh ?? '-'}%</td></tr>
                             <tr><td>Tahun selesai</td><td style="text-align:right;padding-left:8px">${p.tahun_selesai ?? '-'}</td></tr>
                         </table>
-                        <a href="${encodeURI(p.url)}" style="display:inline-block;margin-top:8px;color:#4f46e5;font-size:12px;font-weight:500">Lihat detail &rarr;</a>
+                        <a href="${encodeURI(p.url)}" style="display:inline-block;margin-top:8px;color:#1d4ed8;font-size:12px;font-weight:600">Lihat detail &rarr;</a>
                     </div>`);
 
                 markers[p.id] = marker;

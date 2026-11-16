@@ -7,7 +7,7 @@
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="space-y-3 lg:col-span-2">
             @foreach ($users as $user)
-                <div class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:hidden">
+                <div class="rounded-card border border-garis bg-white p-4 shadow-card md:hidden">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div class="flex items-start gap-3">
                             <span class="flex h-10 w-10 items-center justify-center rounded-pill bg-brand-100 text-sm font-semibold text-brand-700">
@@ -17,17 +17,17 @@
                                 <p class="font-semibold text-slate-800">
                                     {{ $user->name }}
                                     @if ($user->id === auth()->id())
-                                        <span class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">Anda</span>
+                                        <span class="ml-1 rounded bg-kertas-tua px-1.5 py-0.5 text-xs font-medium text-slate-600">Anda</span>
                                     @endif
                                 </p>
                                 <p class="text-sm text-slate-600">{{ $user->username }}</p>
-                                <p class="text-xs text-slate-500">{{ $user->email }}</p>
+                                <p class="text-xs text-slate-600">{{ $user->email }}</p>
                                 <p class="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                                    <span class="rounded-pill px-2 py-0.5 font-medium ring-1 ring-inset {{ $user->isAdmin() ? 'bg-brand-50 text-brand-700 ring-brand-200' : 'bg-slate-100 text-slate-600 ring-slate-200' }}">
+                                    <span class="rounded-pill px-2 py-0.5 font-medium ring-1 ring-inset {{ $user->isAdmin() ? 'bg-brand-50 text-brand-700 ring-brand-200' : 'bg-kertas-tua text-slate-600 ring-garis' }}">
                                         {{ $user->label_role }}
                                     </span>
                                     @if ($user->jabatan)
-                                        <span class="text-slate-500">{{ $user->jabatan }}</span>
+                                        <span class="text-slate-600">{{ $user->jabatan }}</span>
                                     @endif
                                     <span class="rounded-pill px-2 py-0.5 font-medium ring-1 ring-inset {{ $user->is_active ? 'bg-success-50 text-success-700 ring-success-200' : 'bg-danger-50 text-danger-700 ring-danger-200' }}">
                                         {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
@@ -40,11 +40,11 @@
                             {{-- ID field diberi prefix "ubah-m-" agar tidak bentrok dengan
                                  form edit yang sama di tabel desktop (keduanya dirender di DOM). --}}
                             <details class="relative">
-                                <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
+                                <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-kertas">
                                     Ubah
                                 </summary>
                                 <form method="POST" action="{{ route('users.update', $user) }}"
-                                      class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                                      class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-lg border border-garis bg-white p-3 shadow-pop">
                                     @csrf
                                     @method('PUT')
                                     @php $popover = true; @endphp
@@ -59,7 +59,7 @@
                                     <x-field name="m-{{ $user->id }}-email" for="ubah-m-{{ $user->id }}-email" label="Email" :show-errors="false">
                                         <input id="ubah-m-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
                                                required autocomplete="email" enterkeyhint="done" class="input">
-                                        <p class="text-xs text-slate-500">Dipakai untuk reset password.</p>
+                                        <p class="text-xs text-slate-600">Dipakai untuk reset password.</p>
                                     </x-field>
                                     <x-field name="m-{{ $user->id }}-role" for="ubah-m-{{ $user->id }}-role" label="Role" :show-errors="false">
                                         <select id="ubah-m-{{ $user->id }}-role" name="role" class="input">
@@ -103,9 +103,9 @@
             @endforeach
 
             {{-- Tampilan tabel untuk layar sedang ke atas --}}
-            <div class="hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:block">
+            <div class="hidden overflow-hidden rounded-card border border-garis bg-white shadow-card md:block">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead class="sticky top-0 z-10 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <thead class="sticky top-0 z-10 bg-kertas text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                         <tr>
                             <th class="px-4 py-3">Pengguna</th>
                             <th class="px-4 py-3">Username / Email</th>
@@ -114,18 +114,18 @@
                             <th class="px-4 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-garis">
                         @foreach ($users as $user)
-                            <tr class="masuk-naik {{ $loop->iteration <= 4 ? 'tunda-'.$loop->iteration : '' }} hover:bg-slate-50">
+                            <tr class="hover:bg-kertas">
                                 <td class="px-4 py-3">
                                     <p class="font-semibold text-slate-800">{{ $user->name }}</p>
                                     <p class="text-sm text-slate-600">{{ $user->username }}</p>
                                     @if ($user->jabatan)
-                                        <p class="text-xs text-slate-500">{{ $user->jabatan }}</p>
+                                        <p class="text-xs text-slate-600">{{ $user->jabatan }}</p>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-slate-600">
-                                    <span class="block text-xs text-slate-500">Email</span>{{ $user->email }}
+                                    <span class="block text-xs text-slate-600">Email</span>{{ $user->email }}
                                 </td>
                                 <td class="px-4 py-3">
                                     <x-badge :tone="$user->isAdmin() ? 'primary' : 'neutral'" size="sm">{{ $user->label_role }}</x-badge>
@@ -138,11 +138,11 @@
                                         {{-- Key data-field diberi prefix "t-" agar id petunjuk (mis. *-petunjuk)
                                              tidak bentrok dengan form "Tambah Pengguna" di kolom kanan. --}}
                                         <details class="relative">
-                                            <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
+                                            <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-kertas">
                                                 Ubah
                                             </summary>
                                             <form method="POST" action="{{ route('users.update', $user) }}"
-                                                  class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                                                  class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-lg border border-garis bg-white p-3 shadow-pop">
                                                 @csrf
                                                 @method('PUT')
                                                 @php $popover = true; @endphp
@@ -157,7 +157,7 @@
                                                     <x-field name="t-{{ $user->id }}-email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
                                                         <input id="ubah-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
                                                                required autocomplete="email" enterkeyhint="done" class="input">
-                                                        <p class="text-xs text-slate-500">Dipakai untuk reset password.</p>
+                                                        <p class="text-xs text-slate-600">Dipakai untuk reset password.</p>
                                                 </x-field>
                                                 <x-field name="t-{{ $user->id }}-role" for="ubah-{{ $user->id }}-role" label="Role" :show-errors="false">
                                                     <select id="ubah-{{ $user->id }}-role" name="role" class="input">
@@ -210,7 +210,7 @@
             </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="rounded-card border border-garis bg-white p-5 shadow-card">
             <h2 class="mb-3 text-sm font-semibold text-slate-800">Tambah Pengguna</h2>
             <form method="POST" action="{{ route('users.store') }}" class="space-y-3" data-unsaved-guard="Data pengguna belum disimpan.">
                 @csrf
@@ -225,7 +225,7 @@
                 <x-field name="email" label="Email" required>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" required
                            autocomplete="email" enterkeyhint="next" placeholder="nama@instansi.go.id" class="input">
-                    <p class="text-xs text-slate-500">Dipakai untuk reset password.</p>
+                    <p class="text-xs text-slate-600">Dipakai untuk reset password.</p>
                 </x-field>
                 <x-field name="role" label="Role" required hint="Administrator kelola seluruh data termasuk pengguna; petugas kelola data perumahan & wilayah.">
                     <select id="role" name="role" required class="input">
@@ -249,7 +249,7 @@
                 <x-button type="submit" class="w-full">Simpan Pengguna</x-button>
             </form>
 
-            <div class="mt-5 rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
+            <div class="mt-5 rounded-lg bg-kertas p-3 text-xs text-slate-600">
                 <p class="font-semibold text-slate-700">Hak akses</p>
                 <p class="mt-1"><span class="font-medium">Administrator</span>: kelola seluruh data termasuk pengguna.</p>
                 <p class="mt-1"><span class="font-medium">Petugas</span>: input dan ubah data perumahan serta wilayah.</p>
