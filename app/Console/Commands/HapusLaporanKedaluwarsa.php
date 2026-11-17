@@ -18,9 +18,13 @@ class HapusLaporanKedaluwarsa extends Command
         }
         $tanpaBatasLama = blank(config('laporan.hapus_otomatis_sejak'));
         if ($tanpaBatasLama) {
-            $pesan = 'LAPORAN_HAPUS_OTOMATIS_SEJAK kosong: laporan lama yang sudah selesai juga akan dihapus';
-            $this->warn($pesan);
-            if (! $this->option('dry-run')) Log::warning('laporan.hapus_otomatis_tanpa_batas_lama');
+            if (! $this->option('dry-run')) {
+                $this->error('Penghapusan otomatis dibatalkan: LAPORAN_HAPUS_OTOMATIS_SEJAK belum diisi. Isi tanggal deploy (YYYY-MM-DD) pada konfigurasi agar laporan lama tidak ikut terhapus. Tidak ada laporan yang dihapus.');
+                Log::error('laporan.hapus_otomatis_tanpa_batas_lama', ['aksi' => 'dibatalkan']);
+
+                return self::FAILURE;
+            }
+            $this->warn('LAPORAN_HAPUS_OTOMATIS_SEJAK kosong: laporan lama yang sudah selesai ikut terdaftar. Mode dry-run tidak menghapus data.');
         }
         $maks = max(1, (int) $this->option('maks'));
         $laporans = Laporan::jatuhTempoHapus()->orderBy('id')->limit($maks)->get();

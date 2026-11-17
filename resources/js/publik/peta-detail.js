@@ -22,9 +22,12 @@ export function initPetaDetail() {
         attribution: el.dataset.attribution,
     }).addTo(map);
 
+    const judul = document.createElement('strong');
+    judul.textContent = el.dataset.nama || '';
+
     window.L.marker([lat, lng])
         .addTo(map)
-        .bindPopup(el.dataset.nama || '')
+        .bindPopup(judul)
         .openPopup();
 
     window.setTimeout(() => map.invalidateSize(), 200);

@@ -94,7 +94,7 @@ class PeriksaProduksi extends Command
         $deleteSince = config('laporan.hapus_otomatis_sejak');
         $this->tambah($rows, 'Batas penghapusan otomatis', $autoDelete && blank($deleteSince) ? 'PERINGATAN' : 'OK',
             $autoDelete && blank($deleteSince)
-                ? 'laporan lama ikut terhapus pada jalan pertama penjadwal'
+                ? 'penghapusan otomatis tidak berjalan sampai tanggal diisi (fail-closed)'
                 : ($autoDelete ? 'terbatas tanggal' : 'tidak aktif'));
 
         if (config('admin.login_path') !== null) {

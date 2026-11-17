@@ -11,33 +11,42 @@
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
 </head>
 <body class="flex min-h-screen items-center justify-center bg-tinta px-4 py-10 font-sans text-slate-800 antialiased">
-    <div class="w-full max-w-md">
+    <main class="w-full max-w-md">
         <div class="mb-6 text-center">
             <x-logo tile ukuran="mx-auto mb-3 h-14 w-14" />
-            <h1 class="text-xl font-semibold text-white">Konfirmasi Password</h1>
+            <h1 class="font-judul text-2xl font-semibold tracking-tight text-white">Konfirmasi Password</h1>
         </div>
 
-        <div class="rounded-modal bg-white p-6 shadow-pop sm:p-8">
-            <p class="mb-5 text-sm leading-6 text-slate-600">
-                Demi keamanan, masukkan password Anda untuk melanjutkan. Setelah dikonfirmasi, Anda akan kembali ke halaman sebelumnya dan perlu mengulangi aksi tersebut. Konfirmasi berlaku {{ $menit }} menit.
-            </p>
-
-            @if ($errors->any())
-                <div class="mb-5 rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700">
-                    {{ $errors->first() }}
+        <div class="overflow-hidden rounded-modal bg-white shadow-pop">
+            <div class="h-1 bg-brand-600" aria-hidden="true"></div>
+            <div class="p-6 sm:p-8">
+                <div class="mb-5 flex flex-wrap items-start gap-3 rounded-lg border border-garis bg-kertas p-3 text-sm leading-6 text-slate-600">
+                    <span class="mt-0.5 shrink-0 text-brand-700" aria-hidden="true">
+                        <x-icon name="perisai" class="h-5 w-5"/>
+                    </span>
+                    <p class="min-w-0">
+                        Demi keamanan, masukkan password Anda untuk melanjutkan. Setelah dikonfirmasi, Anda akan kembali ke halaman sebelumnya dan perlu mengulangi aksi tersebut. Konfirmasi berlaku {{ $menit }} menit.
+                    </p>
                 </div>
-            @endif
 
-            <form method="POST" action="{{ route('password.confirm.store') }}" class="space-y-4">
-                @csrf
-                <x-field name="password" for="password" label="Password" required>
-                    <input id="password" name="password" type="password" required autofocus autocomplete="current-password" class="input">
-                </x-field>
-                <button type="submit" class="tombol-utama w-full">
-                    Konfirmasi
-                </button>
-            </form>
+                @if ($errors->any())
+                    <div class="mb-5 rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('password.confirm.store') }}" class="space-y-4">
+                    @csrf
+                    <x-field name="password" for="password" label="Password" required>
+                        <input id="password" name="password" type="password" required autofocus autocomplete="current-password" class="input">
+                    </x-field>
+                    <x-button type="submit" class="w-full">
+                        <x-icon name="kunci" class="h-4 w-4"/>
+                        Konfirmasi
+                    </x-button>
+                </form>
+            </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>

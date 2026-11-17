@@ -5,15 +5,15 @@
 
 @section('content')
     <div class="grid gap-4 lg:grid-cols-3">
-        <div class="space-y-3 lg:col-span-2">
+        <div class="min-w-0 space-y-3 lg:col-span-2">
             @foreach ($users as $user)
                 <div class="rounded-card border border-garis bg-white p-4 shadow-card md:hidden">
                     <div class="flex flex-wrap items-start justify-between gap-3">
-                        <div class="flex items-start gap-3">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-pill bg-brand-100 text-sm font-semibold text-brand-700">
+                        <div class="flex min-w-0 items-start gap-3">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill bg-brand-100 text-sm font-semibold text-brand-700">
                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                             </span>
-                            <div>
+                            <div class="min-w-0">
                                 <p class="font-semibold text-slate-800">
                                     {{ $user->name }}
                                     @if ($user->id === auth()->id())
@@ -21,33 +21,29 @@
                                     @endif
                                 </p>
                                 <p class="text-sm text-slate-600">{{ $user->username }}</p>
-                                <p class="text-xs text-slate-600">{{ $user->email }}</p>
-                                <p class="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                                    <span class="rounded-pill px-2 py-0.5 font-medium ring-1 ring-inset {{ $user->isAdmin() ? 'bg-brand-50 text-brand-700 ring-brand-200' : 'bg-kertas-tua text-slate-600 ring-garis' }}">
-                                        {{ $user->label_role }}
-                                    </span>
+                                <p class="break-all text-xs text-slate-600">{{ $user->email }}</p>
+                                <p class="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+                                    <x-badge :tone="$user->isAdmin() ? 'primary' : 'neutral'" size="sm">{{ $user->label_role }}</x-badge>
                                     @if ($user->jabatan)
                                         <span class="text-slate-600">{{ $user->jabatan }}</span>
                                     @endif
-                                    <span class="rounded-pill px-2 py-0.5 font-medium ring-1 ring-inset {{ $user->is_active ? 'bg-success-50 text-success-700 ring-success-200' : 'bg-danger-50 text-danger-700 ring-danger-200' }}">
-                                        {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
-                                    </span>
+                                    <x-badge :tone="$user->is_active ? 'success' : 'danger'" size="sm">{{ $user->is_active ? 'Aktif' : 'Nonaktif' }}</x-badge>
                                 </p>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-1">
                             {{-- ID field diberi prefix "ubah-m-" agar tidak bentrok dengan
                                  form edit yang sama di tabel desktop (keduanya dirender di DOM). --}}
                             <details class="relative">
-                                <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-kertas">
+                                <summary class="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-control border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-kertas lg:min-h-0">
+                                    <x-icon name="pensil" class="h-3.5 w-3.5"/>
                                     Ubah
                                 </summary>
                                 <form method="POST" action="{{ route('users.update', $user) }}"
-                                      class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-lg border border-garis bg-white p-3 shadow-pop">
+                                      class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-card border border-garis bg-white p-3 shadow-pop">
                                     @csrf
                                     @method('PUT')
-                                    @php $popover = true; @endphp
                                     <x-field name="m-{{ $user->id }}-name" for="ubah-m-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
                                         <input id="ubah-m-{{ $user->id }}-name" type="text" name="name" value="{{ $user->name }}"
                                                required autocomplete="name" class="input">
@@ -72,7 +68,7 @@
                                         <input id="ubah-m-{{ $user->id }}-jabatan" type="text" name="jabatan" value="{{ $user->jabatan }}"
                                                autocomplete="organization-title" class="input">
                                     </x-field>
-                                     <x-field name="m-{{ $user->id }}-password" for="ubah-m-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
+                                    <x-field name="m-{{ $user->id }}-password" for="ubah-m-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
                                         <input id="ubah-m-{{ $user->id }}-password" type="password" name="password"
                                                 autocomplete="new-password" class="input" placeholder="Minimal 12 karakter">
                                     </x-field>
@@ -94,7 +90,10 @@
                                       data-confirm="Hapus akun {{ $user->name }}?">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
+                                    <button type="submit" class="inline-flex min-h-11 items-center gap-1.5 rounded-control px-2.5 py-2 text-xs font-medium text-danger-700 transition hover:bg-danger-50 lg:min-h-0">
+                                        <x-icon name="sampah" class="h-3.5 w-3.5"/>
+                                        Hapus
+                                    </button>
                                 </form>
                             @endif
                         </div>
@@ -104,8 +103,8 @@
 
             {{-- Tampilan tabel untuk layar sedang ke atas --}}
             <div class="hidden overflow-hidden rounded-card border border-garis bg-white shadow-card md:block">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead class="sticky top-0 z-10 bg-kertas text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                <table class="min-w-full divide-y divide-garis text-sm">
+                    <thead class="sticky top-0 z-10 bg-kertas-tua text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                         <tr>
                             <th class="px-4 py-3">Pengguna</th>
                             <th class="px-4 py-3">Username / Email</th>
@@ -116,16 +115,26 @@
                     </thead>
                     <tbody class="divide-y divide-garis">
                         @foreach ($users as $user)
-                            <tr class="hover:bg-kertas">
+                            <tr class="transition hover:bg-kertas">
                                 <td class="px-4 py-3">
-                                    <p class="font-semibold text-slate-800">{{ $user->name }}</p>
-                                    <p class="text-sm text-slate-600">{{ $user->username }}</p>
-                                    @if ($user->jabatan)
-                                        <p class="text-xs text-slate-600">{{ $user->jabatan }}</p>
-                                    @endif
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-brand-100 text-xs font-semibold text-brand-700">
+                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                        </span>
+                                        <div class="min-w-0">
+                                            <p class="font-semibold text-slate-800">
+                                                {{ $user->name }}
+                                                @if ($user->id === auth()->id())
+                                                    <span class="ml-1 rounded bg-kertas-tua px-1.5 py-0.5 text-[11px] font-medium text-slate-600">Anda</span>
+                                                @endif
+                                            </p>
+                                            <p class="text-xs text-slate-600">{{ $user->jabatan ?: '-' }}</p>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3 text-slate-600">
-                                    <span class="block text-xs text-slate-600">Email</span>{{ $user->email }}
+                                    <p class="font-medium text-slate-700">{{ $user->username }}</p>
+                                    <p class="break-all text-xs">{{ $user->email }}</p>
                                 </td>
                                 <td class="px-4 py-3">
                                     <x-badge :tone="$user->isAdmin() ? 'primary' : 'neutral'" size="sm">{{ $user->label_role }}</x-badge>
@@ -134,30 +143,30 @@
                                     <x-badge :tone="$user->is_active ? 'success' : 'danger'" size="sm">{{ $user->is_active ? 'Aktif' : 'Nonaktif' }}</x-badge>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div class="flex items-center justify-end gap-1">
                                         {{-- Key data-field diberi prefix "t-" agar id petunjuk (mis. *-petunjuk)
                                              tidak bentrok dengan form "Tambah Pengguna" di kolom kanan. --}}
                                         <details class="relative">
-                                            <summary class="cursor-pointer list-none rounded-control border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-kertas">
+                                            <summary class="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-control border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-kertas">
+                                                <x-icon name="pensil" class="h-3.5 w-3.5"/>
                                                 Ubah
                                             </summary>
                                             <form method="POST" action="{{ route('users.update', $user) }}"
-                                                  class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-lg border border-garis bg-white p-3 shadow-pop">
+                                                  class="absolute right-0 z-20 mt-2 w-80 max-w-[calc(100vw-3rem)] space-y-2 rounded-card border border-garis bg-white p-3 shadow-pop">
                                                 @csrf
                                                 @method('PUT')
-                                                @php $popover = true; @endphp
-                                                    <x-field name="t-{{ $user->id }}-name" for="ubah-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
+                                                <x-field name="t-{{ $user->id }}-name" for="ubah-{{ $user->id }}-name" label="Nama lengkap" :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-name" type="text" name="name" value="{{ $user->name }}"
                                                            required autocomplete="name" class="input">
-                                                    </x-field>
-                                                    <x-field name="t-{{ $user->id }}-username" for="ubah-{{ $user->id }}-username" label="Username" hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung." :show-errors="false">
-                                                        <input id="ubah-{{ $user->id }}-username" type="text" name="username" value="{{ $user->username }}"
-                                                               required autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" class="input">
-                                                    </x-field>
-                                                    <x-field name="t-{{ $user->id }}-email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
-                                                        <input id="ubah-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
-                                                               required autocomplete="email" enterkeyhint="done" class="input">
-                                                        <p class="text-xs text-slate-600">Dipakai untuk reset password.</p>
+                                                </x-field>
+                                                <x-field name="t-{{ $user->id }}-username" for="ubah-{{ $user->id }}-username" label="Username" hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung." :show-errors="false">
+                                                    <input id="ubah-{{ $user->id }}-username" type="text" name="username" value="{{ $user->username }}"
+                                                           required autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" class="input">
+                                                </x-field>
+                                                <x-field name="t-{{ $user->id }}-email" for="ubah-{{ $user->id }}-email" label="Email" :show-errors="false">
+                                                    <input id="ubah-{{ $user->id }}-email" type="email" name="email" value="{{ $user->email }}"
+                                                           required autocomplete="email" enterkeyhint="done" class="input">
+                                                    <p class="text-xs text-slate-600">Dipakai untuk reset password.</p>
                                                 </x-field>
                                                 <x-field name="t-{{ $user->id }}-role" for="ubah-{{ $user->id }}-role" label="Role" :show-errors="false">
                                                     <select id="ubah-{{ $user->id }}-role" name="role" class="input">
@@ -170,7 +179,7 @@
                                                     <input id="ubah-{{ $user->id }}-jabatan" type="text" name="jabatan" value="{{ $user->jabatan }}"
                                                            autocomplete="organization-title" class="input">
                                                 </x-field>
-                                                 <x-field name="t-{{ $user->id }}-password" for="ubah-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
+                                                <x-field name="t-{{ $user->id }}-password" for="ubah-{{ $user->id }}-password" label="Password baru" optional hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka." :show-errors="false">
                                                     <input id="ubah-{{ $user->id }}-password" type="password" name="password"
                                                         autocomplete="new-password" class="input" placeholder="Minimal 12 karakter">
                                                 </x-field>
@@ -186,12 +195,16 @@
                                                 <x-button type="submit" class="w-full">Simpan Perubahan</x-button>
                                             </form>
                                         </details>
+
                                         @if ($user->id !== auth()->id())
                                             <form method="POST" action="{{ route('users.destroy', $user) }}"
                                                   data-confirm="Hapus akun {{ $user->name }}?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
+                                                <button type="submit" class="inline-flex items-center gap-1 rounded-control px-2 py-1.5 text-xs font-medium text-danger-700 transition hover:bg-danger-50">
+                                                    <x-icon name="sampah" class="h-3.5 w-3.5"/>
+                                                    Hapus
+                                                </button>
                                             </form>
                                         @endif
                                     </div>
@@ -202,57 +215,61 @@
                 </table>
             </div>
 
-            <div class="hidden md:block">
-                {{ $users->links() }}
-            </div>
-            <div class="md:hidden">
-                {{ $users->links() }}
+            <div class="mt-4">
+                {{ $users->links('vendor.pagination.admin') }}
             </div>
         </div>
 
-        <div class="rounded-card border border-garis bg-white p-5 shadow-card">
-            <h2 class="mb-3 text-sm font-semibold text-slate-800">Tambah Pengguna</h2>
-            <form method="POST" action="{{ route('users.store') }}" class="space-y-3" data-unsaved-guard="Data pengguna belum disimpan.">
-                @csrf
-                <x-field name="name" label="Nama lengkap" required>
-                    <input id="name" type="text" name="name" value="{{ old('name') }}" required
-                           autocomplete="name" enterkeyhint="next" placeholder="Nama lengkap" class="input">
-                </x-field>
-                <x-field name="username" label="Username" required hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung.">
-                    <input id="username" type="text" name="username" value="{{ old('username') }}" required
-                           autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" class="input">
-                </x-field>
-                <x-field name="email" label="Email" required>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                           autocomplete="email" enterkeyhint="next" placeholder="nama@instansi.go.id" class="input">
-                    <p class="text-xs text-slate-600">Dipakai untuk reset password.</p>
-                </x-field>
-                <x-field name="role" label="Role" required hint="Administrator kelola seluruh data termasuk pengguna; petugas kelola data perumahan & wilayah.">
-                    <select id="role" name="role" required class="input">
-                        @foreach (\App\Models\User::ROLE as $value => $label)
-                            <option value="{{ $value }}" @selected($value === 'petugas')>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </x-field>
-                <x-field name="jabatan" label="Jabatan" optional>
-                    <input id="jabatan" type="text" name="jabatan" value="{{ old('jabatan') }}"
-                           autocomplete="organization-title" enterkeyhint="next" placeholder="Jabatan (opsional)" class="input">
-                </x-field>
-                 <x-field name="password" label="Password" required hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka.">
-                    <input id="password" type="password" name="password" required
-                            autocomplete="new-password" enterkeyhint="next" placeholder="Minimal 12 karakter" class="input">
-                </x-field>
-                <x-field name="password_confirmation" label="Konfirmasi password" required>
-                    <input id="password_confirmation" type="password" name="password_confirmation" required
-                           autocomplete="new-password" enterkeyhint="done" placeholder="Ulangi password" class="input">
-                </x-field>
-                <x-button type="submit" class="w-full">Simpan Pengguna</x-button>
-            </form>
+        <div class="min-w-0 space-y-4">
+            <x-card heading="Tambah Pengguna" meta="Akun baru untuk administrator atau petugas">
+                <form method="POST" action="{{ route('users.store') }}" class="space-y-3" data-unsaved-guard="Data pengguna belum disimpan.">
+                    @csrf
+                    <x-field name="name" label="Nama lengkap" required>
+                        <input id="name" type="text" name="name" value="{{ old('name') }}" required
+                               autocomplete="name" enterkeyhint="next" placeholder="Nama lengkap" class="input">
+                    </x-field>
+                    <x-field name="username" label="Username" required hint="Dipakai untuk login. 3–30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung.">
+                        <input id="username" type="text" name="username" value="{{ old('username') }}" required
+                               autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" class="input">
+                    </x-field>
+                    <x-field name="email" label="Email" required>
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required
+                               autocomplete="email" enterkeyhint="next" placeholder="nama@instansi.go.id" class="input">
+                        <p class="text-xs text-slate-600">Dipakai untuk reset password.</p>
+                    </x-field>
+                    <x-field name="role" label="Role" required hint="Administrator kelola seluruh data termasuk pengguna; petugas kelola data perumahan & wilayah.">
+                        <select id="role" name="role" required class="input">
+                            @foreach (\App\Models\User::ROLE as $value => $label)
+                                <option value="{{ $value }}" @selected($value === 'petugas')>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </x-field>
+                    <x-field name="jabatan" label="Jabatan" optional>
+                        <input id="jabatan" type="text" name="jabatan" value="{{ old('jabatan') }}"
+                               autocomplete="organization-title" enterkeyhint="next" placeholder="Jabatan (opsional)" class="input">
+                    </x-field>
+                    <x-field name="password" label="Password" required hint="Minimal 12 karakter, memuat huruf besar, huruf kecil, dan angka.">
+                        <input id="password" type="password" name="password" required
+                                autocomplete="new-password" enterkeyhint="next" placeholder="Minimal 12 karakter" class="input">
+                    </x-field>
+                    <x-field name="password_confirmation" label="Konfirmasi password" required>
+                        <input id="password_confirmation" type="password" name="password_confirmation" required
+                               autocomplete="new-password" enterkeyhint="done" placeholder="Ulangi password" class="input">
+                    </x-field>
+                    <x-button type="submit" class="w-full">
+                        <x-icon name="simpan" class="h-4 w-4"/>
+                        Simpan Pengguna
+                    </x-button>
+                </form>
+            </x-card>
 
-            <div class="mt-5 rounded-lg bg-kertas p-3 text-xs text-slate-600">
-                <p class="font-semibold text-slate-700">Hak akses</p>
-                <p class="mt-1"><span class="font-medium">Administrator</span>: kelola seluruh data termasuk pengguna.</p>
-                <p class="mt-1"><span class="font-medium">Petugas</span>: input dan ubah data perumahan serta wilayah.</p>
+            <div class="rounded-card border border-garis bg-kertas p-4 text-xs text-slate-600">
+                <p class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <x-icon name="perisai" class="h-4 w-4 text-brand-700"/>
+                    Hak akses
+                </p>
+                <p class="mt-2"><span class="font-medium text-slate-700">Administrator</span>: kelola seluruh data termasuk pengguna.</p>
+                <p class="mt-1"><span class="font-medium text-slate-700">Petugas</span>: input dan ubah data perumahan serta wilayah.</p>
             </div>
         </div>
     </div>

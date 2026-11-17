@@ -344,6 +344,33 @@ class PerumahanTest extends TestCase
         $this->actingAs($admin)->get(route('users.index'))->assertOk();
     }
 
+    public function test_nama_perumahan_menolak_karakter_htm_di_tambah_dan_ubah(): void
+    {
+        $kelurahan = $this->wilayah();
+        $dasar = [
+            'kelurahan_id' => $kelurahan->id,
+            'luas_lahan' => 5000,
+            'jumlah_unit' => 50,
+            'status' => 'komersil',
+        ];
+
+        foreach (['<script>alert(1)</script>', 'Perumahan > Aman'] as $nama) {
+            $this->actingAs($this->petugas())
+                ->post(route('perumahan.store'), array_merge($dasar, ['nama' => $nama]))
+                ->assertSessionHasErrors('nama');
+        }
+
+        $this->assertSame(0, Perumahan::count());
+
+        $perumahan = Perumahan::create(array_merge($dasar, ['nama' => 'Perumahan Tetap Aman']));
+
+        $this->actingAs($this->petugas())
+            ->put(route('perumahan.update', $perumahan), array_merge($dasar, ['nama' => 'Perumahan <b>Tidak Aman</b>']))
+            ->assertSessionHasErrors('nama');
+
+        $this->assertSame('Perumahan Tetap Aman', $perumahan->fresh()->nama);
+    }
+
     public function test_peta_sebaran_menyediakan_fokus_kecamatan(): void
     {
         $kecamatan = Kecamatan::create(['nama' => 'Mandalasari', 'kabupaten_kota' => 'Kota Bandung']);

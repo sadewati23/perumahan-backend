@@ -6,6 +6,7 @@ use App\Models\Laporan;
 use App\Models\LaporanFoto;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
@@ -41,7 +42,7 @@ class HapusOtomatisLaporanTest extends TestCase
 
     public function test_02_tidak_menghapus_status_tidak_selesai_ditahan_atau_null(): void
     {
-        Carbon::setTestNow('2026-10-21 12:00');
+        Carbon::setTestNow('2026-10-21 12:00'); config(['laporan.hapus_otomatis_sejak' => '2026-10-01']);
         foreach (['diproses', 'baru', 'ditolak'] as $status) $this->laporan(['status' => $status, 'selesai_pada' => now()->subDays(30)]);
         $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(2)->subHours(23)]);
         $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(4), 'jangan_hapus_otomatis' => true]);
@@ -58,7 +59,7 @@ class HapusOtomatisLaporanTest extends TestCase
 
     public function test_04_nilai_hari_invalid_jatuh_ke_default_tiga(): void
     {
-        Carbon::setTestNow('2026-10-25');
+        config(['laporan.hapus_otomatis_sejak' => '2026-10-01']); Carbon::setTestNow('2026-10-25');
         foreach ([0, '', -4, 'abc'] as $nilai) { config(['laporan.hapus_otomatis_hari' => 3]); $l = $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(2)]); $this->assertSame(3, config('laporan.hapus_otomatis_hari')); $this->assertDatabaseHas('laporans', ['id' => $l->id]); }
         config(['laporan.hapus_otomatis_hari' => 3]); $l = $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(3)->subMinute()]); Artisan::call('laporan:hapus-kedaluwarsa'); $this->assertDatabaseMissing('laporans', ['id' => $l->id]);
     }
@@ -67,6 +68,7 @@ class HapusOtomatisLaporanTest extends TestCase
     {
         config(['laporan.hapus_otomatis_sejak' => null]); Carbon::setTestNow('2026-10-21'); foreach (range(1, 3) as $i) $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(4)]);
         Artisan::call('laporan:hapus-kedaluwarsa', ['--dry-run' => true]); $this->assertSame(3, Laporan::count()); $this->assertStringContainsString('3 laporan', Artisan::output());
+        config(['laporan.hapus_otomatis_sejak' => '2026-10-01']);
         Artisan::call('laporan:hapus-kedaluwarsa', ['--maks' => 2]); $this->assertSame(1, Laporan::count()); Artisan::call('laporan:hapus-kedaluwarsa'); $this->assertSame(0, Laporan::count());
     }
 
@@ -119,8 +121,43 @@ class HapusOtomatisLaporanTest extends TestCase
         Storage::fake('local'); $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]); $l = $this->laporan(); $this->foto($l, 'manual.jpg', 'laporan'); $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($admin)->delete(route('laporan.destroy', $l))->assertRedirect(route('laporan.index')); $this->assertDatabaseMissing('laporans', ['id' => $l->id]); Storage::disk('local')->assertMissing('manual.jpg');
     }
 
-    public function test_peringatan_sejak_kosong_muncul_di_dry_run_dan_normal(): void
+    public function test_sejak_kosong_tanpa_dry_run_gagal_dan_tidak_menghapus_apa_pun(): void
     {
-        config(['laporan.hapus_otomatis_sejak' => null]); $l = $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(4)]); Artisan::call('laporan:hapus-kedaluwarsa', ['--dry-run' => true]); $this->assertStringContainsString('LAPORAN_HAPUS_OTOMATIS_SEJAK kosong', Artisan::output()); Log::spy(); Artisan::call('laporan:hapus-kedaluwarsa'); Log::shouldHaveReceived('warning')->with('laporan.hapus_otomatis_tanpa_batas_lama'); $this->assertDatabaseMissing('laporans', ['id' => $l->id]);
+        Log::spy(); config(['laporan.hapus_otomatis_sejak' => null]);
+        $l = $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(4)]);
+
+        $kode = Artisan::call('laporan:hapus-kedaluwarsa');
+        $output = Artisan::output();
+
+        $this->assertSame(Command::FAILURE, $kode);
+        $this->assertStringContainsString('LAPORAN_HAPUS_OTOMATIS_SEJAK', $output);
+        $this->assertStringContainsString('Tidak ada laporan yang dihapus', $output);
+        $this->assertDatabaseHas('laporans', ['id' => $l->id]);
+        Log::shouldHaveReceived('error')->with('laporan.hapus_otomatis_tanpa_batas_lama', ['aksi' => 'dibatalkan']);
+    }
+
+    public function test_sejak_kosong_dengan_dry_run_sukses_dan_tidak_menghapus(): void
+    {
+        config(['laporan.hapus_otomatis_sejak' => null]);
+        $l = $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(4)]);
+
+        $kode = Artisan::call('laporan:hapus-kedaluwarsa', ['--dry-run' => true]);
+        $output = Artisan::output();
+
+        $this->assertSame(Command::SUCCESS, $kode);
+        $this->assertStringContainsString('LAPORAN_HAPUS_OTOMATIS_SEJAK kosong', $output);
+        $this->assertStringContainsString('1 laporan akan dihapus', $output);
+        $this->assertDatabaseHas('laporans', ['id' => $l->id]);
+    }
+
+    public function test_sejak_terisi_tetap_menghapus_seperti_biasa(): void
+    {
+        config(['laporan.hapus_otomatis_sejak' => now()->subDays(10)->toDateString()]);
+        $l = $this->laporan(['status' => 'selesai', 'selesai_pada' => now()->subDays(4)]);
+
+        $kode = Artisan::call('laporan:hapus-kedaluwarsa');
+
+        $this->assertSame(Command::SUCCESS, $kode);
+        $this->assertDatabaseMissing('laporans', ['id' => $l->id]);
     }
 }

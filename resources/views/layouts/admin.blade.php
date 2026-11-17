@@ -28,18 +28,18 @@
     {{-- Sidebar --}}
     <aside id="sidebar"
            class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-tinta text-slate-300 transition-transform duration-200 lg:static lg:translate-x-0">
-        <div class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-            <x-logo tile />
-            <div class="min-w-0 leading-tight">
+        <div class="flex items-center gap-3 border-b border-white/10 px-4 py-4">
+            <x-logo tile ukuran="h-9 w-9" />
+
+            <div class="min-w-0 flex-1 leading-tight">
                 <p class="truncate text-sm font-semibold text-white">Sistem Data</p>
                 <p class="truncate text-xs text-slate-400">Perumahan</p>
             </div>
+
             <button type="button" data-toggle-sidebar
-                    class="rounded-md p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-white lg:hidden"
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/10 hover:text-white lg:hidden"
                     aria-label="Tutup menu">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+                <x-icon name="tutup" class="h-5 w-5"/>
             </button>
         </div>
 
@@ -47,14 +47,14 @@
             @php
                 $groups = [
                     'Data' => [
-                        ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'M3 12l9-9 9 9M5 10v10h14V10'],
-                        ['label' => 'Data Perumahan', 'route' => 'perumahan.index', 'active' => 'perumahan.*', 'icon' => 'M4 21V8l8-5 8 5v13M9 21v-6h6v6'],
-                        ['label' => 'Peta Sebaran', 'route' => 'perumahan.peta', 'active' => 'perumahan.peta', 'icon' => 'M12 21s7-6.4 7-11a7 7 0 10-14 0c0 4.6 7 11 7 11zm0-8.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z'],
-                        ['label' => 'Master Wilayah', 'route' => 'wilayah.index', 'active' => 'wilayah.*', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
-                        ['label' => 'Manajemen Pengguna', 'route' => 'users.index', 'active' => 'users.*', 'icon' => 'M16 21v-2a4 4 0 00-8 0v2M12 11a4 4 0 100-8 4 4 0 000 8z', 'role' => 'admin'],
+                        ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'dashboard'],
+                        ['label' => 'Data Perumahan', 'route' => 'perumahan.index', 'active' => 'perumahan.*', 'icon' => 'perumahan'],
+                        ['label' => 'Peta Sebaran', 'route' => 'perumahan.peta', 'active' => 'perumahan.peta', 'icon' => 'peta'],
+                        ['label' => 'Master Wilayah', 'route' => 'wilayah.index', 'active' => 'wilayah.*', 'icon' => 'wilayah'],
+                        ['label' => 'Manajemen Pengguna', 'route' => 'users.index', 'active' => 'users.*', 'icon' => 'pengguna', 'role' => 'admin'],
                     ],
                     'Layanan' => [
-                        ['label' => 'Laporan Warga', 'route' => 'laporan.index', 'active' => 'laporan.*', 'icon' => 'M12 9v4m0 4h.01M10.3 3.9L2.5 17a1.7 1.7 0 001.5 2.5h16a1.7 1.7 0 001.5-2.5L13.7 3.9a1.7 1.7 0 00-3 0z', 'badgeLaporan' => true],
+                        ['label' => 'Laporan Warga', 'route' => 'laporan.index', 'active' => 'laporan.*', 'icon' => 'laporan', 'badgeLaporan' => true],
                     ],
                 ];
             @endphp
@@ -65,19 +65,26 @@
                 @endphp
                 @if ($visibleItems->isNotEmpty())
                     <div>
-                        <p class="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $groupLabel }}</p>
+                        <p class="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{{ $groupLabel }}</p>
                         <div class="space-y-1">
                             @foreach ($visibleItems as $item)
                                 @php $isActive = request()->routeIs($item['active']); @endphp
                                 <a href="{{ route($item['route']) }}"
                                    @if ($isActive) aria-current="page" @endif
-                                   class="group flex items-center gap-3 rounded-lg px-3 py-2 transition {{ $isActive ? 'bg-brand-600 text-white shadow-card' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}">
-                                    <svg class="h-5 w-5 shrink-0 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
-                                    </svg>
-                                    <span>{{ $item['label'] }}</span>
+                                   class="group relative flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 transition lg:min-h-0 {{ $isActive ? 'bg-brand-600 text-white shadow-card' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}">
+                                    @if ($isActive)
+                                        <span class="absolute inset-y-2 left-0 w-1 rounded-full bg-white/80" aria-hidden="true"></span>
+                                    @endif
+
+                                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition {{ $isActive ? 'bg-white/15 text-white' : 'bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                        <x-icon :name="$item['icon']" class="h-4 w-4"/>
+                                    </span>
+
+                                    <span class="min-w-0 truncate">{{ $item['label'] }}</span>
+
                                     @if (! empty($item['badgeLaporan']) && ($jumlahLaporanBaru ?? 0) > 0)
-                                        <span class="ml-auto rounded-full bg-amber-500 px-2 py-0.5 text-[11px] font-bold text-white">{{ $jumlahLaporanBaru }}</span>
+                                        <span class="ml-auto rounded-full bg-amber-300 px-2 py-0.5 text-[11px] font-bold tabular-nums text-amber-950"
+                                              aria-label="{{ $jumlahLaporanBaru }} laporan baru">{{ $jumlahLaporanBaru }}</span>
                                     @endif
                                 </a>
                             @endforeach
@@ -87,22 +94,32 @@
             @endforeach
         </nav>
 
-        <div class="border-t border-white/10 p-3">
+        <div class="space-y-2 border-t border-white/10 p-3">
             <a href="{{ route('publik.beranda') }}" target="_blank" rel="noopener"
-               class="mb-3 flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
-                <span>Lihat Situs Publik</span>
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5v5M19 5l-7 7M9 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-3"/>
-                </svg>
+               class="flex min-h-11 items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-300 transition hover:bg-white/5 hover:text-white lg:min-h-0">
+                <span class="flex items-center gap-2">
+                    <x-icon name="eksternal" class="h-4 w-4 text-slate-400"/>
+                    Lihat situs publik
+                </span>
+                <span class="sr-only">(terbuka di tab baru)</span>
             </a>
 
             <div class="rounded-lg bg-white/5 p-3">
-                <p class="truncate text-sm font-medium text-white">{{ auth()->user()?->name }}</p>
-                <p class="mt-0.5 text-xs text-slate-400">{{ auth()->user()?->label_role }}</p>
+                <div class="flex items-center gap-2.5">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white">
+                        {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 1)) }}
+                    </span>
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-white">{{ auth()->user()?->name }}</p>
+                        <p class="truncate text-xs text-slate-400">{{ auth()->user()?->label_role }}</p>
+                    </div>
+                </div>
+
                 <form method="POST" action="{{ route('logout') }}" class="mt-3">
                     @csrf
                     <button type="submit"
-                            class="w-full rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-rose-600">
+                            class="flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-danger-600 lg:min-h-0">
+                        <x-icon name="keluar" class="h-4 w-4"/>
                         Keluar
                     </button>
                 </form>
@@ -112,82 +129,99 @@
 
     <div id="konten-utama" class="flex min-h-screen flex-1 flex-col">
         {{-- Topbar --}}
-        <header class="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-garis bg-kertas/90 px-4 py-3 backdrop-blur lg:px-8">
-            <div class="flex min-w-0 items-center gap-3">
-                <button type="button" data-toggle-sidebar aria-controls="sidebar" aria-expanded="false" aria-label="Buka menu"
-                        class="rounded-md border border-slate-300 p-2 text-slate-600 transition hover:bg-white lg:hidden">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
-                <div class="min-w-0">
-                    <nav aria-label="Breadcrumb" class="mb-0.5">
-                        <ol class="flex items-center gap-1 text-xs text-slate-600">
-                            <li><a href="{{ route('dashboard') }}" class="hover:text-brand-700 hover:underline">Admin</a></li>
-                            <li aria-hidden="true">/</li>
-                            <li class="font-medium text-slate-700" aria-current="page">@yield('title', 'Dashboard')</li>
-                        </ol>
-                    </nav>
-                    <h1 class="truncate font-judul text-xl font-semibold tracking-tight text-tinta">@yield('title', 'Dashboard')</h1>
-                    @hasSection('subtitle')
-                        <p class="truncate text-xs text-slate-600">@yield('subtitle')</p>
-                    @endif
-                </div>
-            </div>
+        <header class="sticky top-0 z-30 border-b border-garis bg-kertas/90 px-4 py-2.5 backdrop-blur lg:px-8">
+            <div class="mx-auto flex w-full max-w-7xl items-center justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-2 sm:gap-3">
+                    <button type="button" data-toggle-sidebar aria-controls="sidebar" aria-expanded="false" aria-label="Buka menu"
+                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 transition hover:bg-kertas lg:hidden">
+                        <x-icon name="menu" class="h-5 w-5"/>
+                    </button>
 
-            <div class="flex items-center gap-3">
-                <details class="relative">
-                    <summary class="flex cursor-pointer list-none items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 transition hover:bg-slate-50">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
-                            {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 1)) }}
-                        </span>
-                        <span class="hidden sm:inline">{{ auth()->user()?->name }}</span>
-                    </summary>
-                    <div class="pop-masuk absolute right-0 z-40 mt-2 w-64 rounded-card border border-slate-200 bg-white p-3 shadow-pop">
-                        <p class="text-sm font-semibold text-tinta">{{ auth()->user()?->name }}</p>
-                        <p class="mt-0.5 text-xs text-slate-500">{{ auth()->user()?->label_role }}</p>
-                        <form method="POST" action="{{ route('logout') }}" class="mt-3">
-                            @csrf
-                            <button type="submit" class="w-full rounded-control bg-danger-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-danger-700">
-                                Keluar
-                            </button>
-                        </form>
+                    <div class="min-w-0">
+                        <nav aria-label="Breadcrumb">
+                            <ol class="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                                <li><a href="{{ route('dashboard') }}" class="transition hover:text-brand-700">Admin</a></li>
+                                <li aria-hidden="true" class="text-slate-400">/</li>
+                                <li class="truncate" aria-current="page">@yield('title', 'Dashboard')</li>
+                            </ol>
+                        </nav>
+                        <h1 class="truncate font-judul text-lg font-semibold tracking-tight text-tinta sm:text-xl">
+                            @yield('title', 'Dashboard')
+                        </h1>
+                        @hasSection('subtitle')
+                            <p class="hidden truncate text-xs text-slate-600 sm:block">@yield('subtitle')</p>
+                        @endif
                     </div>
-                </details>
+                </div>
+
+                <div class="flex shrink-0 items-center gap-2">
+                    <a href="{{ route('publik.beranda') }}" target="_blank" rel="noopener"
+                       class="hidden min-h-11 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-slate-600 transition hover:bg-white hover:text-brand-700 lg:inline-flex lg:min-h-9">
+                        <x-icon name="eksternal" class="h-4 w-4"/>
+                        Situs publik
+                    </a>
+
+                    <details class="relative">
+                        <summary class="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-full border border-slate-300 bg-white px-1.5 py-1 text-sm text-slate-700 transition hover:bg-kertas lg:min-h-0">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
+                                {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 1)) }}
+                            </span>
+                            <span class="hidden max-w-40 truncate pr-1 sm:inline">{{ auth()->user()?->name }}</span>
+                            <span class="sr-only">Buka menu akun</span>
+                        </summary>
+                        <div class="pop-masuk absolute right-0 z-40 mt-2 w-64 rounded-card border border-garis bg-white p-3 shadow-pop">
+                            <p class="text-sm font-semibold text-tinta">{{ auth()->user()?->name }}</p>
+                            <p class="mt-0.5 text-xs text-slate-500">{{ auth()->user()?->label_role }}</p>
+                            <form method="POST" action="{{ route('logout') }}" class="mt-3">
+                                @csrf
+                                <button type="submit" class="flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-danger-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-danger-700 lg:min-h-0">
+                                    <x-icon name="keluar" class="h-4 w-4"/>
+                                    Keluar
+                                </button>
+                            </form>
+                        </div>
+                    </details>
+                </div>
             </div>
         </header>
 
         <main id="main" class="flex-1 px-4 py-6 lg:px-8">
-            @if (auth()->user()?->isAdmin() && \App\Support\TurnstileKonfigurasi::perluPerhatian())
-                <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
-                    Perlindungan CAPTCHA pada form laporan belum aktif: kunci Turnstile kosong atau masih kunci uji. Isi kunci asli di file .env server (lihat HOSTING.md).
-                </div>
-            @endif
+            <div class="mx-auto w-full max-w-7xl">
+                @if (auth()->user()?->isAdmin() && \App\Support\TurnstileKonfigurasi::perluPerhatian())
+                    <div class="mb-4 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
+                        <x-icon name="laporan" class="mt-0.5 h-5 w-5 shrink-0 text-amber-700"/>
+                        <p>
+                            Perlindungan CAPTCHA pada form laporan belum aktif: kunci Turnstile kosong atau masih kunci uji.
+                            Isi kunci asli di file .env server (lihat HOSTING.md).
+                        </p>
+                    </div>
+                @endif
 
-            @if (session('success'))
-                <x-flash-message tone="success" auto-dismiss>
-                    {{ session('success') }}
-                </x-flash-message>
-            @endif
+                @if (session('success'))
+                    <x-flash-message tone="success" auto-dismiss>
+                        {{ session('success') }}
+                    </x-flash-message>
+                @endif
 
-            @if (session('error'))
-                <x-flash-message tone="error">
-                    {{ session('error') }}
-                </x-flash-message>
-            @endif
+                @if (session('error'))
+                    <x-flash-message tone="error">
+                        {{ session('error') }}
+                    </x-flash-message>
+                @endif
 
-            @if ($errors->any())
-                <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-                    <p class="font-semibold">Periksa kembali isian berikut:</p>
-                    <ul class="mt-1 list-inside list-disc space-y-0.5">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+                @if ($errors->any())
+                    <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                        <p class="font-semibold">Periksa kembali isian berikut:</p>
+                        <ul class="mt-1 list-inside list-disc space-y-0.5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-            @yield('content')
+                @yield('content')
+            </div>
         </main>
 
         <footer class="border-t border-garis px-4 py-4 text-center text-xs text-slate-600 lg:px-8">

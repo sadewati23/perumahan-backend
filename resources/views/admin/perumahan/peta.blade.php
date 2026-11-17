@@ -16,87 +16,106 @@
         $tanpaKoordinat = $perumahans->filter(fn ($p) => ! $p->punya_koordinat);
     @endphp
 
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-wrap items-center gap-4 text-sm">
-            <span class="flex items-center gap-2">
-                <span class="h-3 w-3 rounded-full bg-emerald-500"></span> Subsidi
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+            <span class="inline-flex items-center gap-1.5 rounded-pill bg-white px-2.5 py-1 ring-1 ring-inset ring-garis">
+                <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
+                Subsidi
             </span>
-            <span class="flex items-center gap-2">
-                <span class="h-3 w-3 rounded-full bg-sky-500"></span> Komersil
+            <span class="inline-flex items-center gap-1.5 rounded-pill bg-white px-2.5 py-1 ring-1 ring-inset ring-garis">
+                <span class="h-2 w-2 rounded-full bg-sky-500" aria-hidden="true"></span>
+                Komersil
             </span>
-            <span class="flex items-center gap-2">
-                <span class="h-3 w-3 rounded-full bg-violet-500"></span> Campuran
+            <span class="inline-flex items-center gap-1.5 rounded-pill bg-white px-2.5 py-1 ring-1 ring-inset ring-garis">
+                <span class="h-2 w-2 rounded-full bg-violet-500" aria-hidden="true"></span>
+                Campuran
             </span>
-            <span class="text-slate-600">{{ $titik->count() }} dari {{ $perumahans->count() }} perumahan sudah punya titik</span>
+            <span class="text-xs text-slate-600 sm:text-sm">
+                <span class="font-semibold text-tinta">{{ $titik->count() }}</span> dari
+                <span class="font-semibold text-tinta">{{ $perumahans->count() }}</span> perumahan sudah punya titik
+            </span>
         </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('perumahan.geojson') }}" target="_blank"
-               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-kertas">
+
+        <div class="flex flex-wrap items-center gap-2">
+            <x-button href="{{ route('perumahan.geojson') }}" variant="secondary" size="sm" target="_blank" rel="noopener">
+                <x-icon name="eksternal" class="h-4 w-4"/>
                 Lihat GeoJSON
-            </a>
-            <a href="{{ route('perumahan.index') }}"
-               class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-kertas">
-                Daftar Data
-            </a>
+            </x-button>
+            <x-button href="{{ route('perumahan.index') }}" variant="secondary" size="sm">
+                <x-icon name="panah-kiri" class="h-4 w-4"/>
+                Daftar data
+            </x-button>
         </div>
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-4">
+    <div class="mt-4 grid gap-4 lg:grid-cols-4">
         <div class="lg:col-span-3">
-            <div id="map-sebaran" class="h-[70vh] w-full overflow-hidden rounded-card border border-garis bg-kertas-tua shadow-card"></div>
+            <div id="map-sebaran"
+                 class="h-[60vh] min-h-80 w-full overflow-hidden rounded-card border border-garis bg-kertas-tua shadow-card"
+                 role="img" aria-label="Peta sebaran titik perumahan"></div>
         </div>
 
-        <div class="space-y-4">
+        <div class="min-w-0 space-y-4">
             @if ($kecamatanFokus)
-                <div class="rounded-card border border-garis bg-white p-4 shadow-card">
-                    <div class="flex items-center justify-between gap-2">
-                        <p class="text-sm font-semibold text-slate-600">Fokus Kecamatan</p>
+                <x-card heading="Fokus Kecamatan" meta="Pilih kecamatan untuk memperbesar area">
+                    <x-slot:actions>
                         <button type="button" data-fokus-kecamatan="0"
-                                class="text-xs font-medium text-slate-600 transition hover:text-brand-600">Reset</button>
-                    </div>
-                    <div class="mt-2 flex flex-wrap gap-1.5">
+                                class="inline-flex min-h-11 items-center rounded-control px-2 text-xs font-medium text-slate-600 transition hover:bg-kertas hover:text-brand-700 lg:min-h-0">
+                            Reset
+                        </button>
+                    </x-slot:actions>
+
+                    <div class="flex flex-wrap gap-1.5">
                         @foreach ($kecamatanFokus as $kec)
                             <button type="button" data-fokus-kecamatan="{{ $kec['id'] }}"
-                                    class="rounded-full border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700">
+                                    class="inline-flex min-h-11 items-center rounded-pill border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700 lg:min-h-0 lg:py-1">
                                 {{ $kec['nama'] }}
                             </button>
                         @endforeach
                     </div>
-                </div>
+                </x-card>
             @endif
 
-            <div class="rounded-card border border-garis bg-white p-4 shadow-card">
-                <label class="mb-1 block text-xs font-medium text-slate-600">Cari lokasi</label>
-                <input type="text" id="cari-lokasi" placeholder="Nama perumahan / kecamatan..."
-                       class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
-
-                <ul id="daftar-lokasi" class="mt-3 max-h-72 space-y-1 overflow-y-auto text-sm">
-                    @foreach ($titik as $item)
-                        <li data-cari="{{ strtolower($item['nama'].' '.$item['alamat']) }}">
-                            <button type="button" data-fokus="{{ $item['id'] }}"
-                                    class="w-full rounded-md px-2 py-1.5 text-left transition hover:bg-kertas">
-                                <span class="flex items-center gap-2">
-                                         <span class="h-2 w-2 shrink-0 rounded-full {{ match ($item['status']) { 'Subsidi' => 'bg-emerald-500', 'Komersil' => 'bg-sky-500', 'Campuran' => 'bg-violet-500', default => 'bg-slate-500' } }}"></span>
-                                    <span class="truncate font-medium text-slate-700">{{ $item['nama'] }}</span>
-                                </span>
-                                <span class="block truncate pl-4 text-xs text-slate-600">{{ $item['alamat'] }}</span>
-                            </button>
-                        </li>
-                    @endforeach
-                </ul>
+            <x-card heading="Cari Lokasi" meta="Nama perumahan atau kecamatan">
+                <label for="cari-lokasi" class="sr-only">Cari lokasi</label>
+                <div class="relative">
+                    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true">
+                        <x-icon name="cari" class="h-4 w-4"/>
+                    </span>
+                    <input type="text" id="cari-lokasi" placeholder="Nama perumahan / kecamatan..."
+                           class="input pl-9">
+                </div>
 
                 @if ($titik->isEmpty())
-                    <p class="mt-3 text-sm text-slate-600">Belum ada perumahan dengan titik koordinat.</p>
+                    <p class="mt-3 rounded-lg bg-kertas px-3 py-2 text-sm text-slate-600">Belum ada perumahan dengan titik koordinat.</p>
+                @else
+                    <ul id="daftar-lokasi" class="no-scrollbar mt-3 max-h-72 space-y-0.5 overflow-y-auto border-t border-garis pt-2 text-sm">
+                        @foreach ($titik as $item)
+                            <li data-cari="{{ strtolower($item['nama'].' '.$item['alamat']) }}">
+                                <button type="button" data-fokus="{{ $item['id'] }}"
+                                        class="w-full rounded-control px-2 py-1.5 text-left transition hover:bg-kertas">
+                                    <span class="flex items-center gap-2">
+                                        <span class="h-2 w-2 shrink-0 rounded-full {{ match ($item['status']) { 'Subsidi' => 'bg-emerald-500', 'Komersil' => 'bg-sky-500', 'Campuran' => 'bg-violet-500', default => 'bg-slate-500' } }}" aria-hidden="true"></span>
+                                        <span class="truncate font-medium text-slate-700">{{ $item['nama'] }}</span>
+                                    </span>
+                                    <span class="block truncate pl-4 text-xs text-slate-600">{{ $item['alamat'] }}</span>
+                                </button>
+                            </li>
+                        @endforeach
+                    </ul>
                 @endif
-            </div>
+            </x-card>
 
             @if ($tanpaKoordinat->isNotEmpty())
-                <div class="rounded-card border border-amber-200 bg-amber-50 p-4 text-sm shadow-card">
-                    <p class="font-semibold text-amber-800">Belum ada titik koordinat ({{ $tanpaKoordinat->count() }})</p>
+                <div class="rounded-card border border-warning-200 bg-warning-50 p-4 text-sm shadow-card">
+                    <p class="flex items-center gap-2 font-semibold text-warning-800">
+                        <x-icon name="gps" class="h-4 w-4"/>
+                        Belum ada titik koordinat ({{ $tanpaKoordinat->count() }})
+                    </p>
                     <ul class="mt-2 space-y-1">
                         @foreach ($tanpaKoordinat as $item)
                             <li>
-                                <a href="{{ route('perumahan.edit', $item) }}" class="text-amber-900 hover:underline">
+                                <a href="{{ route('perumahan.edit', $item) }}" class="text-warning-800 underline decoration-warning-300 underline-offset-2 hover:text-warning-900">
                                     {{ $item->nama }}
                                 </a>
                             </li>

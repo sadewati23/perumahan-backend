@@ -66,6 +66,28 @@ class CakupanJsTest extends TestCase
         $this->assertFileDoesNotExist(resource_path('js/app.js'), 'Entri lama app.js harus sudah dihapus.');
     }
 
+    public function test_peta_detail_menyisipkan_nama_sebagai_teks_bukan_html(): void
+    {
+        $js = (string) file_get_contents(resource_path('js/publik/peta-detail.js'));
+
+        $this->assertStringNotContainsString(
+            'bindPopup(el.dataset',
+            $js,
+            'Nama perumahan tidak boleh diberikan ke Leaflet sebagai string HTML mentah.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/const\s+judul\s*=\s*document\.createElement\(/',
+            $js,
+            'Popup harus dibuat sebagai node DOM.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/judul\.textContent\s*=\s*el\.dataset\.nama/',
+            $js,
+            'Nama perumahan harus disisipkan lewat textContent.'
+        );
+        $this->assertMatchesRegularExpression('/bindPopup\(judul\)/', $js);
+    }
+
     private function tentukanCakupan(string $area): void
     {
         $modul = $this->modulJs();

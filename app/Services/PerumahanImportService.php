@@ -250,7 +250,7 @@ class PerumahanImportService
             ? (string) $row['lokasi_lahan_pemakaman'] : null;
 
         $validator = Validator::make($data, [
-            'nama' => ['required', 'string', 'max:150'],
+            'nama' => ['required', 'string', 'max:150', 'not_regex:/[<>]/'],
             'kelurahan_id' => ['required', 'integer', 'exists:kelurahans,id'],
             'pengembang' => ['nullable', 'string', 'max:150'],
             'alamat' => ['nullable', 'string', 'max:255'],
@@ -274,6 +274,7 @@ class PerumahanImportService
         ], [
             'nama.required' => 'Kolom nama wajib diisi.',
             'nama.max' => 'Kolom nama maksimal 150 karakter.',
+            'nama.not_regex' => 'Kolom nama tidak boleh mengandung karakter < atau >.',
             'kelurahan_id.required' => 'Kolom kelurahan wajib diisi sesuai daftar di menu Wilayah.',
             'kelurahan_id.exists' => 'Kelurahan tidak ditemukan pada data Wilayah. Cek ejaan atau tambahkan dulu di menu Wilayah.',
             'luas_lahan.required' => 'Kolom luas lahan wajib diisi.',

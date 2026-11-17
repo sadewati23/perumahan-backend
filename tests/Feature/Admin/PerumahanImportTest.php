@@ -216,6 +216,26 @@ class PerumahanImportTest extends TestCase
         $this->assertSame($dagoCidadap->id, Perumahan::first()->kelurahan_id);
     }
 
+    public function test_impor_menolak_nama_berisi_karakter_htm_tanpa_menyimpan_apa_pun(): void
+    {
+        $this->buatWilayah();
+
+        $isi = "Nama Perumahan,Kecamatan,Kelurahan,Luas Lahan,Jumlah Unit\n"
+            ."Perumahan Bersih,Coblong,Dago,5000,10\n"
+            ."<script>alert(1)</script>,Coblong,Dago,4000,8\n";
+
+        $this->actingAs($this->petugas())
+            ->post(route('perumahan.import.simpan'), ['file' => $this->csv($isi)]);
+
+        $this->assertSame(0, Perumahan::count());
+
+        $satuTeks = implode(' ', collect(session('errors')->getBag('default')->get('file'))->all());
+
+        $this->assertStringContainsString('Baris 3', $satuTeks);
+        $this->assertStringContainsString('< atau >', $satuTeks);
+        $this->assertStringContainsString('TIDAK disimpan', $satuTeks);
+    }
+
     public function test_file_yang_tidak_bisa_dibaca_ditolak_dengan_pesan_jelas(): void
     {
         $this->actingAs($this->petugas())

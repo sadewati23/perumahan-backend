@@ -11,12 +11,16 @@ import { initSubmitGuard } from './umum/form-submit';
 import { initFormFields } from './umum/form-fields';
 import { initSidebar } from './admin/sidebar';
 import { initBarisDinamis } from './admin/baris-dinamis';
+import { initGrafikDashboard } from './admin/grafik-dashboard';
 import { initFotoUpload } from './umum/foto-upload';
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Sidebar admin (mobile) + baris dinamis (PSU & tipe unit) ---
     initSidebar();
     initBarisDinamis();
+
+    // --- Grafik ringkasan dashboard (Chart.js dari CDN halaman dashboard) ---
+    initGrafikDashboard();
 
     // --- Fondasi UI/UX: flash, dialog konfirmasi, anti klik ganda ---
     initFlashMessages();

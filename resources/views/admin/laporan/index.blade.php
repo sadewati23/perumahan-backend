@@ -6,11 +6,11 @@
 @section('content')
     @php
         $chipStatus = [
-            '' => ['label' => 'Semua', 'warna' => 'bg-tinta text-white'],
-            'baru' => ['label' => 'Baru', 'warna' => 'bg-amber-100 text-amber-800 ring-amber-600/20'],
-            'diproses' => ['label' => 'Diproses', 'warna' => 'bg-sky-100 text-sky-800 ring-sky-600/20'],
-            'selesai' => ['label' => 'Selesai', 'warna' => 'bg-emerald-100 text-emerald-800 ring-emerald-600/20'],
-            'ditolak' => ['label' => 'Ditolak', 'warna' => 'bg-rose-100 text-rose-800 ring-rose-600/20'],
+            '' => ['label' => 'Semua', 'titik' => 'bg-tinta'],
+            'baru' => ['label' => 'Baru', 'titik' => 'bg-amber-500'],
+            'diproses' => ['label' => 'Diproses', 'titik' => 'bg-sky-500'],
+            'selesai' => ['label' => 'Selesai', 'titik' => 'bg-emerald-500'],
+            'ditolak' => ['label' => 'Ditolak', 'titik' => 'bg-rose-500'],
         ];
 
         $activeFilters = collect($filters)->filter(fn ($v) => filled($v));
@@ -26,41 +26,52 @@
         ];
     @endphp
 
-    <div class="flex flex-wrap gap-3">
+    {{-- Ringkasan per status --}}
+    <div class="grid gap-3 sm:grid-cols-3 xl:grid-cols-5">
         @foreach ($chipStatus as $status => $chip)
+            @php $aktif = ($filters['status'] ?? '') === $status; @endphp
             <a href="{{ route('laporan.index', array_filter(['q' => $filters['q'] ?? null, 'jenis' => $filters['jenis'] ?? null, 'tingkat' => $filters['tingkat'] ?? null, 'perumahan_id' => $filters['perumahan_id'] ?? null, 'status' => $status])) }}"
-               class="flex-1 rounded-card border border-garis bg-white p-4 shadow-card transition hover:border-brand-300
-                      {{ ($filters['status'] ?? '') === $status ? 'ring-2 ring-brand-500/40' : '' }}">
-                <p class="text-xs font-medium text-slate-600">{{ $chip['label'] }}</p>
-                <p class="mt-1 text-2xl font-semibold text-tinta">
-                    {{ $status === '' ? $ringkasan['total'] : $ringkasan[$status] }}
+               @if ($aktif) aria-current="true" @endif
+               class="rounded-card border bg-white p-4 shadow-card transition hover:border-brand-300
+                      {{ $aktif ? 'border-brand-400 ring-2 ring-brand-500/20' : 'border-garis' }}">
+                <p class="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                    <span class="h-1.5 w-1.5 rounded-full {{ $chip['titik'] }}" aria-hidden="true"></span>
+                    {{ $chip['label'] }}
+                </p>
+                <p class="mt-1 font-judul text-2xl font-semibold tabular-nums tracking-tight text-tinta">
+                    {{ number_format($status === '' ? $ringkasan['total'] : $ringkasan[$status], 0, ',', '.') }}
                 </p>
             </a>
         @endforeach
     </div>
 
-    <details class="mt-4 rounded-card border border-garis bg-white p-4 shadow-card" open>
-        <summary class="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-700 md:cursor-default md:after:hidden">
-            Filter laporan
-            <span class="text-xs font-normal text-slate-600 md:hidden">ketuk untuk buka/tutup</span>
+    {{-- Filter --}}
+    <details class="mt-4 rounded-card border border-garis bg-white shadow-card" open>
+        <summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-tinta sm:px-5 md:cursor-default">
+            <span class="flex items-center gap-2">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-kertas-tua text-slate-600 ring-1 ring-garis" aria-hidden="true">
+                    <x-icon name="filter" class="h-4 w-4"/>
+                </span>
+                Filter laporan
+            </span>
+            <span class="text-xs font-normal text-slate-600 md:hidden">Buka / tutup</span>
         </summary>
 
-        <form method="GET" action="{{ route('laporan.index') }}" class="mt-3 flex flex-wrap items-end gap-3">
+        <form method="GET" action="{{ route('laporan.index') }}" class="flex flex-wrap items-end gap-3 border-t border-garis px-4 py-4 sm:px-5">
             @if ($filters['status'] ?? '')
                 <input type="hidden" name="status" value="{{ $filters['status'] }}">
             @endif
 
             <div class="min-w-48 flex-1">
-                <label for="q" class="mb-1.5 block text-sm font-medium text-slate-700">Cari</label>
+                <label for="q" class="label mb-1.5">Cari</label>
                 <input type="text" id="q" name="q" value="{{ $filters['q'] ?? '' }}"
                        placeholder="Kode tiket, judul, pelapor, atau perumahan…"
-                       class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+                       class="input">
             </div>
 
             <div class="min-w-40">
-                <label for="jenis" class="mb-1.5 block text-sm font-medium text-slate-700">Jenis</label>
-                <select id="jenis" name="jenis"
-                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+                <label for="jenis" class="label mb-1.5">Jenis</label>
+                <select id="jenis" name="jenis" class="input">
                     <option value="">Semua</option>
                     @foreach (\App\Models\Laporan::JENIS as $value => $label)
                         <option value="{{ $value }}" @selected(($filters['jenis'] ?? '') === $value)>{{ $label }}</option>
@@ -69,9 +80,8 @@
             </div>
 
             <div class="min-w-40">
-                <label for="perumahan_id" class="mb-1.5 block text-sm font-medium text-slate-700">Perumahan</label>
-                <select id="perumahan_id" name="perumahan_id"
-                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+                <label for="perumahan_id" class="label mb-1.5">Perumahan</label>
+                <select id="perumahan_id" name="perumahan_id" class="input">
                     <option value="">Semua</option>
                     @foreach ($perumahans as $item)
                         <option value="{{ $item->id }}" @selected((string) ($filters['perumahan_id'] ?? '') === (string) $item->id)>{{ $item->nama }}</option>
@@ -80,9 +90,8 @@
             </div>
 
             <div class="min-w-36">
-                <label for="tingkat" class="mb-1.5 block text-sm font-medium text-slate-700">Tingkat</label>
-                <select id="tingkat" name="tingkat"
-                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+                <label for="tingkat" class="label mb-1.5">Tingkat</label>
+                <select id="tingkat" name="tingkat" class="input">
                     <option value="">Semua</option>
                     @foreach (\App\Models\Laporan::TINGKAT as $value => $label)
                         <option value="{{ $value }}" @selected(($filters['tingkat'] ?? '') === $value)>{{ $label }}</option>
@@ -90,13 +99,12 @@
                 </select>
             </div>
 
-            <div class="flex gap-2">
-                <button type="submit" class="tombol-utama">
+            <div class="flex flex-wrap gap-2">
+                <x-button type="submit">
+                    <x-icon name="cari" class="h-4 w-4"/>
                     Terapkan
-                </button>
-                <a href="{{ route('laporan.index') }}" class="tombol-sekunder">
-                    Reset
-                </a>
+                </x-button>
+                <x-button href="{{ route('laporan.index') }}" variant="secondary">Reset</x-button>
             </div>
         </form>
     </details>
@@ -118,7 +126,7 @@
                     }
                 @endphp
                 <a href="{{ route('laporan.index', $activeFilters->except($key)->all()) }}"
-                   class="inline-flex items-center gap-1 rounded-pill bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 transition hover:bg-brand-100">
+                   class="inline-flex min-h-11 items-center gap-1 rounded-pill bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 transition hover:bg-brand-100 lg:min-h-0">
                     {{ $filterLabels[$key] ?? $key }}: {{ $labelNilai }}
                     <span aria-hidden="true">&times;</span>
                 </a>
@@ -127,35 +135,38 @@
         </div>
     @endif
 
-    <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+    <div class="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
         <p>
             Menampilkan <span class="font-semibold text-tinta">{{ $laporans->firstItem() ?? 0 }}</span>–<span class="font-semibold text-tinta">{{ $laporans->lastItem() ?? 0 }}</span>
             dari <span class="font-semibold text-tinta">{{ $resultCount }}</span> data
         </p>
-    </div>
 
-    {{-- Cetak rekap membawa seluruh filter aktif agar hasil cetak sama dengan daftar di layar. --}}
-    <div class="mt-2 flex justify-end">
-        <x-button href="{{ route('laporan.cetak-rekap', request()->query()) }}" variant="secondary" size="sm">🖨 Cetak Rekap</x-button>
+        {{-- Cetak rekap membawa seluruh filter aktif agar hasil cetak sama dengan daftar di layar. --}}
+        <x-button href="{{ route('laporan.cetak-rekap', request()->query()) }}" variant="secondary" size="sm">
+            <x-icon name="cetak" class="h-4 w-4"/>
+            Cetak Rekap
+        </x-button>
     </div>
 
     {{-- Daftar kartu untuk layar kecil --}}
-    <div class="mt-4 space-y-3 md:hidden">
+    <div class="mt-3 space-y-3 md:hidden">
         @forelse ($laporans as $laporan)
             <x-card>
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                        <a href="{{ route('laporan.show', $laporan) }}" class="font-mono text-xs font-semibold text-slate-700 hover:text-brand-700">{{ $laporan->kode }}</a>
+                        <a href="{{ route('laporan.show', $laporan) }}" class="font-mono text-xs font-semibold text-brand-700 hover:underline">{{ $laporan->kode }}</a>
                         <p class="mt-1 font-medium text-slate-800">{{ $laporan->judul }}</p>
                         <p class="mt-0.5 text-xs text-slate-600">{{ $laporan->lokasi_ringkas }}</p>
                     </div>
-                    <x-badge :tone="match ($laporan->status) { 'selesai' => 'success', 'ditolak' => 'danger', 'diproses' => 'info', default => 'warning' }" size="sm">
-                        {{ $laporan->label_status }}
-                     </x-badge>
-                     @if ($laporan->status === 'selesai' && $laporan->jatuh_tempo_hapus)
-                         @php $sisa = now()->diffInDays($laporan->jatuh_tempo_hapus, false); @endphp
-                         <x-badge tone="warning" size="sm">{{ $sisa < 0 ? 'Menunggu penghapusan' : ($sisa === 0 ? 'Dihapus hari ini' : 'Dihapus '.$sisa.' hari lagi') }}</x-badge>
-                     @endif
+                    <div class="flex shrink-0 flex-col items-end gap-1">
+                        <x-badge :tone="match ($laporan->status) { 'selesai' => 'success', 'ditolak' => 'danger', 'diproses' => 'info', default => 'warning' }" size="sm">
+                            {{ $laporan->label_status }}
+                        </x-badge>
+                        @if ($laporan->status === 'selesai' && $laporan->jatuh_tempo_hapus)
+                            @php $sisa = now()->diffInDays($laporan->jatuh_tempo_hapus, false); @endphp
+                            <x-badge tone="warning" size="sm">{{ $sisa < 0 ? 'Menunggu penghapusan' : ($sisa === 0 ? 'Dihapus hari ini' : 'Dihapus '.$sisa.' hari lagi') }}</x-badge>
+                        @endif
+                    </div>
                 </div>
 
                 <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
@@ -164,11 +175,7 @@
                         <dd class="mt-0.5">
                             <x-badge :tone="match ($laporan->jenis) { 'pengaduan' => 'info', 'bangunan_liar' => 'danger', default => 'warning' }" size="sm">
                                 {{ $laporan->label_jenis }}
-                                 </x-badge>
-                                 @if ($laporan->status === 'selesai' && $laporan->jatuh_tempo_hapus)
-                                     @php $sisa = now()->diffInDays($laporan->jatuh_tempo_hapus, false); @endphp
-                                     <x-badge tone="warning" size="sm">{{ $sisa < 0 ? 'Menunggu penghapusan' : ($sisa === 0 ? 'Dihapus hari ini' : 'Dihapus '.$sisa.' hari lagi') }}</x-badge>
-                                 @endif
+                            </x-badge>
                         </dd>
                     </div>
                     <div>
@@ -186,26 +193,30 @@
                 </dl>
 
                 @if ($laporan->deskripsi)
-                    <p class="mt-3 text-xs text-slate-600">{{ $laporan->deskripsi }}</p>
+                    <p class="mt-3 line-clamp-3 text-xs text-slate-600">{{ $laporan->deskripsi }}</p>
                 @endif
 
-                @if ($laporan->fotosLaporan->isNotEmpty())
-                    <a href="{{ route('laporan.show', $laporan) }}" class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:underline">
-                        {{ $laporan->fotosLaporan->count() }} foto bukti
-                    </a>
-                @endif
+                <div class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-garis pt-2">
+                    <div class="flex flex-wrap items-center gap-1">
+                        <a href="{{ route('laporan.show', $laporan) }}" class="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-slate-600 hover:bg-kertas hover:text-brand-700">Detail</a>
 
-                @if (auth()->user()->isAdmin())
-                     <div class="mt-3 border-t border-garis pt-3 text-right">
-                         <form method="POST" action="{{ route('laporan.destroy', $laporan) }}" class="inline" data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan.">
-                             @csrf
-                             @method('DELETE')
-                             <button type="submit" class="text-xs font-medium text-danger-600 hover:text-danger-700">
-                                 Hapus
-                             </button>
-                         </form>
+                        @if ($laporan->fotosLaporan->isNotEmpty())
+                            <a href="{{ route('laporan.show', $laporan) }}" class="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-brand-700 hover:bg-brand-50">
+                                {{ $laporan->fotosLaporan->count() }} foto bukti
+                            </a>
+                        @endif
                     </div>
-                @endif
+
+                    @if (auth()->user()->isAdmin())
+                        <form method="POST" action="{{ route('laporan.destroy', $laporan) }}" class="inline" data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan.">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-danger-700 hover:bg-danger-50">
+                                Hapus
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </x-card>
         @empty
             <x-empty-state
@@ -218,8 +229,8 @@
     {{-- Tabel untuk layar sedang ke atas --}}
     <div class="mt-4 hidden overflow-hidden rounded-card border border-garis bg-white shadow-card md:block">
         <div class="no-scrollbar overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="sticky top-0 z-10 bg-kertas text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+            <table class="min-w-full divide-y divide-garis text-sm">
+                <thead class="sticky top-0 z-10 bg-kertas-tua text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                     <tr>
                         <th class="whitespace-nowrap px-4 py-3">Kode</th>
                         <th class="whitespace-nowrap px-4 py-3">Laporan</th>
@@ -236,9 +247,11 @@
                 <tbody class="divide-y divide-garis">
                     @forelse ($laporans as $laporan)
                         <tr class="transition hover:bg-kertas">
-                            <td class="whitespace-nowrap px-4 py-3 font-mono text-xs font-semibold text-slate-700">{{ $laporan->kode }}</td>
+                            <td class="whitespace-nowrap px-4 py-3">
+                                <a href="{{ route('laporan.show', $laporan) }}" class="font-mono text-xs font-semibold text-brand-700 hover:underline">{{ $laporan->kode }}</a>
+                            </td>
                             <td class="px-4 py-3">
-                                <p class="font-medium text-slate-800">{{ $laporan->judul }}</p>
+                                <a href="{{ route('laporan.show', $laporan) }}" class="font-medium text-slate-800 hover:text-brand-700">{{ $laporan->judul }}</a>
                                 <p class="mt-0.5 text-xs text-slate-600">{{ $laporan->lokasi_ringkas }}</p>
                             </td>
                             <td class="whitespace-nowrap px-4 py-3">
@@ -252,14 +265,14 @@
                             </td>
                             <td class="whitespace-nowrap px-4 py-3">
                                 @if ($laporan->label_tingkat)
-                                    <x-badge tone="warning" size="sm">{{ $laporan->label_tingkat }}</x-badge>
+                                    <x-badge :tone="match ($laporan->tingkat) { 'rusak_berat' => 'danger', 'rusak_ringan' => 'warning', default => 'neutral' }" size="sm">{{ $laporan->label_tingkat }}</x-badge>
                                 @else
                                     <span class="text-xs text-slate-400">-</span>
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-600">{{ $laporan->ukuran_ringkas }}</td>
                             <td class="max-w-xs px-4 py-3 text-xs text-slate-600">
-                                <p>{{ $laporan->deskripsi }}</p>
+                                <p class="line-clamp-2">{{ $laporan->deskripsi }}</p>
 
                                 @if ($laporan->tanggal_kejadian)
                                     <p class="mt-1 text-slate-600">Kejadian: {{ $laporan->label_tanggal_kejadian }}</p>
@@ -267,7 +280,7 @@
 
                                 @if ($laporan->fotosLaporan->isNotEmpty())
                                     <a href="{{ route('laporan.show', $laporan) }}"
-                                       class="mt-1 inline-flex items-center gap-1 font-medium text-brand-600 hover:underline">
+                                       class="mt-1 inline-flex items-center gap-1 font-medium text-brand-700 hover:underline">
                                         {{ $laporan->fotosLaporan->count() }} foto bukti
                                     </a>
                                 @endif
@@ -280,16 +293,16 @@
                             <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-600">
                                 {{ $laporan->created_at->translatedFormat('d M Y, H:i') }}
                             </td>
-                             <td class="whitespace-nowrap px-4 py-3 text-right">
-                                 @if (auth()->user()->isAdmin())
-                                     <form method="POST" action="{{ route('laporan.destroy', $laporan) }}" class="inline" data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan.">
-                                         @csrf
-                                         @method('DELETE')
-                                         <button type="submit" class="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                             Hapus
-                                         </button>
-                                     </form>
-                                 @endif
+                            <td class="whitespace-nowrap px-4 py-3 text-right">
+                                @if (auth()->user()->isAdmin())
+                                    <form method="POST" action="{{ route('laporan.destroy', $laporan) }}" class="inline" data-confirm="Hapus laporan {{ $laporan->kode }} ini? Data laporan, foto buktinya, dan penanganan akan dihapus permanen dan tidak bisa dikembalikan.">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="rounded-control border border-danger-200 px-2.5 py-1.5 text-xs font-semibold text-danger-700 transition hover:bg-danger-50">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -308,8 +321,6 @@
     </div>
 
     <div class="mt-4">
-        {{ $laporans->links() }}
+        {{ $laporans->links('vendor.pagination.admin') }}
     </div>
-
-    {{-- inline script remove; confirm dialog handled globally --}}
 @endsection

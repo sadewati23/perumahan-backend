@@ -34,7 +34,7 @@ class StorePerumahanRequest extends FormRequest
         $tahunSekarang = (int) date('Y');
 
         return [
-            'nama' => ['required', 'string', 'max:150'],
+            'nama' => ['required', 'string', 'max:150', 'not_regex:/[<>]/'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=6000,max_height=6000'],
             'pengembang' => ['nullable', 'string', 'max:150'],
             'kelurahan_id' => ['required', 'exists:kelurahans,id'],
@@ -77,6 +77,7 @@ class StorePerumahanRequest extends FormRequest
     {
         return [
             'nama.required' => 'Nama perumahan wajib diisi.',
+            'nama.not_regex' => 'Nama perumahan tidak boleh mengandung karakter < atau >.',
             'kelurahan_id.required' => 'Kelurahan wajib dipilih.',
             'luas_lahan.required' => 'Luas lahan wajib diisi.',
             'jumlah_unit.required' => 'Jumlah unit wajib diisi.',

@@ -33,7 +33,7 @@
     <div class="min-w-0 space-y-4 xl:col-span-2">
         <x-card>
             <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">1</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-100">1</span>
                 Identitas &amp; Lokasi Administratif
             </h2>
 
@@ -120,7 +120,7 @@
         <x-card>
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">2</span>
+                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-100">2</span>
                     Titik Lokasi (GIS)
                 </h2>
                 <button type="button" id="btn-lokasi-saya"
@@ -153,7 +153,7 @@
 
         <x-card>
             <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">3</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-100">3</span>
                 Luasan, Unit, RTH &amp; Koefisien
             </h2>
 
@@ -208,15 +208,15 @@
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div>
                         <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">4</span>
+                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-100">4</span>
                             Unit &amp; Tipe Rumah
                         </h2>
                         <p class="mt-0.5 text-xs text-slate-600">Rincikan tipe unit yang dibangun beserta jumlahnya.</p>
                     </div>
-                    <button type="button" data-add-row
-                            class="shrink-0 whitespace-nowrap rounded-control border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-kertas">
-                        + Tambah Tipe
-                    </button>
+                    <x-button type="button" variant="secondary" size="sm" data-add-row>
+                        <x-icon name="plus" class="h-4 w-4"/>
+                        Tambah tipe
+                    </x-button>
                 </div>
             </div>
 
@@ -268,7 +268,11 @@
                                     </x-field>
                                 </td>
                                 <td class="py-2 text-right">
-                                    <button type="button" data-remove-row class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
+                                    <button type="button" data-remove-row
+                                            class="inline-flex min-h-11 items-center gap-1.5 rounded-control px-2 text-xs font-medium text-danger-700 transition hover:bg-danger-50 lg:min-h-0">
+                                        <x-icon name="sampah" class="h-3.5 w-3.5"/>
+                                        Hapus
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -282,15 +286,15 @@
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div>
                         <h2 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">5</span>
+                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-100">5</span>
                             Data PSU
                         </h2>
                         <p class="mt-0.5 text-xs text-slate-600">Prasarana, sarana, dan utilitas yang tersedia di perumahan.</p>
                     </div>
-                    <button type="button" data-add-row
-                            class="shrink-0 whitespace-nowrap rounded-control border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-kertas">
-                        + Tambah PSU
-                    </button>
+                    <x-button type="button" variant="secondary" size="sm" data-add-row>
+                        <x-icon name="plus" class="h-4 w-4"/>
+                        Tambah PSU
+                    </x-button>
                 </div>
             </div>
 
@@ -350,7 +354,11 @@
                                     </x-field>
                                 </td>
                                 <td class="py-2 text-right">
-                                    <button type="button" data-remove-row class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
+                                    <button type="button" data-remove-row
+                                            class="inline-flex min-h-11 items-center gap-1.5 rounded-control px-2 text-xs font-medium text-danger-700 transition hover:bg-danger-50 lg:min-h-0">
+                                        <x-icon name="sampah" class="h-3.5 w-3.5"/>
+                                        Hapus
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -370,7 +378,7 @@
     <div class="space-y-4">
         <x-card>
             <h2 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700 ring-1 ring-garis">6</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-100">6</span>
                 Lahan Pemakaman
             </h2>
 
@@ -397,7 +405,7 @@
 
         <x-card>
             <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-kertas-tua text-xs font-bold text-slate-700">7</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-700">7</span>
                 Keterangan Tambahan
             </h2>
             <x-field name="keterangan" optional hint="Maksimal 2000 karakter.">
@@ -412,7 +420,10 @@
 <div class="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-garis bg-white/95 px-4 py-3 shadow-pop backdrop-blur lg:-mx-8 lg:px-8">
     <div class="flex flex-wrap items-center justify-end gap-3">
         <x-button variant="secondary" href="{{ $cancelRoute ?? route('perumahan.index') }}">Batal</x-button>
-        <x-button type="submit">{{ $submitLabel ?? 'Simpan Data' }}</x-button>
+        <x-button type="submit">
+            <x-icon name="simpan" class="h-4 w-4"/>
+            {{ $submitLabel ?? 'Simpan Data' }}
+        </x-button>
     </div>
 </div>
 
@@ -434,7 +445,11 @@
             <input type="text" name="tipe_units[__INDEX__][keterangan]" class="input w-40">
         </td>
         <td class="py-2 text-right">
-            <button type="button" data-remove-row class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
+            <button type="button" data-remove-row
+                    class="inline-flex min-h-11 items-center gap-1.5 rounded-control px-2 text-xs font-medium text-danger-700 transition hover:bg-danger-50 lg:min-h-0">
+                <x-icon name="sampah" class="h-3.5 w-3.5"/>
+                Hapus
+            </button>
         </td>
     </tr>
 </template>
@@ -467,7 +482,11 @@
             <input type="text" name="psu[__INDEX__][keterangan]" class="input w-44">
         </td>
         <td class="py-2 text-right">
-            <button type="button" data-remove-row class="rounded-md px-2 py-2 text-xs font-medium text-danger-600 transition hover:text-danger-700">Hapus</button>
+            <button type="button" data-remove-row
+                    class="inline-flex min-h-11 items-center gap-1.5 rounded-control px-2 text-xs font-medium text-danger-700 transition hover:bg-danger-50 lg:min-h-0">
+                <x-icon name="sampah" class="h-3.5 w-3.5"/>
+                Hapus
+            </button>
         </td>
     </tr>
 </template>

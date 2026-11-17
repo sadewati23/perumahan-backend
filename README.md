@@ -255,7 +255,7 @@ LAPORAN_HAPUS_OTOMATIS_HARI=3
 LAPORAN_HAPUS_OTOMATIS_SEJAK=2026-10-21
 ```
 
-`LAPORAN_HAPUS_OTOMATIS_SEJAK` adalah tanggal deploy (`YYYY-MM-DD`); di server **wajib diisi** agar laporan lama tidak ikut terhapus. Periksa dahulu dengan `php artisan laporan:hapus-kedaluwarsa --dry-run`. Pada Windows, Task Scheduler setiap 1 menit harus menjalankan `C:\xampp\php\php.exe artisan schedule:run` dengan **Start in** folder project. Untuk pengembangan dapat memakai `php artisan schedule:work`. Jalankan `--dry-run` dan cadangkan database serta `storage/app/public` sebelum mengaktifkan pertama kali.
+`LAPORAN_HAPUS_OTOMATIS_HARI` bawaan **3 hari** (nilai tidak valid juga jatuh ke 3). `LAPORAN_HAPUS_OTOMATIS_SEJAK` adalah tanggal deploy (`YYYY-MM-DD`); di server **wajib diisi** agar laporan lama tidak ikut terhapus. Bila `LAPORAN_HAPUS_OTOMATIS_SEJAK` kosong, penghapusan otomatis **dibatalkan** (fail-closed): perintah mengembalikan status gagal, mencatat `Log::error`, dan tidak menghapus laporan apa pun. Mode `--dry-run` tetap menampilkan peringatan beserta daftar kandidat tanpa mengubah data. Periksa dahulu dengan `php artisan laporan:hapus-kedaluwarsa --dry-run`. Pada Windows, Task Scheduler setiap 1 menit harus menjalankan `C:\xampp\php\php.exe artisan schedule:run` dengan **Start in** folder project. Untuk pengembangan dapat memakai `php artisan schedule:work`. Jalankan `--dry-run` dan cadangkan database serta `storage/app/public` sebelum mengaktifkan pertama kali.
 
 ### Cetak dan ekspor laporan
 
@@ -350,7 +350,7 @@ resources/js/                  # publik.js + admin.js (dua entri), umum/ modul b
 routes/                        # web.php (pemuat) + publik.php, auth.php, admin.php
 config/peta.php                # Konfigurasi wilayah dan peta
 public/                        # Entry point, asset hasil build, dan storage link
-tests/                         # Feature/{Publik,Admin,Konsol,Konfigurasi} + Unit
+tests/                         # Feature/{Publik,Admin,Konsol,Konfigurasi,Keamanan} + Unit
 ```
 
 ## Struktur Proyek: Publik vs Admin
@@ -362,7 +362,7 @@ Kode aplikasi dipisah secara arsitektural menjadi dua area tanpa mengubah perila
 - **Middleware**: `SecurityHeaders` global; middleware area admin (`role`, `active`, `tanpa-cache`, `simpan-tujuan-konfirmasi`) berada di `App\Http\Middleware\Admin` dan di-alias dengan nama yang sama di `bootstrap/app.php`.
 - **View**: halaman publik memakai `layouts.publik` + `views/publik/**`; area admin memakai `layouts.admin` + `views/admin/**` (termasuk `admin/auth/*` yang berdiri sendiri); `components/`, `partials/`, dan `vendor/pagination/` dipakai kedua area.
 - **JavaScript**: `npm run build` menghasilkan **dua entri** — `resources/js/publik.js` untuk seluruh halaman publik dan `resources/js/admin.js` untuk `layouts.admin` beserta `admin/auth/*`. Modul yang dipakai kedua area ada di `resources/js/umum/`; modul khusus area masing-masing di `resources/js/publik/` dan `resources/js/admin/`, sehingga halaman publik tidak memuat JavaScript khusus admin (dipantau oleh `tests/Feature/CakupanJsTest.php`).
-- **Tests**: `tests/Feature/{Publik,Admin,Konsol,Konfigurasi}/` dengan namespace `Tests\Feature\*` masing-masing.
+- **Tests**: `tests/Feature/{Publik,Admin,Konsol,Konfigurasi,Keamanan}/` dengan namespace `Tests\Feature\*` masing-masing.
 
 ## Pengujian
 
@@ -379,6 +379,23 @@ composer test
 ```
 
 Test feature mencakup portal publik, login dan throttling, role, akun nonaktif, CRUD perumahan, validasi, laporan warga, foto perbaikan, GeoJSON, dashboard, dan render halaman.
+
+### Regresi SQL injection
+
+`tests/Feature/Keamanan/SqlInjectionTest.php` mengunci hasil audit injeksi SQL pada seluruh parameter filter/pencarian dan impor. Test ini tidak mengubah kode aplikasi; ia mengirim payload ke endpoint dan menegaskan tidak ada jalur yang menjadi error server atau mengubah data.
+
+- **Payload**: `' OR 1=1 --`, `" OR "1"="1`, `%`, `_`, `\`, `'; DROP TABLE users; --`, dan string unicode.
+- **Filter publik**: `/perumahan` dan `/peta` (`q`, `status`, `kecamatan_id`), serta `POST /cek-laporan` (`kode`).
+- **Filter admin**: daftar perumahan (`q`, `status`, `kecamatan_id`, `tahun`), daftar laporan (`q`, `jenis`, `status`, `tingkat`, `perumahan_id`), dan rekap cetak/Word (`q`, `jenis`, `status`, `tingkat`, `perumahan_id`, `dari`, `sampai`).
+- **Impor CSV/Excel**: payload pada sel `nama` harus tersimpan sebagai data biasa (bukan dieksekusi), sedangkan payload pada sel `kelurahan`/`kecamatan` harus ditolak all-or-nothing tanpa menyimpan baris apa pun.
+- **Tegasan tiap kasus**: respons 200/302/303/422 (bukan 500), `Schema::hasTable` untuk tabel penting (`perumahans`, `kelurahans`, `kecamatans`, `laporans`, `psu_perumahans`, `users`), jumlah record tidak berubah, dan hasil filter tidak melebihi hasil tanpa filter. Khusus `q`, `%` dan `_` harus diperlakukan sebagai teks biasa (bukan wildcard yang mencocokkan semua baris).
+- **Catatan lingkungan**: test berjalan pada sqlite `:memory:` (lihat `phpunit.xml`), sehingga escape LIKE diuji sesuai perilaku sqlite; di produksi (MySQL) nilai tetap dikirim sebagai binding.
+
+Menjalankan hanya test ini:
+
+```bash
+php artisan test --filter=SqlInjectionTest
+```
 
 ## Operasional dan Deployment
 

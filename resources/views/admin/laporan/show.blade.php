@@ -4,48 +4,80 @@
 @section('subtitle', $laporan->kode)
 
 @section('content')
-    @if ($laporan->jatuh_tempo_hapus)<div role="status" class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Laporan ini akan dihapus otomatis pada {{ $laporan->jatuh_tempo_hapus->translatedFormat('d F Y, H:i') }} WIB. <a class="font-semibold underline" href="{{ route('laporan.cetak', $laporan) }}">Cetak laporan</a> terlebih dahulu bila masih diperlukan.</div>@elseif ($laporan->jangan_hapus_otomatis)<div role="status" class="mb-4 rounded-lg border border-garis bg-kertas-tua p-4 text-sm text-slate-700">Laporan ini disimpan permanen.</div>@endif
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-wrap items-center gap-2">
-            <span class="rounded-lg bg-tinta px-3 py-1.5 font-mono text-sm font-bold text-white">{{ $laporan->kode }}</span>
-            <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_jenis }}">{{ $laporan->label_jenis }}</span>
-            <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_status }}">{{ $laporan->label_status }}</span>
-            @if ($laporan->label_tingkat)
-                <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset {{ $laporan->badge_tingkat }}">{{ $laporan->label_tingkat }}</span>
-            @endif
+    @if ($laporan->jatuh_tempo_hapus)
+        <div role="status" class="mb-4 flex flex-wrap items-start gap-3 rounded-card border border-warning-200 bg-warning-50 p-4 text-sm text-warning-800">
+            <span class="mt-0.5 shrink-0 text-warning-700" aria-hidden="true">
+                <x-icon name="jam" class="h-5 w-5"/>
+            </span>
+            <p class="min-w-0">
+                Laporan ini akan dihapus otomatis pada {{ $laporan->jatuh_tempo_hapus->translatedFormat('d F Y, H:i') }} WIB.
+                <a class="font-semibold underline" href="{{ route('laporan.cetak', $laporan) }}">Cetak laporan</a> terlebih dahulu bila masih diperlukan.
+            </p>
         </div>
+    @elseif ($laporan->jangan_hapus_otomatis)
+        <div role="status" class="mb-4 flex flex-wrap items-start gap-3 rounded-card border border-garis bg-kertas-tua p-4 text-sm text-slate-700">
+            <span class="mt-0.5 shrink-0 text-slate-500" aria-hidden="true">
+                <x-icon name="perisai" class="h-5 w-5"/>
+            </span>
+            <p class="min-w-0">Laporan ini disimpan permanen.</p>
+        </div>
+    @endif
 
-        <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('laporan.cetak', $laporan) }}" target="_blank" rel="noopener"
-               class="tombol-sekunder">
-                Cetak Laporan
-            </a>
-            <a href="{{ route('laporan.index') }}"
-               class="tombol-sekunder">
-                &larr; Kembali ke Daftar
-            </a>
+    {{-- Identitas laporan --}}
+    <div class="rounded-card border border-garis bg-white p-4 shadow-card sm:p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-lg bg-tinta px-2.5 py-1 font-mono text-xs font-semibold text-white">{{ $laporan->kode }}</span>
+                    <x-badge :tone="match ($laporan->jenis) { 'pengaduan' => 'info', 'bangunan_liar' => 'danger', default => 'warning' }">
+                        {{ $laporan->label_jenis }}
+                    </x-badge>
+                    <x-badge :tone="match ($laporan->status) { 'selesai' => 'success', 'ditolak' => 'danger', 'diproses' => 'info', default => 'warning' }">
+                        {{ $laporan->label_status }}
+                    </x-badge>
+                    @if ($laporan->label_tingkat)
+                        <x-badge :tone="match ($laporan->tingkat) { 'rusak_berat' => 'danger', 'rusak_ringan' => 'warning', default => 'neutral' }">
+                            <x-icon name="grafik" class="h-3.5 w-3.5"/>
+                            {{ $laporan->label_tingkat }}
+                        </x-badge>
+                    @endif
+                </div>
+                <p class="mt-2 font-judul text-xl font-semibold tracking-tight text-tinta">{{ $laporan->judul }}</p>
+                <p class="mt-0.5 text-sm text-slate-600">
+                    Dilaporkan {{ $laporan->created_at->translatedFormat('d F Y, H:i') }} WIB
+                    &middot; {{ $laporan->nama_pelapor }}
+                </p>
+            </div>
+
+            <div class="flex w-full flex-wrap gap-2 sm:w-auto">
+                <x-button href="{{ route('laporan.cetak', $laporan) }}" variant="secondary" class="flex-1 sm:flex-none" target="_blank" rel="noopener">
+                    <x-icon name="cetak" class="h-4 w-4"/>
+                    Cetak laporan
+                </x-button>
+                <x-button href="{{ route('laporan.index') }}" variant="ghost" class="flex-1 sm:flex-none">
+                    <x-icon name="panah-kiri" class="h-4 w-4"/>
+                    Kembali ke daftar
+                </x-button>
+            </div>
         </div>
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-3">
-        <div class="space-y-4 lg:col-span-2">
-            <div class="rounded-card border border-garis bg-white p-5 shadow-card">
-                <h2 class="text-sm font-semibold text-slate-800">Isi Laporan</h2>
-
-                <p class="mt-3 text-lg font-semibold text-tinta">{{ $laporan->judul }}</p>
-                <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-600">{{ $laporan->deskripsi }}</p>
+    <div class="mt-4 grid gap-4 lg:grid-cols-3">
+        <div class="min-w-0 space-y-4 lg:col-span-2">
+            <x-card heading="Isi Laporan">
+                <p class="whitespace-pre-line text-sm leading-relaxed text-slate-700">{{ $laporan->deskripsi }}</p>
 
                 <dl class="mt-5 grid gap-4 border-t border-garis pt-4 sm:grid-cols-2">
-                     <div>
-                        <dt class="text-xs text-slate-600">Lokasi</dt>
-                        <dd class="text-sm font-medium text-slate-800">
+                    <div>
+                        <dt class="text-xs font-medium text-slate-600">Lokasi</dt>
+                        <dd class="mt-0.5 text-sm font-medium text-slate-800">
                             @if ($laporan->perumahan)
-                                <a href="{{ route('perumahan.show', $laporan->perumahan) }}" class="text-brand-600 hover:underline">
+                                <a href="{{ route('perumahan.show', $laporan->perumahan) }}" class="text-brand-700 hover:underline">
                                     {{ $laporan->perumahan->nama }}
                                 </a>
                             @elseif ($laporan->kelurahan)
                                 Kel. {{ $laporan->kelurahan->nama }}, Kec. {{ $laporan->kelurahan->kecamatan->nama ?? '-' }}
-                                <span class="text-xs text-slate-600">(di luar area perumahan)</span>
+                                <span class="text-xs font-normal text-slate-600">(di luar area perumahan)</span>
                             @else
                                 -
                             @endif
@@ -53,25 +85,25 @@
                     </div>
                     @if ($laporan->lokasi_teks)
                         <div>
-                            <dt class="text-xs text-slate-600">Titik / alamat kejadian</dt>
-                            <dd class="text-sm font-medium text-slate-800">{{ $laporan->lokasi_teks }}</dd>
+                            <dt class="text-xs font-medium text-slate-600">Titik / alamat kejadian</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-slate-800">{{ $laporan->lokasi_teks }}</dd>
                         </div>
                     @endif
                     @if ($laporan->punyaTitik())
                         <div>
-                            <dt class="text-xs text-slate-600">Titik GPS dari pelapor</dt>
-                            <dd class="text-sm font-medium text-slate-800">
+                            <dt class="text-xs font-medium text-slate-600">Titik GPS dari pelapor</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-slate-800">
                                 {{ number_format((float) $laporan->latitude, 7, '.') }}, {{ number_format((float) $laporan->longitude, 7, '.') }}
-                                <a href="{{ $laporan->tautan_peta }}" target="_blank" rel="noopener" class="ml-1 text-brand-600 hover:underline">buka di peta ↗</a>
+                                <a href="{{ $laporan->tautan_peta }}" target="_blank" rel="noopener" class="ml-1 font-medium text-brand-700 hover:underline">buka di peta &nearr;</a>
                             </dd>
                         </div>
                     @endif
                     <div>
-                        <dt class="text-xs text-slate-600">Sarana / prasarana</dt>
-                        <dd class="text-sm font-medium text-slate-800">
+                        <dt class="text-xs font-medium text-slate-600">Sarana / prasarana</dt>
+                        <dd class="mt-0.5 text-sm font-medium text-slate-800">
                             @if ($laporan->psu)
                                 {{ $laporan->psu->jenis }}
-                                <span class="text-xs text-slate-600">(kondisi terdata: {{ $laporan->psu->label_kondisi }})</span>
+                                <span class="text-xs font-normal text-slate-600">(kondisi terdata: {{ $laporan->psu->label_kondisi }})</span>
                             @elseif ($laporan->jenis === 'kerusakan')
                                 Umum / tidak spesifik
                             @else
@@ -81,23 +113,23 @@
                     </div>
                     @if ($laporan->jenis === 'kerusakan')
                         <div>
-                            <dt class="text-xs text-slate-600">Persentase kerusakan</dt>
-                            <dd class="text-sm font-medium text-slate-800">{{ $laporan->label_persentase_kerusakan }}</dd>
+                            <dt class="text-xs font-medium text-slate-600">Persentase kerusakan</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-slate-800">{{ $laporan->label_persentase_kerusakan }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs text-slate-600">Panjang kerusakan</dt>
-                            <dd class="text-sm font-medium text-slate-800">{{ $laporan->label_panjang_kerusakan }}</dd>
+                            <dt class="text-xs font-medium text-slate-600">Panjang kerusakan</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-slate-800">{{ $laporan->label_panjang_kerusakan }}</dd>
                         </div>
                     @endif
                     @if ($laporan->tanggal_kejadian)
                         <div>
-                            <dt class="text-xs text-slate-600">Tanggal kejadian</dt>
-                            <dd class="text-sm font-medium text-slate-800">{{ $laporan->label_tanggal_kejadian }}</dd>
+                            <dt class="text-xs font-medium text-slate-600">Tanggal kejadian</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-slate-800">{{ $laporan->label_tanggal_kejadian }}</dd>
                         </div>
                     @endif
                     <div class="sm:col-span-2">
-                        <dt class="text-xs text-slate-600">Lokasi administratif</dt>
-                        <dd class="text-sm font-medium text-slate-800">
+                        <dt class="text-xs font-medium text-slate-600">Lokasi administratif</dt>
+                        <dd class="mt-0.5 text-sm font-medium text-slate-800">
                             @if ($laporan->kelurahan_id && $laporan->kelurahan)
                                 Kel. {{ $laporan->kelurahan->nama }}, Kec. {{ $laporan->kelurahan->kecamatan->nama ?? '-' }}
                             @else
@@ -107,16 +139,16 @@
                         </dd>
                     </div>
                 </dl>
-            </div>
+            </x-card>
 
-            <div class="rounded-card border border-garis bg-white p-5 shadow-card">
-                <h2 class="text-sm font-semibold text-slate-800">
-                    Foto Bukti
-                    <span class="ml-1 font-normal text-slate-600">({{ $laporan->fotosLaporan->count() }} lampiran warga)</span>
-                </h2>
+            <x-card>
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 class="text-sm font-semibold text-slate-800">Foto Bukti</h2>
+                    <span class="text-xs text-slate-600">{{ $laporan->fotosLaporan->count() }} lampiran warga</span>
+                </div>
 
                 @if ($laporan->fotosLaporan->isEmpty())
-                    <p class="mt-3 text-sm text-slate-600">
+                    <p class="mt-3 rounded-lg bg-kertas px-3 py-2 text-sm text-slate-600">
                         @if ($laporan->jenis === 'bangunan_liar')
                             Tidak ada foto terlampir.
                         @else
@@ -124,65 +156,75 @@
                         @endif
                     </p>
                 @else
-                    <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <ul class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                         @foreach ($laporan->fotosLaporan as $foto)
-                            <a href="{{ $foto->url }}" target="_blank" rel="noopener"
-                               class="group block overflow-hidden rounded-lg border border-garis">
-                                <img src="{{ $foto->url }}" alt="Foto bukti {{ $laporan->kode }} #{{ $loop->iteration }}"
-                                     loading="lazy"
-                                     class="h-36 w-full object-cover transition group-hover:scale-105">
-                            </a>
+                            <li>
+                                <a href="{{ $foto->url }}" target="_blank" rel="noopener"
+                                   class="group block overflow-hidden rounded-lg border border-garis focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
+                                    <img src="{{ $foto->url }}" alt="Foto bukti {{ $laporan->kode }} #{{ $loop->iteration }}"
+                                         loading="lazy"
+                                         class="h-32 w-full object-cover transition motion-safe:group-hover:scale-105 sm:h-36">
+                                </a>
+                            </li>
                         @endforeach
-                    </div>
+                    </ul>
                 @endif
-            </div>
+            </x-card>
 
             {{-- Peringatan bila laporan sudah selesai tapi belum ada bukti hasil perbaikan. --}}
             @if ($laporan->status === 'selesai' && $laporan->fotosPerbaikan->isEmpty())
-                <div class="rounded-card border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                    Laporan sudah ditandai <strong>selesai</strong>, tetapi belum ada foto hasil perbaikan.
-                    Unggah dokumentasi hasil kerja di bawah agar arsip penanganan lengkap.
+                <div class="flex flex-wrap items-start gap-3 rounded-card border border-warning-200 bg-warning-50 p-4 text-sm text-warning-800">
+                    <span class="mt-0.5 shrink-0 text-warning-700" aria-hidden="true">
+                        <x-icon name="jam" class="h-5 w-5"/>
+                    </span>
+                    <p class="min-w-0">
+                        Laporan sudah ditandai <strong>selesai</strong>, tetapi belum ada foto hasil perbaikan.
+                        Unggah dokumentasi hasil kerja di bawah agar arsip penanganan lengkap.
+                    </p>
                 </div>
             @endif
 
-            <div class="rounded-card border border-garis bg-white p-5 shadow-card">
-                <h2 class="text-sm font-semibold text-slate-800">
-                    Foto Hasil Perbaikan
-                    <span class="ml-1 font-normal text-slate-600">({{ $laporan->fotosPerbaikan->count() }}/10)</span>
-                </h2>
+            <x-card>
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 class="text-sm font-semibold text-slate-800">Foto Hasil Perbaikan</h2>
+                    <span class="text-xs text-slate-600">{{ $laporan->fotosPerbaikan->count() }}/10 foto</span>
+                </div>
 
                 @if ($laporan->status === 'ditolak')
-                    <p class="mt-3 text-sm text-slate-600">Laporan ditolak — unggahan foto hasil perbaikan tidak tersedia.</p>
+                    <p class="mt-3 rounded-lg bg-kertas px-3 py-2 text-sm text-slate-600">
+                        Laporan ditolak — unggahan foto hasil perbaikan tidak tersedia.
+                    </p>
                 @else
                     @if ($laporan->fotosPerbaikan->isEmpty())
-                        <p class="mt-3 text-sm text-slate-600">Belum ada foto hasil perbaikan.</p>
+                        <p class="mt-3 rounded-lg bg-kertas px-3 py-2 text-sm text-slate-600">Belum ada foto hasil perbaikan.</p>
                     @else
-                        <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        <ul class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                             @foreach ($laporan->fotosPerbaikan as $foto)
-                                <div class="group overflow-hidden rounded-lg border border-garis">
-                                    <a href="{{ $foto->url }}" target="_blank" rel="noopener">
+                                <li class="overflow-hidden rounded-lg border border-garis">
+                                    <a href="{{ $foto->url }}" target="_blank" rel="noopener" class="group block">
                                         <img src="{{ $foto->url }}" alt="Foto perbaikan {{ $laporan->kode }} #{{ $loop->iteration }}"
                                              loading="lazy"
-                                             class="h-36 w-full object-cover transition group-hover:scale-105">
+                                             class="h-32 w-full object-cover transition motion-safe:group-hover:scale-105 sm:h-36">
                                     </a>
-                                    <div class="flex items-start justify-between gap-2 px-2 py-2">
-                                        <p class="text-xs text-slate-600">
-                                            {{ $foto->keterangan ?? 'Tanpa keterangan' }}
+                                    <div class="flex items-start justify-between gap-2 border-t border-garis px-2 py-2">
+                                        <div class="min-w-0 text-xs text-slate-600">
+                                            <p class="line-clamp-2">{{ $foto->keterangan ?? 'Tanpa keterangan' }}</p>
                                             @if ($foto->pengunggah)
-                                                <span class="block text-slate-400">oleh {{ $foto->pengunggah->name }}</span>
+                                                <p class="mt-0.5 text-slate-500">oleh {{ $foto->pengunggah->name }}</p>
                                             @endif
-                                        </p>
+                                        </div>
                                         @if (auth()->user()->isAdmin() || $foto->diunggah_oleh === auth()->id())
                                             <button type="button" data-confirm="Hapus foto hasil perbaikan ini?\nFile akan dihapus permanen dari penyimpanan."
                                                     data-action="{{ route('laporan.foto-perbaikan.destroy', [$laporan, $foto]) }}"
-                                                    class="shrink-0 rounded-lg border border-rose-300 px-2 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                                Hapus
+                                                    aria-label="Hapus foto hasil perbaikan {{ $loop->iteration }}"
+                                                    class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-control border border-danger-200 px-2 py-1 text-danger-700 transition hover:bg-danger-50 sm:min-h-8">
+                                                <x-icon name="sampah" class="h-4 w-4"/>
                                             </button>
                                         @endif
                                     </div>
-                                </div>
+                                </li>
                             @endforeach
-                        </div>
+                        </ul>
                     @endif
 
                     {{-- Form unggah multi-foto hasil perbaikan. --}}
@@ -190,117 +232,119 @@
                           class="mt-4 space-y-3 rounded-lg border border-garis bg-kertas p-4">
                         @csrf
                         <div>
-                            <label for="foto_perbaikan" class="mb-1.5 block text-sm font-medium text-slate-700">
-                                Tambah Foto Hasil Perbaikan <span class="font-normal text-slate-600">(maks. 5 foto, 5 MB / foto — foto besar otomatis dikompres)</span>
+                            <label for="foto_perbaikan" class="label mb-1.5">
+                                Tambah foto hasil perbaikan
+                                <span class="font-normal text-slate-600">(maks. 5 foto, 5 MB / foto — foto besar otomatis dikompres)</span>
                             </label>
                             <div data-foto-upload data-maks="5" data-maks-ukuran="5120"
                                  data-tipe="image/jpeg,image/png,image/webp">
                                 <input type="file" id="foto_perbaikan" name="foto_perbaikan[]" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" multiple required
-                                       class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-brand-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-brand-700">
+                                       class="input cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-brand-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-brand-700">
                                 <ul data-foto-daftar class="mt-2 space-y-2"></ul>
                                 <p data-foto-pesan class="mt-1 text-xs font-medium" aria-live="polite"></p>
                             </div>
                             @error('foto_perbaikan.*')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1 text-xs font-medium text-danger-600">{{ $message }}</p>
                             @enderror
                             @error('foto_perbaikan')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1 text-xs font-medium text-danger-600">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
-                            <label for="keterangan_foto" class="mb-1.5 block text-sm font-medium text-slate-700">
-                                Keterangan foto <span class="font-normal text-slate-600">(opsional, berlaku untuk semua foto di unggahan ini)</span>
+                            <label for="keterangan_foto" class="label mb-1.5">
+                                Keterangan foto
+                                <span class="font-normal text-slate-600">(opsional, berlaku untuk semua foto di unggahan ini)</span>
                             </label>
                             <input type="text" id="keterangan_foto" name="keterangan" value="{{ old('keterangan') }}" maxlength="255"
                                    placeholder="Contoh: PJU blok C sudah diganti tegangan baru"
-                                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+                                   class="input">
                             @error('keterangan')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1 text-xs font-medium text-danger-600">{{ $message }}</p>
                             @enderror
                         </div>
-                        <button type="submit" class="tombol-utama">
-                            Unggah Foto Perbaikan
-                        </button>
+                        <x-button type="submit">
+                            <x-icon name="unggah" class="h-4 w-4"/>
+                            Unggah foto perbaikan
+                        </x-button>
                     </form>
                 @endif
-            </div>
+            </x-card>
         </div>
 
-        <div class="space-y-4">
-            <div class="rounded-card border border-garis bg-white p-5 shadow-card">
-                <h2 class="text-sm font-semibold text-slate-800">Pelapor</h2>
-                <dl class="mt-3 space-y-3 text-sm">
+        <div class="min-w-0 space-y-4">
+            <x-card heading="Pelapor">
+                <dl class="space-y-3 text-sm">
                     <div>
-                        <dt class="text-xs text-slate-600">Nama</dt>
-                        <dd class="font-medium text-slate-800">{{ $laporan->nama_pelapor }}</dd>
+                        <dt class="text-xs font-medium text-slate-600">Nama</dt>
+                        <dd class="mt-0.5 font-medium text-slate-800">{{ $laporan->nama_pelapor }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs text-slate-600">Kontak</dt>
+                        <dt class="text-xs font-medium text-slate-600">Kontak</dt>
                         @if ($laporan->kontak_pelapor)
-                            <dd class="font-medium text-slate-800">{{ $laporan->kontak_pelapor }}</dd>
+                            <dd class="mt-0.5 font-medium text-slate-800">{{ $laporan->kontak_pelapor }}</dd>
                         @else
-                            <dd class="text-slate-400">Tidak dicantumkan</dd>
+                            <dd class="mt-0.5 text-slate-500">Tidak dicantumkan</dd>
                         @endif
                     </div>
                 </dl>
 
                 @if ($laporan->kontak_wa)
-                    <a href="https://wa.me/{{ $laporan->kontak_wa }}" target="_blank" rel="noopener"
-                       class="tombol-sekunder mt-4 w-full">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/>
-                        </svg>
+                    <x-button href="https://wa.me/{{ $laporan->kontak_wa }}" variant="secondary" class="mt-4 w-full" target="_blank" rel="noopener">
+                        <x-icon name="telepon" class="h-4 w-4"/>
                         Hubungi via WhatsApp
-                    </a>
+                    </x-button>
                 @endif
-            </div>
+            </x-card>
 
-            <div class="rounded-card border border-garis bg-white p-5 shadow-card">
-                <h2 class="text-sm font-semibold text-slate-800">Penanganan</h2>
-
-                <form action="{{ route('laporan.update', $laporan) }}" method="POST" class="mt-3 space-y-4">
+            <x-card heading="Penanganan">
+                <form action="{{ route('laporan.update', $laporan) }}" method="POST" class="space-y-4">
                     @csrf
                     @method('PUT')
 
                     <div>
-                        <label for="status" class="mb-1.5 block text-sm font-medium text-slate-700">Status <span class="text-rose-500">*</span></label>
-                        <select id="status" name="status" required
-                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+                        <label for="status" class="label mb-1.5">
+                            Status <span class="text-danger-600" aria-hidden="true">*</span><span class="sr-only">(wajib diisi)</span>
+                        </label>
+                        <select id="status" name="status" required class="input">
                             @foreach (\App\Models\Laporan::STATUS as $value => $label)
                                 <option value="{{ $value }}" @selected(old('status', $laporan->status) === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
-                        @if (config('laporan.hapus_otomatis'))<p class="mt-1 text-xs text-slate-600">Laporan yang ditandai selesai akan dihapus otomatis {{ config('laporan.hapus_otomatis_hari') }} hari kemudian, beserta semua fotonya.</p>@endif
-                        <label class="mt-3 flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="jangan_hapus_otomatis" value="1" @checked(old('jangan_hapus_otomatis', $laporan->jangan_hapus_otomatis))> Simpan permanen (jangan hapus otomatis)</label>
+                        @if (config('laporan.hapus_otomatis'))
+                            <p class="mt-1 text-xs text-slate-600">Laporan yang ditandai selesai akan dihapus otomatis {{ config('laporan.hapus_otomatis_hari') }} hari kemudian, beserta semua fotonya.</p>
+                        @endif
+                        <label class="mt-3 flex min-h-11 items-center gap-2 text-sm text-slate-700">
+                            <input type="checkbox" name="jangan_hapus_otomatis" value="1" @checked(old('jangan_hapus_otomatis', $laporan->jangan_hapus_otomatis))
+                                   class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                            Simpan permanen (jangan hapus otomatis)
+                        </label>
                     </div>
 
                     <div>
-                        <label for="catatan_petugas" class="mb-1.5 block text-sm font-medium text-slate-700">
-                            Catatan tindak lanjut
-                        </label>
+                        <label for="catatan_petugas" class="label mb-1.5">Catatan tindak lanjut</label>
                         <textarea id="catatan_petugas" name="catatan_petugas" rows="5" maxlength="2000"
                                   placeholder="Contoh: Tim lapangan sudah turun pada 12 Oktober, reparasi PJU blok C selesai."
-                                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">{{ old('catatan_petugas', $laporan->catatan_petugas) }}</textarea>
+                                  class="input">{{ old('catatan_petugas', $laporan->catatan_petugas) }}</textarea>
                     </div>
 
                     <div>
-                        <label for="deskripsi_aksi_selesai" class="mb-1.5 block text-sm font-medium text-slate-700">
+                        <label for="deskripsi_aksi_selesai" class="label mb-1.5">
                             Detail aksi selesai <span class="font-normal text-slate-600">(opsional)</span>
                         </label>
                         <textarea id="deskripsi_aksi_selesai" name="deskripsi_aksi_selesai" rows="3" maxlength="2000"
                                   placeholder="Jelaskan kegiatan yang selesai dilakukan mengatasi kerusakan ini…"
-                                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">{{ old('deskripsi_aksi_selesai', $laporan->deskripsi_aksi_selesai) }}</textarea>
+                                  class="input">{{ old('deskripsi_aksi_selesai', $laporan->deskripsi_aksi_selesai) }}</textarea>
                     </div>
 
-                    <button type="submit" class="tombol-utama w-full">
-                        Simpan Penanganan
-                    </button>
+                    <x-button type="submit" class="w-full">
+                        <x-icon name="simpan" class="h-4 w-4"/>
+                        Simpan penanganan
+                    </x-button>
                 </form>
-            </div>
+            </x-card>
 
-            <div class="rounded-card border border-garis bg-white p-5 shadow-card text-xs text-slate-600">
-                <h2 class="text-sm font-semibold text-slate-800">Riwayat</h2>
-                <ul class="mt-3 space-y-2">
+            <x-card heading="Riwayat">
+                <ul class="space-y-2 text-xs text-slate-600">
                     <li>Dilaporkan: <span class="font-medium text-slate-700">{{ $laporan->created_at->translatedFormat('d F Y, H:i') }}</span></li>
                     @if ($laporan->ditangani_pada)
                         <li>
@@ -317,15 +361,15 @@
                     Perubahan Status
                 </h3>
                 @if ($laporan->riwayats->isEmpty())
-                    <p class="mt-2">Belum ada perubahan status.</p>
+                    <p class="mt-2 text-xs">Belum ada perubahan status.</p>
                 @else
-                    <ol class="mt-2 space-y-3">
+                    <ol class="mt-3 space-y-3 text-xs">
                         @foreach ($laporan->riwayats as $riwayat)
-                            <li class="border-l-2 border-garis pl-3">
+                            <li class="border-l-2 border-brand-200 pl-3">
                                 <p class="font-medium text-slate-700">
                                     {{ $riwayat->label_status_lama }} &rarr; {{ $riwayat->label_status_baru }}
                                 </p>
-                                <p class="mt-0.5">
+                                <p class="mt-0.5 text-slate-600">
                                     {{ $riwayat->created_at?->translatedFormat('d F Y, H:i') ?? '-' }} WIB
                                     &middot; oleh
                                     <span class="font-medium text-slate-700">{{ $riwayat->user->name ?? 'Pengguna tidak dikenal' }}</span>
@@ -337,7 +381,7 @@
                         @endforeach
                     </ol>
                 @endif
-            </div>
+            </x-card>
         </div>
     </div>
 @endsection
